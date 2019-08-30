@@ -37,7 +37,6 @@ public class PropertyMetadata {
   @Nullable
   private final Integer scale;
 
-
   public PropertyMetadata(String name, String edmTypeName, boolean nullable, Integer precision, Integer scale,
                           Map<String, String> annotations) {
     this.name = name;

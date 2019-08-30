@@ -17,11 +17,14 @@
 package io.cdap.plugin.sap.odata;
 
 import org.apache.olingo.client.api.domain.ClientEntity;
+import org.apache.olingo.client.api.domain.ClientLink;
+import org.apache.olingo.client.api.domain.ClientLinkType;
 import org.apache.olingo.client.api.domain.ClientProperty;
 import org.apache.olingo.odata2.api.ep.entry.ODataEntry;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 /**
@@ -46,8 +49,38 @@ public class ODataEntity {
   public static ODataEntity valueOf(ClientEntity clientEntity) {
     Map<String, Object> properties = clientEntity.getProperties().stream()
       .collect(HashMap::new, (m, v) -> m.put(v.getName(), getClientPropertyValue(v)), HashMap::putAll);
+    // OData4 'Edm.Stream' properties can be accessed via ClientEntity#getMediaEditLinks
+    if (clientEntity.getMediaEditLinks() != null && !clientEntity.getMediaEditLinks().isEmpty()) {
+      Map<String, StreamProperty> streamProperties = extractStreamProperties(clientEntity);
+      properties.putAll(streamProperties);
+    }
 
     return new ODataEntity(properties);
+  }
+
+  /**
+   * Single 'Edm.Stream' property annotated with both 'mediaReadLink' and 'mediaEditLink' will be represented as two
+   * separate instances of Olingo {@link ClientLink}. This method maps such links to single {@link StreamProperty}
+   * instance and returns map of stream properties with their names as keys.
+   * See:
+   * <a href="https://docs.oasis-open.org/odata/odata-json-format/v4.01/csprd05/odata-json-format-v4.01-csprd05.html">
+   * "Stream PropertyMetadata" Section of the "OData JSON Format Version 4.01" document
+   * </a>
+   */
+  static Map<String, StreamProperty> extractStreamProperties(ClientEntity clientEntity) {
+    return clientEntity.getMediaEditLinks().stream()
+      .filter(link -> link.getType() == ClientLinkType.MEDIA_READ || link.getType() == ClientLinkType.MEDIA_EDIT)
+      .collect(Collectors.toMap(
+        ClientLink::getName,
+        link -> link.getType() == ClientLinkType.MEDIA_READ
+          ? new StreamProperty(link.getMediaETag(), link.getType().toString(), link.getLink().toASCIIString(), null)
+          : new StreamProperty(link.getMediaETag(), link.getType().toString(), null, link.getLink().toASCIIString()),
+        (first, second) -> {
+          String readLink = first.getMediaReadLink() == null ? second.getMediaReadLink() : first.getMediaReadLink();
+          String editLink = first.getMediaEditLink() == null ? second.getMediaEditLink() : first.getMediaEditLink();
+          return new StreamProperty(first.getMediaEtag(), first.getMediaContentType(), readLink, editLink);
+        }
+      ));
   }
 
   @Nullable

@@ -39,6 +39,7 @@ import io.cdap.plugin.sap.odata.PropertyMetadata;
 import io.cdap.plugin.sap.odata.exception.ODataException;
 import io.cdap.plugin.sap.transformer.ODataEntryToRecordTransformer;
 import org.apache.hadoop.io.NullWritable;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -175,7 +176,37 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntity, Struc
         return Schema.of(Schema.Type.LONG);
       case "String":
         return Schema.of(Schema.Type.STRING);
+      case "GeographyPoint":
+      case "GeometryPoint":
+        return SapODataConstants.Point.SCHEMA;
+      case "GeographyLineString":
+      case "GeometryLineString":
+        return SapODataConstants.LineString.SCHEMA;
+      case "GeographyPolygon":
+      case "GeometryPolygon":
+        return SapODataConstants.Polygon.SCHEMA;
+      case "GeographyMultiPoint":
+      case "GeometryMultiPoint":
+        return SapODataConstants.MultiPoint.SCHEMA;
+      case "GeographyMultiLineString":
+      case "GeometryMultiLineString":
+        return SapODataConstants.MultiLineString.SCHEMA;
+      case "GeographyMultiPolygon":
+      case "GeometryMultiPolygon":
+        return SapODataConstants.MultiPolygon.SCHEMA;
+      case "GeographyCollection":
+      case "GeometryCollection":
+        return SapODataConstants.GeospatialCollection.SCHEMA;
+      case "Date":
+        return Schema.of(Schema.LogicalType.TIMESTAMP_MICROS);
+      case "Duration":
+        return Schema.of(Schema.Type.STRING);
+      case "Stream":
+        return SapODataConstants.Stream.SCHEMA;
+      case "TimeOfDay":
+        return Schema.of(Schema.LogicalType.TIME_MICROS);
       default:
+        // this should never happen
         throw new InvalidStageException(String.format("Field '%s' is of unsupported type '%s'.",
                                                       propertyMetadata.getName(), propertyMetadata.getEdmTypeName()));
     }

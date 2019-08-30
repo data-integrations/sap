@@ -7,11 +7,15 @@
       "Binary": "T0RhdGE",
       "Boolean": true,
       "Byte": 127,
+      "Date@odata.type": "#Date",
+      "Date": "2012-12-03",
       "DateTimeOffset": "2002-10-10T17:00:01+01:00",
       "Decimal@odata.type": "#Decimal",
       "Decimal": "123.456",
       "Double@odata.type": "#Double",
       "Double": 940282346638528860000000000000000000000.000000,
+      "Duration@odata.type": "#Duration",
+      "Duration": "P12DT23H59M59.999999999999S",
       "Guid": "484f2eb4-f60d-4652-8673-6517d7c64d0e",
       "Int16": 1,
       "Int32": 1,
@@ -20,18 +24,418 @@
       "SByte": -128,
       "Single@odata.type": "#Single",
       "Single": 3.14,
-      "String": "DEMO"
+      "Stream@odata.mediaReadLink": "http://placehold.it/10x10.jpg?read",
+      "Stream@odata.mediaEditLink": "http://placehold.it/10x10.jpg?edit",
+      "Stream@odata.mediaContentType": "image/jpeg",
+      "Stream@odata.mediaEtag": "W/\"####\"",
+      "Stream": "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDEwMCAxMDAiPgogIDxnIHN0cm9rZT0iZGFya21hZ2VudGEiIHN0cm9rZS13aWR0aD0iMTYiIGZpbGw9ImRhcmt0dXJxdW9pc2UiPgogICAgPGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNDIiLz4KICA8L2c+Cjwvc3ZnPgo=",
+      "String": "DEMO",
+      "TimeOfDay@odata.type": "#TimeOfDay",
+      "TimeOfDay": "07:59:59.999",
+      "GeographyPoint": {
+        "type": "Point",
+        "coordinates": [
+          142.1,
+          64.1
+        ]
+      },
+      "GeographyLineString": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            100.0,
+            0.0
+          ],
+          [
+            101.0,
+            1.0
+          ]
+        ]
+      },
+      "GeographyPolygon": { "type": "Polygon",
+        "coordinates": [
+          [ [100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0] ],
+          [ [100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2] ]
+        ]
+      },
+      "GeographyMultiPoint": {
+        "type": "MultiPoint",
+        "coordinates": [
+          [
+            2.5,
+            3.125
+          ],
+          [
+            3.5,
+            4.125
+          ],
+          [
+            4.5,
+            5.125
+          ]
+        ]
+      },
+      "GeographyMultiLineString": {
+        "type": "MultiLineString",
+        "coordinates": [
+          [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              2.0,
+              2.0
+            ],
+            [
+              3.0,
+              3.0
+            ],
+            [
+              4.0,
+              4.0
+            ],
+            [
+              5.0,
+              5.0
+            ]
+          ],
+          [
+            [
+              99.5,
+              101.5
+            ],
+            [
+              150.0,
+              151.25
+            ]
+          ]
+        ]
+      },
+      "GeographyMultiPolygon": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                3.0,
+                0.0
+              ],
+              [
+                3.0,
+                3.0
+              ],
+              [
+                0.0,
+                3.0
+              ],
+              [
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                2.0
+              ],
+              [
+                2.0,
+                2.0
+              ],
+              [
+                2.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                30.0,
+                0.0
+              ],
+              [
+                0.0,
+                30.0
+              ],
+              [
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                10.0,
+                10.0
+              ],
+              [
+                10.0,
+                20.0
+              ],
+              [
+                20.0,
+                10.0
+              ],
+              [
+                10.0,
+                10.0
+              ]
+            ]
+          ]
+        ]
+      },
+      "GeographyCollection@odata.type": "#GeographyCollection",
+      "GeographyCollection": {
+        "type": "GeographyCollection",
+        "geometries": [
+          {
+            "type": "Point",
+            "coordinates": [
+              100.0,
+              0.0
+            ]
+          },
+          {
+            "type": "LineString",
+            "coordinates": [
+              [
+                101.0,
+                0.0
+              ],
+              [
+                102.0,
+                1.0
+              ]
+            ]
+          }
+        ]
+      },
+      "GeometryPoint": {
+        "type": "Point",
+        "coordinates": [
+          142.1,
+          64.1
+        ]
+      },
+      "GeometryLineString": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            100.0,
+            0.0
+          ],
+          [
+            101.0,
+            1.0
+          ]
+        ]
+      },
+      "GeometryPolygon": { "type": "Polygon",
+        "coordinates": [
+          [ [100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0] ],
+          [ [100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2] ]
+        ]
+      },
+      "GeometryMultiPoint": {
+        "type": "MultiPoint",
+        "coordinates": [
+          [
+            2.5,
+            3.125
+          ],
+          [
+            3.5,
+            4.125
+          ],
+          [
+            4.5,
+            5.125
+          ]
+        ]
+      },
+      "GeometryMultiLineString": {
+        "type": "MultiLineString",
+        "coordinates": [
+          [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              2.0,
+              2.0
+            ],
+            [
+              3.0,
+              3.0
+            ],
+            [
+              4.0,
+              4.0
+            ],
+            [
+              5.0,
+              5.0
+            ]
+          ],
+          [
+            [
+              99.5,
+              101.5
+            ],
+            [
+              150.0,
+              151.25
+            ]
+          ]
+        ]
+      },
+      "GeometryMultiPolygon": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                3.0,
+                0.0
+              ],
+              [
+                3.0,
+                3.0
+              ],
+              [
+                0.0,
+                3.0
+              ],
+              [
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                2.0
+              ],
+              [
+                2.0,
+                2.0
+              ],
+              [
+                2.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                30.0,
+                0.0
+              ],
+              [
+                0.0,
+                30.0
+              ],
+              [
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                10.0,
+                10.0
+              ],
+              [
+                10.0,
+                20.0
+              ],
+              [
+                20.0,
+                10.0
+              ],
+              [
+                10.0,
+                10.0
+              ]
+            ]
+          ]
+        ]
+      },
+      "GeometryCollection@odata.type": "#GeometryCollection",
+      "GeometryCollection": {
+        "type": "GeometryCollection",
+        "geometries": [
+          {
+            "type": "Point",
+            "coordinates": [
+              100.0,
+              0.0
+            ]
+          },
+          {
+            "type": "LineString",
+            "coordinates": [
+              [
+                101.0,
+                0.0
+              ],
+              [
+                102.0,
+                1.0
+              ]
+            ]
+          }
+        ]
+      }
     },
     {
       "Binary@odata.type": "#Binary",
       "Binary": "T0RhdGE",
       "Boolean": true,
       "Byte": 127,
+      "Date@odata.type": "#Date",
+      "Date": "2012-12-03",
       "DateTimeOffset": "2002-10-10T17:00:01+01:00",
       "Decimal@odata.type": "#Decimal",
       "Decimal": "123.456",
       "Double@odata.type": "#Double",
       "Double": 940282346638528860000000000000000000000.000000,
+      "Duration": "P12DT23H59M59.999999999999S",
       "Guid": "484f2eb4-f60d-4652-8673-6517d7c64d0e",
       "Int16": 2,
       "Int32": 2,
@@ -40,7 +444,405 @@
       "SByte": -128,
       "Single@odata.type": "#Single",
       "Single": -3.14,
-      "String": "DEMO"
+      "Stream@odata.mediaReadLink": "http://placehold.it/10x10.jpg?read",
+      "Stream@odata.mediaEditLink": "http://placehold.it/10x10.jpg?edit",
+      "Stream@odata.mediaContentType": "image/jpeg",
+      "Stream@odata.mediaEtag": "W/\"####\"",
+      "Stream": "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgdmlld0JveD0iMCAwIDEwMCAxMDAiPgogIDxnIHN0cm9rZT0iZGFya21hZ2VudGEiIHN0cm9rZS13aWR0aD0iMTYiIGZpbGw9ImRhcmt0dXJxdW9pc2UiPgogICAgPGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iNDIiLz4KICA8L2c+Cjwvc3ZnPgo=",
+      "String": "DEMO",
+      "TimeOfDay@odata.type": "#TimeOfDay",
+      "TimeOfDay": "07:59:59.999",
+      "GeographyPoint": {
+        "type": "Point",
+        "coordinates": [
+          142.1,
+          64.1
+        ]
+      },
+      "GeographyLineString": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            100.0,
+            0.0
+          ],
+          [
+            101.0,
+            1.0
+          ]
+        ]
+      },
+      "GeographyPolygon": {
+        "type": "Polygon",
+        "coordinates": [
+          [ [100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0] ],
+          [ [100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2] ]
+        ]
+      },
+      "GeographyMultiPoint": {
+        "type": "MultiPoint",
+        "coordinates": [
+          [
+            2.5,
+            3.125
+          ],
+          [
+            3.5,
+            4.125
+          ],
+          [
+            4.5,
+            5.125
+          ]
+        ]
+      },
+      "GeographyMultiLineString": {
+        "type": "MultiLineString",
+        "coordinates": [
+          [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              2.0,
+              2.0
+            ],
+            [
+              3.0,
+              3.0
+            ],
+            [
+              4.0,
+              4.0
+            ],
+            [
+              5.0,
+              5.0
+            ]
+          ],
+          [
+            [
+              99.5,
+              101.5
+            ],
+            [
+              150.0,
+              151.25
+            ]
+          ]
+        ]
+      },
+      "GeographyMultiPolygon": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                3.0,
+                0.0
+              ],
+              [
+                3.0,
+                3.0
+              ],
+              [
+                0.0,
+                3.0
+              ],
+              [
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                2.0
+              ],
+              [
+                2.0,
+                2.0
+              ],
+              [
+                2.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                30.0,
+                0.0
+              ],
+              [
+                0.0,
+                30.0
+              ],
+              [
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                10.0,
+                10.0
+              ],
+              [
+                10.0,
+                20.0
+              ],
+              [
+                20.0,
+                10.0
+              ],
+              [
+                10.0,
+                10.0
+              ]
+            ]
+          ]
+        ]
+      },
+      "GeographyCollection@odata.type": "#GeographyCollection",
+      "GeographyCollection": {
+        "type": "GeographyCollection",
+        "geometries": [
+          {
+            "type": "Point",
+            "coordinates": [
+              100.0,
+              0.0
+            ]
+          },
+          {
+            "type": "LineString",
+            "coordinates": [
+              [
+                101.0,
+                0.0
+              ],
+              [
+                102.0,
+                1.0
+              ]
+            ]
+          }
+        ]
+      },
+      "GeometryPoint": {
+        "type": "Point",
+        "coordinates": [
+          142.1,
+          64.1
+        ]
+      },
+      "GeometryLineString": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            100.0,
+            0.0
+          ],
+          [
+            101.0,
+            1.0
+          ]
+        ]
+      },
+      "GeometryPolygon": { "type": "Polygon",
+        "coordinates": [
+          [ [100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0] ],
+          [ [100.2, 0.2], [100.8, 0.2], [100.8, 0.8], [100.2, 0.8], [100.2, 0.2] ]
+        ]
+      },
+      "GeometryMultiPoint": {
+        "type": "MultiPoint",
+        "coordinates": [
+          [
+            2.5,
+            3.125
+          ],
+          [
+            3.5,
+            4.125
+          ],
+          [
+            4.5,
+            5.125
+          ]
+        ]
+      },
+      "GeometryMultiLineString": {
+        "type": "MultiLineString",
+        "coordinates": [
+          [
+            [
+              1.0,
+              1.0
+            ],
+            [
+              2.0,
+              2.0
+            ],
+            [
+              3.0,
+              3.0
+            ],
+            [
+              4.0,
+              4.0
+            ],
+            [
+              5.0,
+              5.0
+            ]
+          ],
+          [
+            [
+              99.5,
+              101.5
+            ],
+            [
+              150.0,
+              151.25
+            ]
+          ]
+        ]
+      },
+      "GeometryMultiPolygon": {
+        "type": "MultiPolygon",
+        "coordinates": [
+          [
+            [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                3.0,
+                0.0
+              ],
+              [
+                3.0,
+                3.0
+              ],
+              [
+                0.0,
+                3.0
+              ],
+              [
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                1.0,
+                1.0
+              ],
+              [
+                1.0,
+                2.0
+              ],
+              [
+                2.0,
+                2.0
+              ],
+              [
+                2.0,
+                1.0
+              ],
+              [
+                1.0,
+                1.0
+              ]
+            ]
+          ],
+          [
+            [
+              [
+                0.0,
+                0.0
+              ],
+              [
+                30.0,
+                0.0
+              ],
+              [
+                0.0,
+                30.0
+              ],
+              [
+                0.0,
+                0.0
+              ]
+            ],
+            [
+              [
+                10.0,
+                10.0
+              ],
+              [
+                10.0,
+                20.0
+              ],
+              [
+                20.0,
+                10.0
+              ],
+              [
+                10.0,
+                10.0
+              ]
+            ]
+          ]
+        ]
+      },
+      "GeometryCollection@odata.type": "#GeometryCollection",
+      "GeometryCollection": {
+        "type": "GeometryCollection",
+        "geometries": [
+          {
+            "type": "Point",
+            "coordinates": [
+              100.0,
+              0.0
+            ]
+          },
+          {
+            "type": "LineString",
+            "coordinates": [
+              [
+                101.0,
+                0.0
+              ],
+              [
+                102.0,
+                1.0
+              ]
+            ]
+          }
+        ]
+      }
     }
   ]
 }
