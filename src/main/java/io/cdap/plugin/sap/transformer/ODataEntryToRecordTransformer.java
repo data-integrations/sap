@@ -58,7 +58,7 @@ import java.util.stream.Stream;
  */
 public class ODataEntryToRecordTransformer {
 
-  private final Schema schema;
+  protected final Schema schema;
 
   public ODataEntryToRecordTransformer(Schema schema) {
     this.schema = schema;
@@ -89,7 +89,7 @@ public class ODataEntryToRecordTransformer {
    * EdmSimpleType
    * </a>
    */
-  private Object extractValue(String fieldName, Object value, Schema schema) {
+  protected Object extractValue(String fieldName, Object value, Schema schema) {
     if (value == null) {
       return null;
     }

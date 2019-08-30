@@ -54,6 +54,39 @@ public class SapOData2SourceETLTest extends BaseSapODataSourceETLTest {
     Schema.Field.of("Time", Schema.of(Schema.LogicalType.TIME_MICROS)),
     Schema.Field.of("DateTimeOffset", Schema.of(Schema.Type.STRING)));
 
+  private static final Schema SCHEMA_WITH_METADATA_ANNOTATIONS = Schema.recordOf(
+    "schema",
+    valueWithMetadataAnnotationsField("Id", Schema.of(Schema.Type.STRING)),
+    valueWithMetadataAnnotationsField("Binary", Schema.of(Schema.Type.BYTES)),
+    valueWithMetadataAnnotationsField("Boolean", Schema.of(Schema.Type.BOOLEAN)),
+    valueWithMetadataAnnotationsField("Byte", Schema.of(Schema.Type.INT)),
+    valueWithMetadataAnnotationsField("Decimal", Schema.decimalOf(16, 3)),
+    valueWithMetadataAnnotationsField("Double", Schema.of(Schema.Type.DOUBLE)),
+    valueWithMetadataAnnotationsField("Single", Schema.of(Schema.Type.FLOAT)),
+    valueWithMetadataAnnotationsField("Guid", Schema.of(Schema.Type.STRING)),
+    valueWithMetadataAnnotationsField("Int16", Schema.of(Schema.Type.INT)),
+    valueWithMetadataAnnotationsField("Int32", Schema.of(Schema.Type.INT)),
+    valueWithMetadataAnnotationsField("Int64", Schema.of(Schema.Type.LONG)),
+    valueWithMetadataAnnotationsField("SByte", Schema.of(Schema.Type.INT)),
+    valueWithMetadataAnnotationsField("String", Schema.of(Schema.Type.STRING)),
+    valueWithMetadataAnnotationsField("DateTime", Schema.of(Schema.LogicalType.TIMESTAMP_MICROS)),
+    valueWithMetadataAnnotationsField("Time", Schema.of(Schema.LogicalType.TIME_MICROS)),
+    valueWithMetadataAnnotationsField("DateTimeOffset", Schema.of(Schema.Type.STRING)));
+
+  private static Schema.Field valueWithMetadataAnnotationsField(String fieldName, Schema valueSchema) {
+    Schema sapMetadataSchema = Schema.recordOf(fieldName + "-metadata",
+                                               Schema.Field.of("label", Schema.of(Schema.Type.STRING)),
+                                               Schema.Field.of("creatable", Schema.of(Schema.Type.STRING)),
+                                               Schema.Field.of("updatable", Schema.of(Schema.Type.STRING)),
+                                               Schema.Field.of("sortable", Schema.of(Schema.Type.STRING)),
+                                               Schema.Field.of("filterable", Schema.of(Schema.Type.STRING)));
+
+    return Schema.Field.of(fieldName, Schema.recordOf(
+      fieldName + "-value-metadata",
+      Schema.Field.of(SapODataConstants.VALUE_FIELD_NAME, valueSchema),
+      Schema.Field.of(SapODataConstants.METADATA_ANNOTATIONS_FIELD_NAME, sapMetadataSchema)));
+  }
+
   @Before
   public void testSetup() throws Exception {
     wireMockRule.stubFor(WireMock.get(WireMock.urlEqualTo(SERVICE_PATH + "/$metadata"))
@@ -78,6 +111,7 @@ public class SapOData2SourceETLTest extends BaseSapODataSourceETLTest {
   public void testSource() throws Exception {
     Map<String, String> properties = new ImmutableMap.Builder<String, String>()
       .put(SapODataConstants.ODATA_SERVICE_URL, getServerAddress() + SERVICE_PATH)
+      .put(SapODataConstants.INCLUDE_METADATA_ANNOTATIONS, "false")
       .put(SapODataConstants.RESOURCE_PATH, ENTITY_SET)
       .build();
 
@@ -89,6 +123,7 @@ public class SapOData2SourceETLTest extends BaseSapODataSourceETLTest {
   public void testSourceXml() throws Exception {
     Map<String, String> properties = new ImmutableMap.Builder<String, String>()
       .put(SapODataConstants.ODATA_SERVICE_URL, getServerAddress() + SERVICE_PATH)
+      .put(SapODataConstants.INCLUDE_METADATA_ANNOTATIONS, "false")
       .put(SapODataConstants.RESOURCE_PATH, ENTITY_SET)
       .put(SapODataConstants.QUERY, "$format=xml")
       .build();
@@ -101,6 +136,7 @@ public class SapOData2SourceETLTest extends BaseSapODataSourceETLTest {
   public void testSourceJson() throws Exception {
     Map<String, String> properties = new ImmutableMap.Builder<String, String>()
       .put(SapODataConstants.ODATA_SERVICE_URL, getServerAddress() + SERVICE_PATH)
+      .put(SapODataConstants.INCLUDE_METADATA_ANNOTATIONS, "false")
       .put(SapODataConstants.RESOURCE_PATH, ENTITY_SET)
       .put(SapODataConstants.QUERY, "$format=json")
       .build();
@@ -113,6 +149,7 @@ public class SapOData2SourceETLTest extends BaseSapODataSourceETLTest {
   public void testSourceWithSchemaSet() throws Exception {
     Map<String, String> properties = new ImmutableMap.Builder<String, String>()
       .put(SapODataConstants.ODATA_SERVICE_URL, getServerAddress() + SERVICE_PATH)
+      .put(SapODataConstants.INCLUDE_METADATA_ANNOTATIONS, "false")
       .put(SapODataConstants.RESOURCE_PATH, ENTITY_SET)
       .put(SapODataConstants.SCHEMA, SCHEMA.toString())
       .build();
@@ -125,6 +162,7 @@ public class SapOData2SourceETLTest extends BaseSapODataSourceETLTest {
   public void testSourceXmlWithSchemaSet() throws Exception {
     Map<String, String> properties = new ImmutableMap.Builder<String, String>()
       .put(SapODataConstants.ODATA_SERVICE_URL, getServerAddress() + SERVICE_PATH)
+      .put(SapODataConstants.INCLUDE_METADATA_ANNOTATIONS, "false")
       .put(SapODataConstants.RESOURCE_PATH, ENTITY_SET)
       .put(SapODataConstants.SCHEMA, SCHEMA.toString())
       .put(SapODataConstants.QUERY, "$format=xml")
@@ -138,6 +176,7 @@ public class SapOData2SourceETLTest extends BaseSapODataSourceETLTest {
   public void testSourceJsonWithSchemaSet() throws Exception {
     Map<String, String> properties = new ImmutableMap.Builder<String, String>()
       .put(SapODataConstants.ODATA_SERVICE_URL, getServerAddress() + SERVICE_PATH)
+      .put(SapODataConstants.INCLUDE_METADATA_ANNOTATIONS, "false")
       .put(SapODataConstants.RESOURCE_PATH, ENTITY_SET)
       .put(SapODataConstants.SCHEMA, SCHEMA.toString())
       .put(SapODataConstants.QUERY, "$format=json")
@@ -145,5 +184,121 @@ public class SapOData2SourceETLTest extends BaseSapODataSourceETLTest {
 
     List<StructuredRecord> records = getPipelineResults(properties);
     Assert.assertEquals(3, records.size());
+  }
+
+  @Test
+  public void testSourceIncludeMetadataAnnotations() throws Exception {
+    Map<String, String> properties = new ImmutableMap.Builder<String, String>()
+      .put(SapODataConstants.ODATA_SERVICE_URL, getServerAddress() + SERVICE_PATH)
+      .put(SapODataConstants.INCLUDE_METADATA_ANNOTATIONS, "true")
+      .put(SapODataConstants.RESOURCE_PATH, ENTITY_SET)
+      .build();
+
+    List<StructuredRecord> records = getPipelineResults(properties);
+    Assert.assertEquals(3, records.size());
+    for (StructuredRecord actualRecord : records) {
+      assertMetadataAnnotationsIncluded(actualRecord);
+    }
+  }
+
+  @Test
+  public void testSourceXmlIncludeMetadataAnnotations() throws Exception {
+    Map<String, String> properties = new ImmutableMap.Builder<String, String>()
+      .put(SapODataConstants.ODATA_SERVICE_URL, getServerAddress() + SERVICE_PATH)
+      .put(SapODataConstants.INCLUDE_METADATA_ANNOTATIONS, "true")
+      .put(SapODataConstants.RESOURCE_PATH, ENTITY_SET)
+      .put(SapODataConstants.QUERY, "$format=xml")
+      .build();
+
+    List<StructuredRecord> records = getPipelineResults(properties);
+    Assert.assertEquals(3, records.size());
+    for (StructuredRecord actualRecord : records) {
+      assertMetadataAnnotationsIncluded(actualRecord);
+    }
+  }
+
+  @Test
+  public void testSourceJsonIncludeMetadataAnnotations() throws Exception {
+    Map<String, String> properties = new ImmutableMap.Builder<String, String>()
+      .put(SapODataConstants.ODATA_SERVICE_URL, getServerAddress() + SERVICE_PATH)
+      .put(SapODataConstants.INCLUDE_METADATA_ANNOTATIONS, "true")
+      .put(SapODataConstants.RESOURCE_PATH, ENTITY_SET)
+      .put(SapODataConstants.QUERY, "$format=json")
+      .build();
+
+    List<StructuredRecord> records = getPipelineResults(properties);
+    Assert.assertEquals(3, records.size());
+    for (StructuredRecord actualRecord : records) {
+      assertMetadataAnnotationsIncluded(actualRecord);
+    }
+  }
+
+  @Test
+  public void testSourceIncludeMetadataAnnotationsSchemaSet() throws Exception {
+    Map<String, String> properties = new ImmutableMap.Builder<String, String>()
+      .put(SapODataConstants.ODATA_SERVICE_URL, getServerAddress() + SERVICE_PATH)
+      .put(SapODataConstants.INCLUDE_METADATA_ANNOTATIONS, "true")
+      .put(SapODataConstants.RESOURCE_PATH, ENTITY_SET)
+      .put(SapODataConstants.SCHEMA, SCHEMA_WITH_METADATA_ANNOTATIONS.toString())
+      .build();
+
+    List<StructuredRecord> records = getPipelineResults(properties);
+    Assert.assertEquals(3, records.size());
+    for (StructuredRecord actualRecord : records) {
+      assertMetadataAnnotationsIncluded(actualRecord);
+    }
+  }
+
+  @Test
+  public void testSourceXmlIncludeMetadataAnnotationsSchemaSet() throws Exception {
+    Map<String, String> properties = new ImmutableMap.Builder<String, String>()
+      .put(SapODataConstants.ODATA_SERVICE_URL, getServerAddress() + SERVICE_PATH)
+      .put(SapODataConstants.INCLUDE_METADATA_ANNOTATIONS, "true")
+      .put(SapODataConstants.RESOURCE_PATH, ENTITY_SET)
+      .put(SapODataConstants.SCHEMA, SCHEMA_WITH_METADATA_ANNOTATIONS.toString())
+      .put(SapODataConstants.QUERY, "$format=xml")
+      .build();
+
+    List<StructuredRecord> records = getPipelineResults(properties);
+    Assert.assertEquals(3, records.size());
+    for (StructuredRecord actualRecord : records) {
+      assertMetadataAnnotationsIncluded(actualRecord);
+    }
+  }
+
+  @Test
+  public void testSourceJsonIncludeMetadataAnnotationsSchemaSet() throws Exception {
+    Map<String, String> properties = new ImmutableMap.Builder<String, String>()
+      .put(SapODataConstants.ODATA_SERVICE_URL, getServerAddress() + SERVICE_PATH)
+      .put(SapODataConstants.INCLUDE_METADATA_ANNOTATIONS, "true")
+      .put(SapODataConstants.RESOURCE_PATH, ENTITY_SET)
+      .put(SapODataConstants.SCHEMA, SCHEMA_WITH_METADATA_ANNOTATIONS.toString())
+      .put(SapODataConstants.QUERY, "$format=json")
+      .build();
+
+    List<StructuredRecord> records = getPipelineResults(properties);
+    Assert.assertEquals(3, records.size());
+    for (StructuredRecord actualRecord : records) {
+      assertMetadataAnnotationsIncluded(actualRecord);
+    }
+  }
+
+  private void assertMetadataAnnotationsIncluded(StructuredRecord actualRecord) {
+    List<Schema.Field> actualFields = actualRecord.getSchema().getFields();
+    Assert.assertNotNull(actualFields);
+    for (Schema.Field actualField : actualFields) {
+      Assert.assertEquals(actualField.getSchema().getType(), Schema.Type.RECORD);
+      StructuredRecord annotatedValueRecord = actualRecord.get(actualField.getName());
+
+      Schema annotatedValueSchema = annotatedValueRecord.getSchema();
+      Schema.Field metadataField = annotatedValueSchema.getField(SapODataConstants.METADATA_ANNOTATIONS_FIELD_NAME);
+      Assert.assertNotNull(metadataField);
+      Assert.assertEquals(metadataField.getSchema().getType(), Schema.Type.RECORD);
+      StructuredRecord annotations = annotatedValueRecord.get(metadataField.getName());
+      Assert.assertEquals("false", annotations.get("creatable"));
+      Assert.assertEquals("false", annotations.get("updatable"));
+      Assert.assertEquals("false", annotations.get("sortable"));
+      Assert.assertEquals("false", annotations.get("filterable"));
+    }
   }
 }

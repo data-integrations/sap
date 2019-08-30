@@ -38,9 +38,11 @@ import io.cdap.plugin.sap.odata.ODataEntity;
 import io.cdap.plugin.sap.odata.PropertyMetadata;
 import io.cdap.plugin.sap.odata.exception.ODataException;
 import io.cdap.plugin.sap.transformer.ODataEntryToRecordTransformer;
+import io.cdap.plugin.sap.transformer.ODataEntryToRecordWithMetadataTransformer;
 import org.apache.hadoop.io.NullWritable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -114,7 +116,9 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntity, Struc
   public void initialize(BatchRuntimeContext context) throws Exception {
     super.initialize(context);
     Schema schema = context.getOutputSchema();
-    this.transformer = new ODataEntryToRecordTransformer(schema);
+    this.transformer = config.isIncludeMetadataAnnotations()
+      ? new ODataEntryToRecordWithMetadataTransformer(schema, getMetadataAnnotations())
+      : new ODataEntryToRecordTransformer(schema);
   }
 
   @Override
@@ -129,7 +133,7 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntity, Struc
       EntityType entityType = oDataClient.getEntitySetType(config.getResourcePath());
       List<Schema.Field> fields = entityType.getProperties().stream()
         .filter(p -> config.getSelectProperties().isEmpty() || config.getSelectProperties().contains(p.getName()))
-        .map(this::getSchemaField)
+        .map(propertyMetadata -> getSchemaField(propertyMetadata, config.isIncludeMetadataAnnotations()))
         .collect(Collectors.toList());
       return Schema.recordOf("output", fields);
     } catch (ODataException e) {
@@ -137,10 +141,41 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntity, Struc
     }
   }
 
-  private Schema.Field getSchemaField(PropertyMetadata propertyMetadata) {
+  // TODO currently works only for OData 2
+  private Map<String, Map<String, String>> getMetadataAnnotations() {
+    GenericODataClient oDataClient = new GenericODataClient(config.getUrl(), config.getUser(), config.getPassword());
+    try {
+      EntityType entityType = oDataClient.getEntitySetType(config.getResourcePath());
+      return entityType.getProperties().stream()
+        .filter(p -> config.getSelectProperties().isEmpty() || config.getSelectProperties().contains(p.getName()))
+        .collect(Collectors.toMap(PropertyMetadata::getName, PropertyMetadata::getAnnotations));
+    } catch (ODataException e) {
+      throw new InvalidStageException("Unable to get metadata annotations for the entity type: " + e.getMessage(), e);
+    }
+  }
+
+  private Schema.Field getSchemaField(PropertyMetadata propertyMetadata, boolean includeAnnotations) {
     Schema nonNullableSchema = convertPropertyType(propertyMetadata);
     Schema schema = propertyMetadata.isNullable() ? Schema.nullableOf(nonNullableSchema) : nonNullableSchema;
-    return Schema.Field.of(propertyMetadata.getName(), schema);
+
+    return includeAnnotations && propertyMetadata.getAnnotations() != null ?
+      getFieldWithAnnotations(propertyMetadata, schema) : Schema.Field.of(propertyMetadata.getName(), schema);
+  }
+
+  private Schema.Field getFieldWithAnnotations(PropertyMetadata propertyMetadata, Schema valueSchema) {
+    Map<String, String> annotations = propertyMetadata.getAnnotations();
+    List<Schema.Field> fields = annotations.keySet().stream()
+      .map(name -> Schema.Field.of(name, Schema.of(Schema.Type.STRING)))
+      .collect(Collectors.toList());
+
+    String propertyName = propertyMetadata.getName();
+    Schema.Field metadataField = Schema.Field.of(SapODataConstants.METADATA_ANNOTATIONS_FIELD_NAME,
+                                                 Schema.recordOf(propertyName + "-metadata-record", fields));
+
+    Schema valueWithMetadataSchema = Schema.recordOf(propertyName + "-value-with-metadata-record",
+                                                     Schema.Field.of(SapODataConstants.VALUE_FIELD_NAME, valueSchema),
+                                                     metadataField);
+    return Schema.Field.of(propertyName, valueWithMetadataSchema);
   }
 
   private Schema convertPropertyType(PropertyMetadata propertyMetadata) {

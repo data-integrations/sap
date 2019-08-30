@@ -32,6 +32,9 @@ see [OData URL components].
 [OData URL components]:
 https://www.odata.org/documentation/odata-version-3-0/url-conventions/
 
+**Include Metadata Annotations:** Whether the plugin should read SAP metadata annotations and include them to each
+record. Currently works only for OData V2.
+
 **Username:** Username for basic authentication.
 
 **Password:** Password for basic authentication.
