@@ -85,11 +85,47 @@
     <hydrator.version>2.2.0</hydrator.version>
     <junit.version>4.11</junit.version>
     <mockito.version>1.10.19</mockito.version>
+    <olingo.version>4.6.0</olingo.version>
     <olingo2.version>2.0.11</olingo2.version>
     <wiremock.version>1.49</wiremock.version>
   </properties>
 
   <dependencies>
+
+    <!--Olingo v4-->
+    <dependency>
+      <groupId>org.apache.olingo</groupId>
+      <artifactId>odata-commons-api</artifactId>
+      <version>${olingo.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.olingo</groupId>
+      <artifactId>odata-commons-core</artifactId>
+      <version>${olingo.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.olingo</groupId>
+      <artifactId>odata-client-api</artifactId>
+      <version>${olingo.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.olingo</groupId>
+      <artifactId>odata-client-core</artifactId>
+      <version>${olingo.version}</version>
+    </dependency>
+
+    <!--Olingo v2-->
+    <dependency>
+      <groupId>org.apache.olingo</groupId>
+      <artifactId>olingo-odata2-api</artifactId>
+      <version>${olingo2.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.olingo</groupId>
+      <artifactId>olingo-odata2-core</artifactId>
+      <version>${olingo2.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>io.cdap.cdap</groupId>
       <artifactId>cdap-api</artifactId>
@@ -240,27 +276,21 @@
     </dependency>
 
     <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-      <version>${common.codec.version}</version>
-    </dependency>
-
-    <!--Olingo v2-->
-    <dependency>
-      <groupId>org.apache.olingo</groupId>
-      <artifactId>olingo-odata2-api</artifactId>
-      <version>${olingo2.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.olingo</groupId>
-      <artifactId>olingo-odata2-core</artifactId>
-      <version>${olingo2.version}</version>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>${httpcomponents.version}</version>
     </dependency>
 
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
       <version>${gson.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>${common.codec.version}</version>
     </dependency>
 
     <!-- tests -->
@@ -292,12 +322,6 @@
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
       <version>${mockito.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-      <version>${httpcomponents.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -469,6 +493,7 @@
         <configuration>
           <instructions>
             <_exportcontents>
+              com.fasterxml.aalto.stax.*;
               io.cdap.plugin.sap.*
             </_exportcontents>
             <Embed-Dependency>*;inline=false;scope=compile</Embed-Dependency>

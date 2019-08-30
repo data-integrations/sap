@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+  <edmx:DataServices>
+    <Schema Namespace="TestService" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+      <EntityType Name="AllDataTypesEntity">
+        <Key>
+          <PropertyRef Name="Int32"/>
+        </Key>
+        <Property Name="Binary" Type="Edm.Binary" Nullable="false" MaxLength="Max" FixedLength="false"/>
+        <Property Name="Boolean" Type="Edm.Boolean" Nullable="false"/>
+        <Property Name="Byte" Type="Edm.Byte" Nullable="false"/>
+        <Property Name="DateTimeOffset" Type="Edm.DateTimeOffset" Nullable="false"/>
+        <Property Name="Decimal" Type="Edm.Decimal" Nullable="false" Precision="16" Scale="3"/>
+        <Property Name="Double" Type="Edm.Double" Nullable="false"/>
+        <Property Name="Guid" Type="Edm.Guid" Nullable="false"/>
+        <Property Name="Int16" Type="Edm.Int32" Nullable="false"/>
+        <Property Name="Int32" Type="Edm.Int32" Nullable="false"/>
+        <Property Name="Int64" Type="Edm.Int64" Nullable="false"/>
+        <Property Name="SByte" Type="Edm.SByte" Nullable="false"/>
+        <Property Name="Single" Type="Edm.Single" Nullable="false"/>
+        <Property Name="String" Type="Edm.String" Nullable="false"/>
+      </EntityType>
+      <EntityContainer Name="InMemoryEntities">
+        <EntitySet Name="AllDataTypes" EntityType="TestService.AllDataTypesEntity">
+          <NavigationPropertyBinding Path="Parent" Target="People"/>
+        </EntitySet>
+      </EntityContainer>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>

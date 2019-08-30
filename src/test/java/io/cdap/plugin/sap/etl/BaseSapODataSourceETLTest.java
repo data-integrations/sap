@@ -13,14 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package io.cdap.plugin.sap;
+package io.cdap.plugin.sap.etl;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.collect.ImmutableMap;
 import io.cdap.cdap.api.artifact.ArtifactSummary;
 import io.cdap.cdap.api.data.format.StructuredRecord;
-import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.cdap.api.dataset.table.Table;
 import io.cdap.cdap.datapipeline.DataPipelineApp;
 import io.cdap.cdap.datapipeline.SmartWorkflow;
@@ -40,12 +38,12 @@ import io.cdap.cdap.test.DataSetManager;
 import io.cdap.cdap.test.TestConfiguration;
 import io.cdap.cdap.test.WorkflowManager;
 import io.cdap.plugin.common.Constants;
+import io.cdap.plugin.sap.SapODataConstants;
+import io.cdap.plugin.sap.SapODataSource;
 import org.apache.olingo.odata2.core.rt.RuntimeDelegateImpl;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.rules.TestName;
 
 import java.io.IOException;
@@ -55,11 +53,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nullable;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
 
-public class SapODataSourceETLTest extends HydratorTestBase {
+public abstract class BaseSapODataSourceETLTest extends HydratorTestBase {
 
   @ClassRule
   public static final TestConfiguration CONFIG = new TestConfiguration("explore.enabled", false);
@@ -83,55 +78,6 @@ public class SapODataSourceETLTest extends HydratorTestBase {
     // this will make our plugins available.
     addPluginArtifact(NamespaceId.DEFAULT.artifact("example-plugins", "1.0.0"), parentArtifact,
                       SapODataSource.class, RuntimeDelegateImpl.class);
-  }
-
-  @Test
-  public void testSource() throws Exception {
-    testSource(null);
-  }
-
-  @Test
-  public void testSourceWithSchemaSet() throws Exception {
-    Schema schema = Schema.recordOf("schema",
-                                    Schema.Field.of("Id", Schema.of(Schema.Type.STRING)),
-                                    Schema.Field.of("Binary", Schema.of(Schema.Type.BYTES)),
-                                    Schema.Field.of("Boolean", Schema.of(Schema.Type.BOOLEAN)),
-                                    Schema.Field.of("Byte", Schema.of(Schema.Type.INT)),
-                                    Schema.Field.of("Decimal", Schema.decimalOf(16, 3)),
-                                    Schema.Field.of("Double", Schema.of(Schema.Type.DOUBLE)),
-                                    Schema.Field.of("Single", Schema.of(Schema.Type.FLOAT)),
-                                    Schema.Field.of("Guid", Schema.of(Schema.Type.STRING)),
-                                    Schema.Field.of("Int16", Schema.of(Schema.Type.INT)),
-                                    Schema.Field.of("Int32", Schema.of(Schema.Type.INT)),
-                                    Schema.Field.of("Int64", Schema.of(Schema.Type.LONG)),
-                                    Schema.Field.of("SByte", Schema.of(Schema.Type.INT)),
-                                    Schema.Field.of("String", Schema.of(Schema.Type.STRING)),
-                                    Schema.Field.of("DateTime", Schema.of(Schema.LogicalType.TIMESTAMP_MICROS)),
-                                    Schema.Field.of("Time", Schema.of(Schema.LogicalType.TIME_MICROS)),
-                                    Schema.Field.of("DateTimeOffset", Schema.of(Schema.Type.STRING)));
-
-    testSource(schema);
-  }
-
-  public void testSource(@Nullable Schema schema) throws Exception {
-    ImmutableMap.Builder<String, String> properties = new ImmutableMap.Builder<String, String>()
-      // http://vhcalnplci.dummy.nodomain:8000/sap/opu/odata/SAP/ZGW100_XX_S2_SRV/
-      .put(SapODataConstants.ODATA_SERVICE_URL, getServerAddress() + "/sap/opu/odata/SAP/ZGW100_XX_S2_SRV")
-      .put(SapODataConstants.RESOURCE_PATH, "AllDataTypes");
-    if (schema != null) {
-      properties.put(SapODataConstants.SCHEMA, schema.toString());
-    }
-
-    wireMockRule.stubFor(WireMock.get(WireMock.urlEqualTo("/sap/opu/odata/SAP/ZGW100_XX_S2_SRV/$metadata"))
-                           .willReturn(WireMock.aResponse().withBody(readResourceFile("metadata.xml"))));
-    wireMockRule.stubFor(
-      WireMock.get(WireMock.urlEqualTo("/sap/opu/odata/SAP/ZGW100_XX_S2_SRV/AllDataTypes"))
-        .willReturn(WireMock.aResponse()
-                      .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_XML)
-                      .withBody(readResourceFile("AllDataTypes.xml"))));
-
-    List<StructuredRecord> records = getPipelineResults(properties.build());
-    Assert.assertEquals(3, records.size());
   }
 
   public List<StructuredRecord> getPipelineResults(Map<String, String> sourceProperties) throws Exception {

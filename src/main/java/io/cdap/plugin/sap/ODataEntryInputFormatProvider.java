@@ -40,7 +40,7 @@ public class ODataEntryInputFormatProvider implements InputFormatProvider {
 
   @Override
   public String getInputFormatClassName() {
-    return ODataEntryInputFormat.class.getName();
+    return ODataEntityInputFormat.class.getName();
   }
 
   @Override

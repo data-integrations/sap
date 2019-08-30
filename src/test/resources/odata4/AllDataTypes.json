@@ -1,0 +1,46 @@
+{
+  "@odata.context": "$metadata#AllDataTypes",
+  "@odata.metadataEtag": "W/\"20190302025931\"",
+  "value": [
+    {
+      "Binary@odata.type": "#Binary",
+      "Binary": "T0RhdGE",
+      "Boolean": true,
+      "Byte": 127,
+      "DateTimeOffset": "2002-10-10T17:00:01+01:00",
+      "Decimal@odata.type": "#Decimal",
+      "Decimal": "123.456",
+      "Double@odata.type": "#Double",
+      "Double": 940282346638528860000000000000000000000.000000,
+      "Guid": "484f2eb4-f60d-4652-8673-6517d7c64d0e",
+      "Int16": 1,
+      "Int32": 1,
+      "Int64@odata.type": "#Int64",
+      "Int64": "9223372036854775807",
+      "SByte": -128,
+      "Single@odata.type": "#Single",
+      "Single": 3.14,
+      "String": "DEMO"
+    },
+    {
+      "Binary@odata.type": "#Binary",
+      "Binary": "T0RhdGE",
+      "Boolean": true,
+      "Byte": 127,
+      "DateTimeOffset": "2002-10-10T17:00:01+01:00",
+      "Decimal@odata.type": "#Decimal",
+      "Decimal": "123.456",
+      "Double@odata.type": "#Double",
+      "Double": 940282346638528860000000000000000000000.000000,
+      "Guid": "484f2eb4-f60d-4652-8673-6517d7c64d0e",
+      "Int16": 2,
+      "Int32": 2,
+      "Int64@odata.type": "#Int64",
+      "Int64": "9223372036854775807",
+      "SByte": -128,
+      "Single@odata.type": "#Single",
+      "Single": -3.14,
+      "String": "DEMO"
+    }
+  ]
+}

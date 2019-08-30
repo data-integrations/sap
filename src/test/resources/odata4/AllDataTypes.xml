@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xml:base="http://odatae2etest.azurewebsites.net/javatest/DefaultService/" xmlns="http://www.w3.org/2005/Atom"
+      xmlns:d="http://docs.oasis-open.org/odata/ns/data" xmlns:m="http://docs.oasis-open.org/odata/ns/metadata"
+      xmlns:gml="http://www.opengis.net/gml"
+      m:context="http://odatae2etest.azurewebsites.net/javatest/DefaultService/$metadata#AllDataTypes">
+  <id>http://odatae2etest.azurewebsites.net/javatest/DefaultService/AllDataTypes</id>
+  <title/>
+  <updated>2014-05-08T16:18:03Z</updated>
+  <entry>
+    <id>http://odatae2etest.azurewebsites.net/javatest/DefaultService/AllDataTypes(3)</id>
+    <category term="#TestService.AllDataTypesEntity"
+              scheme="http://docs.oasis-open.org/odata/ns/scheme"/>
+    <link rel="edit"
+          href="http://odatae2etest.azurewebsites.net/javatest/DefaultService/AllDataTypes(3)/TestService.AllDataTypesEntity"/>
+    <title/>
+    <updated>2014-05-08T16:18:03Z</updated>
+    <author>
+      <name/>
+    </author>
+    <link rel="http://docs.oasis-open.org/odata/ns/edit-media/Stream" title="Stream" href="AllDataTypes(3)/Stream"/>
+    <content type="application/xml">
+      <m:properties>
+        <d:Binary m:type="Binary">
+          fi653p3+MklA/LdoBlhWgnMTUUEo8tEgtbMXnF0a3CUNL9BZxXpSRiD9ebTnmNR0zWPjJVIDx4tdmCnq55XrJh+RW9aI/b34wAogK3kcORw=
+        </d:Binary>
+        <d:Boolean m:type="Edm.Boolean">true</d:Boolean>
+        <d:Byte m:type="Edm.Byte">127</d:Byte>
+        <d:DateTimeOffset m:type="DateTimeOffset">2010-12-13T00:00:00Z</d:DateTimeOffset>
+        <d:Decimal m:type="Edm.Decimal">123.456</d:Decimal>
+        <d:Double m:type="Edm.Double">1.234</d:Double>
+        <d:Guid>484f2eb4-f60d-4652-8673-6517d7c64d0e</d:Guid>
+        <d:Int16 m:type="Int16">3</d:Int16>
+        <d:Int32 m:type="Int32">3</d:Int32>
+        <d:Int64 m:type="Int64">9223372036854775807</d:Int64>
+        <d:SByte m:type="SByte">-128</d:SByte>
+        <d:Single m:type="Single">3.141</d:Single>
+        <d:String>Jacob</d:String>
+      </m:properties>
+    </content>
+  </entry>
+  <entry>
+    <id>http://odatae2etest.azurewebsites.net/javatest/DefaultService/AllDataTypes(4)</id>
+    <category term="#TestService.AllDataTypesEntity"
+              scheme="http://docs.oasis-open.org/odata/ns/scheme"/>
+    <link rel="edit"
+          href="http://odatae2etest.azurewebsites.net/javatest/DefaultService/AllDataTypes(4)/TestService.AllDataTypesEntity"/>
+    <title/>
+    <updated>2014-05-08T16:18:03Z</updated>
+    <author>
+      <name/>
+    </author>
+    <link rel="http://docs.oasis-open.org/odata/ns/edit-media/Stream" title="Stream" href="AllDataTypes(4)/Stream"/>
+    <content type="application/xml">
+      <m:properties>
+        <d:Binary m:type="Binary">
+          fi653p3+MklA/LdoBlhWgnMTUUEo8tEgtbMXnF0a3CUNL9BZxXpSRiD9ebTnmNR0zWPjJVIDx4tdmCnq55XrJh+RW9aI/b34wAogK3kcORw=
+        </d:Binary>
+        <d:Boolean m:type="Edm.Boolean">true</d:Boolean>
+        <d:Byte m:type="Edm.Byte">127</d:Byte>
+        <d:DateTimeOffset m:type="DateTimeOffset">2010-12-13T00:00:00Z</d:DateTimeOffset>
+        <d:Decimal m:type="Edm.Decimal">123.456</d:Decimal>
+        <d:Double m:type="Edm.Double">1.234</d:Double>
+        <d:Guid>484f2eb4-f60d-4652-8673-6517d7c64d0e</d:Guid>
+        <d:Int16 m:type="Int16">4</d:Int16>
+        <d:Int32 m:type="Int32">4</d:Int32>
+        <d:Int64 m:type="Int64">9223372036854775807</d:Int64>
+        <d:SByte m:type="SByte">-128</d:SByte>
+        <d:Single m:type="Single">3.141</d:Single>
+        <d:String>Elmo</d:String>
+      </m:properties>
+    </content>
+  </entry>
+</feed>

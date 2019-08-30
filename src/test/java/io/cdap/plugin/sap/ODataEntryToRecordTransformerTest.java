@@ -18,8 +18,9 @@ package io.cdap.plugin.sap;
 
 import io.cdap.cdap.api.data.format.StructuredRecord;
 import io.cdap.cdap.api.data.schema.Schema;
+import io.cdap.plugin.sap.odata.ODataEntity;
+import io.cdap.plugin.sap.transformer.ODataEntryToRecordTransformer;
 import org.apache.olingo.odata2.api.edm.EdmSimpleTypeException;
-import org.apache.olingo.odata2.api.ep.entry.ODataEntry;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -44,7 +45,7 @@ public class ODataEntryToRecordTransformerTest {
 
   @Test
   @SuppressWarnings("ConstantConditions")
-  public void testTransform() throws EdmSimpleTypeException {
+  public void testTransformOData2Types() throws EdmSimpleTypeException {
     Schema schema = Schema.recordOf("schema",
                                     Schema.Field.of("binary", Schema.of(Schema.Type.BYTES)),
                                     Schema.Field.of("boolean", Schema.of(Schema.Type.BOOLEAN)),
@@ -92,7 +93,7 @@ public class ODataEntryToRecordTransformerTest {
     timeCalendar.set(Calendar.MINUTE, time.getMinute());
     timeCalendar.set(Calendar.SECOND, time.getSecond());
     timeCalendar.set(Calendar.MILLISECOND, (int) TimeUnit.NANOSECONDS.toMillis(time.getNano()));
-    ODataEntry entry = ODataEntryBuilder.builder()
+    ODataEntity entity = ODataEntityBuilder.builder()
       .setBinary("binary", expected.<byte[]>get("binary"))
       .setBoolean("boolean", expected.get("boolean"))
       .setByte("byte", expected.<Number>get("byte").byteValue())
@@ -113,7 +114,7 @@ public class ODataEntryToRecordTransformerTest {
       .build();
 
     ODataEntryToRecordTransformer transformer = new ODataEntryToRecordTransformer(schema);
-    StructuredRecord transformed = transformer.transform(entry);
+    StructuredRecord transformed = transformer.transform(entity);
 
     Assert.assertArrayEquals(expected.<byte[]>get("binary"), transformed.get("binary"));
     Assert.assertEquals(expected.<Boolean>get("boolean"), transformed.get("boolean"));
