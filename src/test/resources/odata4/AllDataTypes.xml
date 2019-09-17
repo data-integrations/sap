@@ -254,6 +254,30 @@
             </gml:geometryMembers>
           </gml:MultiGeometry>
         </d:GeometryCollection>
+
+        <d:MultipleAnnotated m:type="Edm.Boolean">true</d:MultipleAnnotated>
+        <d:Targeted m:type="Edm.Boolean">true</d:Targeted>
+        <d:Price m:type="Edm.Boolean">true</d:Price>
+        <d:Currency m:type="Edm.Boolean">true</d:Currency>
+        <d:ThumbnailProperty m:type="Edm.Boolean">true</d:ThumbnailProperty>
+        <d:EnumProperty m:type="Edm.Boolean">true</d:EnumProperty>
+        <d:CanonicalFunctionsProperty m:type="Edm.Boolean">true</d:CanonicalFunctionsProperty>
+        <d:AndAnnotated m:type="Edm.Boolean">true</d:AndAnnotated>
+        <d:OrAnnotated m:type="Edm.Boolean">true</d:OrAnnotated>
+        <d:NotAnnotated m:type="Edm.Boolean">true</d:NotAnnotated>
+        <d:EqAnnotated m:type="Edm.Boolean">true</d:EqAnnotated>
+        <d:NeAnnotated m:type="Edm.Boolean">true</d:NeAnnotated>
+        <d:GtAnnotated m:type="Edm.Boolean">true</d:GtAnnotated>
+        <d:GeAnnotated m:type="Edm.Boolean">true</d:GeAnnotated>
+        <d:LtAnnotated m:type="Edm.Boolean">true</d:LtAnnotated>
+        <d:LeAnnotated m:type="Edm.Boolean">true</d:LeAnnotated>
+        <d:CastAnnotated m:type="Edm.Boolean">true</d:CastAnnotated>
+        <d:CollectionAnnotated m:type="Edm.Boolean">true</d:CollectionAnnotated>
+        <d:IfAnnotated m:type="Edm.Boolean">true</d:IfAnnotated>
+        <d:IsOfAnnotated m:type="Edm.Boolean">true</d:IsOfAnnotated>
+        <d:LabeledElementAnnotated m:type="Edm.Boolean">true</d:LabeledElementAnnotated>
+        <d:RecordAnnotated m:type="Edm.Boolean">true</d:RecordAnnotated>
+        <d:UrlRefAnnotated m:type="Edm.Boolean">true</d:UrlRefAnnotated>
       </m:properties>
     </content>
   </entry>
@@ -505,6 +529,29 @@
             </gml:geometryMembers>
           </gml:MultiGeometry>
         </d:GeometryCollection>
+        <d:MultipleAnnotated m:type="Edm.Boolean">true</d:MultipleAnnotated>
+        <d:Targeted m:type="Edm.Boolean">true</d:Targeted>
+        <d:Price m:type="Edm.Boolean">true</d:Price>
+        <d:Currency m:type="Edm.Boolean">true</d:Currency>
+        <d:ThumbnailProperty m:type="Edm.Boolean">true</d:ThumbnailProperty>
+        <d:EnumProperty m:type="Edm.Boolean">true</d:EnumProperty>
+        <d:CanonicalFunctionsProperty m:type="Edm.Boolean">true</d:CanonicalFunctionsProperty>
+        <d:AndAnnotated m:type="Edm.Boolean">true</d:AndAnnotated>
+        <d:OrAnnotated m:type="Edm.Boolean">true</d:OrAnnotated>
+        <d:NotAnnotated m:type="Edm.Boolean">true</d:NotAnnotated>
+        <d:EqAnnotated m:type="Edm.Boolean">true</d:EqAnnotated>
+        <d:NeAnnotated m:type="Edm.Boolean">true</d:NeAnnotated>
+        <d:GtAnnotated m:type="Edm.Boolean">true</d:GtAnnotated>
+        <d:GeAnnotated m:type="Edm.Boolean">true</d:GeAnnotated>
+        <d:LtAnnotated m:type="Edm.Boolean">true</d:LtAnnotated>
+        <d:LeAnnotated m:type="Edm.Boolean">true</d:LeAnnotated>
+        <d:CastAnnotated m:type="Edm.Boolean">true</d:CastAnnotated>
+        <d:CollectionAnnotated m:type="Edm.Boolean">true</d:CollectionAnnotated>
+        <d:IfAnnotated m:type="Edm.Boolean">true</d:IfAnnotated>
+        <d:IsOfAnnotated m:type="Edm.Boolean">true</d:IsOfAnnotated>
+        <d:LabeledElementAnnotated m:type="Edm.Boolean">true</d:LabeledElementAnnotated>
+        <d:RecordAnnotated m:type="Edm.Boolean">true</d:RecordAnnotated>
+        <d:UrlRefAnnotated m:type="Edm.Boolean">true</d:UrlRefAnnotated>
       </m:properties>
     </content>
   </entry>

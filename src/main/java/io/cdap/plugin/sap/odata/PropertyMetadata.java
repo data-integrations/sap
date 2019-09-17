@@ -16,9 +16,7 @@
 
 package io.cdap.plugin.sap.odata;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import javax.annotation.Nullable;
 
 /**
@@ -29,7 +27,6 @@ public class PropertyMetadata {
   private final String name;
   private final String edmTypeName;
   private final boolean nullable;
-  private final Map<String, String> annotations;
 
   @Nullable
   private final Integer precision;
@@ -37,15 +34,16 @@ public class PropertyMetadata {
   @Nullable
   private final Integer scale;
 
+  private final List<ODataAnnotation> annotations;
+
   public PropertyMetadata(String name, String edmTypeName, boolean nullable, Integer precision, Integer scale,
-                          Map<String, String> annotations) {
+                          List<ODataAnnotation> annotations) {
     this.name = name;
     this.edmTypeName = edmTypeName;
     this.nullable = nullable;
     this.precision = precision;
     this.scale = scale;
-    this.annotations = annotations != null ? Collections.unmodifiableMap(new HashMap<>(annotations))
-      : Collections.emptyMap();
+    this.annotations = annotations;
   }
 
   public String getName() {
@@ -70,7 +68,7 @@ public class PropertyMetadata {
     return scale;
   }
 
-  public Map<String, String> getAnnotations() {
+  public List<ODataAnnotation> getAnnotations() {
     return annotations;
   }
 }

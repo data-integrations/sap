@@ -50,7 +50,6 @@ public class SapOData4SourceETLTest extends BaseSapODataSourceETLTest {
     Schema.Field.of("Int32", Schema.of(Schema.Type.INT)),
     Schema.Field.of("Int64", Schema.of(Schema.Type.LONG)),
     Schema.Field.of("SByte", Schema.of(Schema.Type.INT)),
-    Schema.Field.of("Single", Schema.of(Schema.Type.FLOAT)),
     Schema.Field.of("Stream", SapODataConstants.Stream.SCHEMA),
     Schema.Field.of("Single", Schema.of(Schema.Type.FLOAT)),
     Schema.Field.of("String", Schema.of(Schema.Type.STRING)),
@@ -166,6 +165,44 @@ public class SapOData4SourceETLTest extends BaseSapODataSourceETLTest {
       .put(SapODataConstants.RESOURCE_PATH, ENTITY_SET)
       .put(SapODataConstants.QUERY, "$format=xml")
       .put(SapODataConstants.SCHEMA, SCHEMA.toString())
+      .build();
+
+    List<StructuredRecord> records = getPipelineResults(properties);
+    Assert.assertEquals(2, records.size());
+  }
+
+  @Test
+  public void testSourceIncludeMetadataAnnotations() throws Exception {
+    Map<String, String> properties = new ImmutableMap.Builder<String, String>()
+      .put(SapODataConstants.ODATA_SERVICE_URL, getServerAddress() + SERVICE_PATH)
+      .put(SapODataConstants.INCLUDE_METADATA_ANNOTATIONS, "true")
+      .put(SapODataConstants.RESOURCE_PATH, ENTITY_SET)
+      .build();
+
+    List<StructuredRecord> records = getPipelineResults(properties);
+    Assert.assertEquals(2, records.size());
+  }
+
+  @Test
+  public void testSourceJsonIncludeMetadataAnnotations() throws Exception {
+    Map<String, String> properties = new ImmutableMap.Builder<String, String>()
+      .put(SapODataConstants.ODATA_SERVICE_URL, getServerAddress() + SERVICE_PATH)
+      .put(SapODataConstants.INCLUDE_METADATA_ANNOTATIONS, "true")
+      .put(SapODataConstants.RESOURCE_PATH, ENTITY_SET)
+      .put(SapODataConstants.QUERY, "$format=json")
+      .build();
+
+    List<StructuredRecord> records = getPipelineResults(properties);
+    Assert.assertEquals(2, records.size());
+  }
+
+  @Test
+  public void testSourceXmlIncludeMetadataAnnotations() throws Exception {
+    Map<String, String> properties = new ImmutableMap.Builder<String, String>()
+      .put(SapODataConstants.ODATA_SERVICE_URL, getServerAddress() + SERVICE_PATH)
+      .put(SapODataConstants.INCLUDE_METADATA_ANNOTATIONS, "true")
+      .put(SapODataConstants.RESOURCE_PATH, ENTITY_SET)
+      .put(SapODataConstants.QUERY, "$format=xml")
       .build();
 
     List<StructuredRecord> records = getPipelineResults(properties);

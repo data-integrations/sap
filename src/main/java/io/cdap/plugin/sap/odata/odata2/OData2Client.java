@@ -17,6 +17,7 @@
 package io.cdap.plugin.sap.odata.odata2;
 
 import io.cdap.plugin.sap.odata.EntityType;
+import io.cdap.plugin.sap.odata.ODataAnnotation;
 import io.cdap.plugin.sap.odata.ODataClient;
 import io.cdap.plugin.sap.odata.ODataEntity;
 import io.cdap.plugin.sap.odata.PropertyMetadata;
@@ -42,7 +43,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.ws.rs.HttpMethod;
@@ -128,10 +128,11 @@ public class OData2Client extends ODataClient {
     Integer precision = property.getFacets().getPrecision();
     Integer scale = property.getFacets().getScale();
     List<EdmAnnotationAttribute> annotationAttributes = property.getAnnotations().getAnnotationAttributes();
-    Map<String, String> fieldMetadata = annotationAttributes == null ? null : annotationAttributes.stream()
-      .collect(Collectors.toMap(EdmAnnotationAttribute::getName, EdmAnnotationAttribute::getText));
+    List<ODataAnnotation> annotations = annotationAttributes == null ? null : annotationAttributes.stream()
+      .map(a -> new OData2Annotation(a.getName(), a.getText()))
+      .collect(Collectors.toList());
 
-    return new PropertyMetadata(property.getName(), type, nullable, precision, scale, fieldMetadata);
+    return new PropertyMetadata(property.getName(), type, nullable, precision, scale, annotations);
   }
 
   private void initMetadata() {

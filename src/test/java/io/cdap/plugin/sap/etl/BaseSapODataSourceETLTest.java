@@ -19,6 +19,7 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.google.common.collect.ImmutableMap;
 import io.cdap.cdap.api.artifact.ArtifactSummary;
 import io.cdap.cdap.api.data.format.StructuredRecord;
+import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.cdap.api.dataset.table.Table;
 import io.cdap.cdap.datapipeline.DataPipelineApp;
 import io.cdap.cdap.datapipeline.SmartWorkflow;
@@ -56,14 +57,14 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class BaseSapODataSourceETLTest extends HydratorTestBase {
 
-  @ClassRule
-  public static final TestConfiguration CONFIG = new TestConfiguration("explore.enabled", false);
-
   @Rule
   public TestName name = new TestName();
 
   @Rule
   public WireMockRule wireMockRule = new WireMockRule();
+
+  @ClassRule
+  public static final TestConfiguration CONFIG = new TestConfiguration("explore.enabled", false);
 
   private static final ArtifactSummary APP_ARTIFACT = new ArtifactSummary("data-pipeline", "3.2.0");
 
@@ -108,12 +109,12 @@ public abstract class BaseSapODataSourceETLTest extends HydratorTestBase {
     return MockSink.readOutput(outputManager);
   }
 
+  protected String getServerAddress() {
+    return "http://localhost:" + wireMockRule.port();
+  }
+
   protected String readResourceFile(String filename) throws URISyntaxException, IOException {
     return new String(Files.readAllBytes(
       Paths.get(getClass().getClassLoader().getResource(filename).toURI())));
-  }
-
-  protected String getServerAddress() {
-    return "http://localhost:" + wireMockRule.port();
   }
 }

@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+
+  <edmx:Reference Uri="https://raw.githubusercontent.com/SAP/openui5/master/src/sap.ui.core/test/sap/ui/core/demokit/sample/ViewTemplate/scenario/data/com.sap.vocabularies.Common.v1.xml">
+    <edmx:Include Namespace="com.sap.vocabularies.Common.v1" Alias="SAP__common"/>
+  </edmx:Reference>
+  <edmx:Reference Uri="https://raw.githubusercontent.com/oasis-tcs/odata-vocabularies/master/vocabularies/Org.OData.Measures.V1.xml">
+    <edmx:Include Namespace="Org.OData.Measures.V1" Alias="Measures"/>
+  </edmx:Reference>
+  <edmx:Reference Uri="https://raw.githubusercontent.com/oasis-tcs/odata-vocabularies/master/vocabularies/Org.OData.Core.V1.xml">
+    <edmx:Include Namespace="Org.OData.Core.V1" Alias="Core"/>
+  </edmx:Reference>
   <edmx:DataServices>
     <Schema Namespace="TestService" xmlns="http://docs.oasis-open.org/odata/ns/edm">
       <EntityType Name="AllDataTypesEntity">
@@ -37,12 +47,201 @@
         <Property Name="GeometryMultiLineString" Type="Edm.GeometryMultiLineString" SRID="4326"/>
         <Property Name="GeometryMultiPolygon" Type="Edm.GeometryMultiPolygon" SRID="4326"/>
         <Property Name="GeometryCollection" Type="Edm.GeometryCollection" SRID="4326"/>
+        <!--Annotated properties-->
+        <Property Name="MultipleAnnotated" Type="Edm.Boolean" Nullable="false">
+          <Annotation Term="Measures.ISOCurrency" String="USD"/>
+          <Annotation Term="Core.Description" String="Annotated property" />
+        </Property>
+        <Property Name="Targeted" Type="Edm.Boolean" Nullable="false"/>
+        <Property Name="Price" Type="Edm.Boolean" Nullable="false">
+          <Annotation Term="Measures.ISOCurrency" Path="Currency" />
+        </Property>
+        <Property Name="Currency" Type="Edm.Boolean" Nullable="false"/>
+        <!--Annotation: Constant Expression-->
+        <Property Name="ThumbnailProperty" Type="Edm.Boolean" Nullable="false">
+          <Annotation Term="Measures.ISOCurrency">
+            <String>USD</String>
+          </Annotation>
+        </Property>
+        <!--Annotation: Constant Expression-->
+        <Property Name="EnumProperty" Type="Edm.Boolean" Nullable="false">
+          <Annotation Term="Core.ModificationException">
+            <EnumMember>update</EnumMember>
+          </Annotation>
+        </Property>
+        <!--Annotation: Canonical Functions-->
+        <Property Name="CanonicalFunctionsProperty" Type="Edm.Boolean" Nullable="false">
+          <Annotation Term="Core.Description">
+            <Apply Function="odata.concat">
+              <String>Product: </String>
+              <!--AllDataTypesEntity/String-->
+              <Path>String</Path>
+              <String> (</String>
+              <!--AllDataTypesEntity/Int16-->
+              <Path>Int16</Path>
+              <String>)</String>
+            </Apply>
+          </Annotation>
+        </Property>
+        <!--Annotation: And-->
+        <Property Name="AndAnnotated" Type="Edm.Boolean" Nullable="false">
+          <Annotation Term="Core.Description">
+            <And>
+              <Path>Boolean</Path>
+              <Path>Boolean</Path>
+            </And>
+          </Annotation>
+        </Property>
+        <!--Annotation: Or-->
+        <Property Name="OrAnnotated" Type="Edm.Boolean" Nullable="false">
+          <Annotation Term="Core.Description">
+            <Or>
+              <Path>AndAnnotated</Path>
+              <Path>Boolean</Path>
+            </Or>
+          </Annotation>
+        </Property>
+        <!--Annotation: Not-->
+        <Property Name="NotAnnotated" Type="Edm.Boolean" Nullable="false">
+          <Annotation Term="Core.Description">
+            <Not>
+              <Path>AndAnnotated</Path>
+            </Not>
+          </Annotation>
+        </Property>
+        <!--Annotation: Eq-->
+        <Property Name="EqAnnotated" Type="Edm.Boolean" Nullable="false">
+          <Annotation Term="Core.Description">
+            <Eq>
+              <Path>Int16</Path>
+              <Path>Int32</Path>
+            </Eq>
+          </Annotation>
+        </Property>
+        <!--Annotation: Ne-->
+        <Property Name="NeAnnotated" Type="Edm.Boolean" Nullable="false">
+          <Annotation Term="Core.Description">
+            <Ne>
+              <Path>Int16</Path>
+              <Path>Int32</Path>
+            </Ne>
+          </Annotation>
+        </Property>
+        <!--Annotation: Gt-->
+        <Property Name="GtAnnotated" Type="Edm.Boolean" Nullable="false">
+          <Annotation Term="Core.Description">
+            <Gt>
+              <Path>Int16</Path>
+              <Path>Int32</Path>
+            </Gt>
+          </Annotation>
+        </Property>
+        <!--Annotation: Ge-->
+        <Property Name="GeAnnotated" Type="Edm.Boolean" Nullable="false">
+          <Annotation Term="Core.Description">
+            <Ge>
+              <Path>Int16</Path>
+              <Path>Int32</Path>
+            </Ge>
+          </Annotation>
+        </Property>
+        <!--Annotation: Lt-->
+        <Property Name="LtAnnotated" Type="Edm.Boolean" Nullable="false">
+          <Annotation Term="Core.Description">
+            <Lt>
+              <Path>Int16</Path>
+              <Path>Int32</Path>
+            </Lt>
+          </Annotation>
+        </Property>
+        <!--Annotation: Le-->
+        <Property Name="LeAnnotated" Type="Edm.Boolean" Nullable="false">
+          <Annotation Term="Core.Description">
+            <Le>
+              <Path>Int32</Path>
+              <Path>Int16</Path>
+            </Le>
+          </Annotation>
+        </Property>
+        <!--Annotation: Cast-->
+        <Property Name="CastAnnotated" Type="Edm.Boolean" Nullable="false">
+          <Annotation Term="Core.Description">
+            <Cast Type="Edm.String">
+              <Path>Int16</Path>
+            </Cast>
+          </Annotation>
+        </Property>
+        <!--Annotation: Collection-->
+        <Property Name="CollectionAnnotated" Type="Edm.Boolean" Nullable="false">
+          <Annotation Term="Core.Description">
+            <Collection>
+              <String>Product</String>
+              <String>Supplier</String>
+              <String>Customer</String>
+            </Collection>
+          </Annotation>
+        </Property>
+        <!--Annotation: If-->
+        <Property Name="IfAnnotated" Type="Edm.Boolean" Nullable="false">
+          <Annotation Term="Core.Description">
+            <If>
+              <Path>Boolean</Path>
+              <String>Female</String>
+              <String>Male</String>
+            </If>
+          </Annotation>
+        </Property>
+        <!--Annotation: IsOf-->
+        <Property Name="IsOfAnnotated" Type="Edm.Boolean" Nullable="false">
+          <Annotation Term="Core.Description">
+            <IsOf Type="Edm.Boolean">
+              <Path>Int16</Path>
+            </IsOf>
+          </Annotation>
+        </Property>
+        <!--Annotation: LabeledElement-->
+        <Property Name="LabeledElementAnnotated" Type="Edm.Boolean" Nullable="false">
+          <Annotation Term="Core.Description">
+            <LabeledElement Name="CustomerFirstName">
+              <Path>String</Path>
+            </LabeledElement>
+          </Annotation>
+        </Property>
+        <!--Annotation: Record-->
+        <Property Name="RecordAnnotated" Type="Edm.Boolean" Nullable="false">
+          <Annotation Term="Core.Description">
+            <Record>
+              <PropertyValue Property="GivenName" Path="String"/>
+              <PropertyValue Property="Age" Path="Byte"/>
+            </Record>
+          </Annotation>
+        </Property>
+        <!--Annotation: UrlRef-->
+        <Property Name="UrlRefAnnotated" Type="Edm.Boolean" Nullable="false">
+          <Annotation Term="Core.Description">
+            <UrlRef><String>http://host/wiki/HowToUse</String></UrlRef>
+          </Annotation>
+        </Property>
       </EntityType>
       <EntityContainer Name="InMemoryEntities">
         <EntitySet Name="AllDataTypes" EntityType="TestService.AllDataTypesEntity">
           <NavigationPropertyBinding Path="Parent" Target="People"/>
         </EntitySet>
       </EntityContainer>
+      <Annotations Target="TestService.AllDataTypesEntity/Targeted">
+        <Annotation Term="Measures.ISOCurrency" String="USD"/>
+        <Annotation Term="Core.Description" String="Property annotated with External Targeting"/>
+        <Annotation Term="SAP__common.ValueListReferences">
+          <Collection>
+            <String>
+              ../dummy1/$metadata
+            </String>
+            <String>
+              ../dummy2/$metadata
+            </String>
+          </Collection>
+        </Annotation>
+      </Annotations>
     </Schema>
   </edmx:DataServices>
 </edmx:Edmx>
