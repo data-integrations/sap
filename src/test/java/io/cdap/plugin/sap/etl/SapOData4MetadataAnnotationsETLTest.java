@@ -36,8 +36,8 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
 
   private static final String SERVICE_PATH = "/sap/opu/odata/SAP/ZGW100_XX_S2_SRV";
   private static final String ENTITY_SET = "AllDataTypes";
-  private static final String DESCRIPTION_TERM = "Org.OData.Core.V1.Description";
-  private static final String CURRENCY_TERM = "Org.OData.Measures.V1.ISOCurrency";
+  private static final String DESCRIPTION_TERM = "Core.Description";
+  private static final String CURRENCY_TERM = "Measures.ISOCurrency";
 
   @Before
   public void testSetup() throws Exception {
@@ -68,8 +68,8 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
       StructuredRecord fieldRecord = actualRecord.get("MultipleAnnotated");
-      assertAnnotationEquals(expectedCurrency, fieldRecord, "isocurrency");
-      assertAnnotationEquals(expectedDescription, fieldRecord, "description");
+      assertAnnotationEquals(expectedCurrency, fieldRecord, "measures_isocurrency");
+      assertAnnotationEquals(expectedDescription, fieldRecord, "core_description");
     }
   }
 
@@ -79,8 +79,8 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
       .setTerm(DESCRIPTION_TERM)
       .withApplyExpression("odata.concat")
       .withConstantExpression(EdmExpression.EdmExpressionType.String, "Product: ")
-      .withConstantExpression(EdmExpression.EdmExpressionType.Path, " (")
-      .withConstantExpression(EdmExpression.EdmExpressionType.String, "Product: ")
+      .withConstantExpression(EdmExpression.EdmExpressionType.Path, "String")
+      .withConstantExpression(EdmExpression.EdmExpressionType.String, " (")
       .withConstantExpression(EdmExpression.EdmExpressionType.Path, "Int16")
       .withConstantExpression(EdmExpression.EdmExpressionType.String, ")")
       .add()
@@ -92,7 +92,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     for (StructuredRecord actualRecord : records) {
       StructuredRecord fieldRecord = actualRecord.get("CanonicalFunctionsProperty");
       Assert.assertNotNull(fieldRecord);
-      assertAnnotationEquals(expected, fieldRecord, "description");
+      assertAnnotationEquals(expected, fieldRecord, "core_description");
     }
   }
 
@@ -111,7 +111,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
       StructuredRecord fieldRecord = actualRecord.get("AndAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "description");
+      assertAnnotationEquals(expected, fieldRecord, "core_description");
     }
   }
 
@@ -130,7 +130,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
       StructuredRecord fieldRecord = actualRecord.get("OrAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "description");
+      assertAnnotationEquals(expected, fieldRecord, "core_description");
     }
   }
 
@@ -148,7 +148,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
       StructuredRecord fieldRecord = actualRecord.get("NotAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "description");
+      assertAnnotationEquals(expected, fieldRecord, "core_description");
     }
   }
 
@@ -167,7 +167,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
       StructuredRecord fieldRecord = actualRecord.get("EqAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "description");
+      assertAnnotationEquals(expected, fieldRecord, "core_description");
     }
   }
 
@@ -186,7 +186,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
       StructuredRecord fieldRecord = actualRecord.get("NeAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "description");
+      assertAnnotationEquals(expected, fieldRecord, "core_description");
     }
   }
 
@@ -205,7 +205,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
       StructuredRecord fieldRecord = actualRecord.get("GtAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "description");
+      assertAnnotationEquals(expected, fieldRecord, "core_description");
     }
   }
 
@@ -224,7 +224,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
       StructuredRecord fieldRecord = actualRecord.get("GeAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "description");
+      assertAnnotationEquals(expected, fieldRecord, "core_description");
     }
   }
 
@@ -243,7 +243,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
       StructuredRecord fieldRecord = actualRecord.get("LtAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "description");
+      assertAnnotationEquals(expected, fieldRecord, "core_description");
     }
   }
 
@@ -262,7 +262,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
       StructuredRecord fieldRecord = actualRecord.get("LeAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "description");
+      assertAnnotationEquals(expected, fieldRecord, "core_description");
     }
   }
 
@@ -280,7 +280,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
       StructuredRecord fieldRecord = actualRecord.get("CastAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "description");
+      assertAnnotationEquals(expected, fieldRecord, "core_description");
     }
   }
 
@@ -300,7 +300,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
       StructuredRecord fieldRecord = actualRecord.get("CollectionAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "description");
+      assertAnnotationEquals(expected, fieldRecord, "core_description");
     }
   }
 
@@ -320,7 +320,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
       StructuredRecord fieldRecord = actualRecord.get("IfAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "description");
+      assertAnnotationEquals(expected, fieldRecord, "core_description");
     }
   }
 
@@ -338,7 +338,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
       StructuredRecord fieldRecord = actualRecord.get("IsOfAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "description");
+      assertAnnotationEquals(expected, fieldRecord, "core_description");
     }
   }
 
@@ -356,7 +356,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
       StructuredRecord fieldRecord = actualRecord.get("LabeledElementAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "description");
+      assertAnnotationEquals(expected, fieldRecord, "core_description");
     }
   }
 
@@ -375,7 +375,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
       StructuredRecord fieldRecord = actualRecord.get("RecordAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "description");
+      assertAnnotationEquals(expected, fieldRecord, "core_description");
     }
   }
 
@@ -393,7 +393,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
       StructuredRecord fieldRecord = actualRecord.get("UrlRefAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "description");
+      assertAnnotationEquals(expected, fieldRecord, "core_description");
     }
   }
 

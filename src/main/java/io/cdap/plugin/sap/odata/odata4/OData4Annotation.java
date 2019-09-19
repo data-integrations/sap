@@ -18,40 +18,42 @@ package io.cdap.plugin.sap.odata.odata4;
 
 import com.google.common.base.Strings;
 import io.cdap.plugin.sap.odata.ODataAnnotation;
-import org.apache.olingo.commons.api.edm.EdmAnnotation;
-import org.apache.olingo.commons.api.edm.annotation.EdmExpression;
+import org.apache.olingo.commons.api.edm.provider.CsdlAnnotation;
+import org.apache.olingo.commons.api.edm.provider.annotation.CsdlExpression;
 
 /**
  * OData annotation metadata.
  */
 public class OData4Annotation extends ODataAnnotation {
 
-  private final EdmAnnotation annotation;
+  private final CsdlAnnotation annotation;
 
-  public OData4Annotation(EdmAnnotation annotation) {
+  public OData4Annotation(CsdlAnnotation annotation) {
     this.annotation = annotation;
   }
 
   public String getTerm() {
-    return annotation.getTerm().getFullQualifiedName().getFullQualifiedNameAsString();
+    return annotation.getTerm();
   }
 
   public String getQualifier() {
     return annotation.getQualifier();
   }
-  public EdmExpression getExpression() {
+
+  public CsdlExpression getExpression() {
     return annotation.getExpression();
   }
 
   /**
    * Replaces any character that are not one of [A-Z][a-z][0-9] or _ with an underscore (_).
+   *
    * @return annotation name
    */
   @Override
   public String getName() {
     String qualifier = annotation.getQualifier();
-    String termName = annotation.getTerm().getName();
-    String annotationName = Strings.isNullOrEmpty(qualifier) ?  termName : qualifier + "_" + termName;
+    String termName = annotation.getTerm();
+    String annotationName = Strings.isNullOrEmpty(qualifier) ? termName : qualifier + "_" + termName;
     return annotationName.toLowerCase().replaceAll("[^A-Za-z0-9]", "_");
   }
 }

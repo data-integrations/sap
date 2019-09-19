@@ -17,33 +17,26 @@
 package io.cdap.plugin.sap.transformer;
 
 import io.cdap.cdap.api.data.format.StructuredRecord;
-import io.cdap.cdap.api.data.format.UnexpectedFormatException;
 import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.plugin.sap.SapODataConstants;
 import io.cdap.plugin.sap.odata.ODataAnnotation;
 import io.cdap.plugin.sap.odata.ODataEntity;
+import io.cdap.plugin.sap.odata.ODataUtil;
 import io.cdap.plugin.sap.odata.odata2.OData2Annotation;
 import io.cdap.plugin.sap.odata.odata4.OData4Annotation;
-import org.apache.olingo.commons.api.edm.EdmStructuredType;
-import org.apache.olingo.commons.api.edm.annotation.EdmAnd;
-import org.apache.olingo.commons.api.edm.annotation.EdmApply;
-import org.apache.olingo.commons.api.edm.annotation.EdmCast;
-import org.apache.olingo.commons.api.edm.annotation.EdmCollection;
-import org.apache.olingo.commons.api.edm.annotation.EdmEq;
 import org.apache.olingo.commons.api.edm.annotation.EdmExpression;
-import org.apache.olingo.commons.api.edm.annotation.EdmGe;
-import org.apache.olingo.commons.api.edm.annotation.EdmGt;
-import org.apache.olingo.commons.api.edm.annotation.EdmIf;
-import org.apache.olingo.commons.api.edm.annotation.EdmIsOf;
-import org.apache.olingo.commons.api.edm.annotation.EdmLabeledElement;
-import org.apache.olingo.commons.api.edm.annotation.EdmLe;
-import org.apache.olingo.commons.api.edm.annotation.EdmLt;
-import org.apache.olingo.commons.api.edm.annotation.EdmNe;
-import org.apache.olingo.commons.api.edm.annotation.EdmNot;
-import org.apache.olingo.commons.api.edm.annotation.EdmOr;
-import org.apache.olingo.commons.api.edm.annotation.EdmPropertyValue;
-import org.apache.olingo.commons.api.edm.annotation.EdmRecord;
-import org.apache.olingo.commons.api.edm.annotation.EdmUrlRef;
+import org.apache.olingo.commons.api.edm.provider.annotation.CsdlApply;
+import org.apache.olingo.commons.api.edm.provider.annotation.CsdlCast;
+import org.apache.olingo.commons.api.edm.provider.annotation.CsdlCollection;
+import org.apache.olingo.commons.api.edm.provider.annotation.CsdlDynamicExpression;
+import org.apache.olingo.commons.api.edm.provider.annotation.CsdlExpression;
+import org.apache.olingo.commons.api.edm.provider.annotation.CsdlIf;
+import org.apache.olingo.commons.api.edm.provider.annotation.CsdlIsOf;
+import org.apache.olingo.commons.api.edm.provider.annotation.CsdlLabeledElement;
+import org.apache.olingo.commons.api.edm.provider.annotation.CsdlLogicalOrComparisonExpression;
+import org.apache.olingo.commons.api.edm.provider.annotation.CsdlPropertyValue;
+import org.apache.olingo.commons.api.edm.provider.annotation.CsdlRecord;
+import org.apache.olingo.commons.api.edm.provider.annotation.CsdlUrlRef;
 
 import java.util.List;
 import java.util.Map;
@@ -127,7 +120,7 @@ public class ODataEntryToRecordWithMetadataTransformer extends ODataEntryToRecor
     Schema.Field expressionField = schema.getField(SapODataConstants.ANNOTATION_EXPRESSION_FIELD_NAME);
     Schema expressionSchema = expressionField.getSchema().isNullable() ? expressionField.getSchema().getNonNullable()
       : expressionField.getSchema();
-    EdmExpression expression = annotation.getExpression();
+    CsdlExpression expression = annotation.getExpression();
     StructuredRecord expressionRecord = extractExpressionRecord(fieldName, expression, expressionSchema);
     return StructuredRecord.builder(schema)
       .set(SapODataConstants.ANNOTATION_TERM_FIELD_NAME, annotation.getTerm())
@@ -136,124 +129,96 @@ public class ODataEntryToRecordWithMetadataTransformer extends ODataEntryToRecor
       .build();
   }
 
-  private StructuredRecord extractExpressionRecord(String fieldName, EdmExpression expression, Schema schema) {
-    EdmExpression.EdmExpressionType type = expression.getExpressionType();
-    switch (type) {
-      case Binary:
-      case Bool:
-      case Date:
-      case DateTimeOffset:
-      case Decimal:
-      case Duration:
-      case EnumMember:
-      case Float:
-      case Guid:
-      case Int:
-      case String:
-      case TimeOfDay:
-        String constantExpressionValue = expression.asConstant().getValueAsString();
-        return extractSingleValueExpressionRecord(expression.getExpressionName(), constantExpressionValue, schema);
-      case AnnotationPath:
-        String annotationPathValue = expression.asDynamic().asAnnotationPath().getValue();
-        return extractSingleValueExpressionRecord(expression.getExpressionName(), annotationPathValue, schema);
-      case LabeledElementReference:
-        String labeledElementReferenceValue = expression.asDynamic().asLabeledElementReference().getValue();
-        return extractSingleValueExpressionRecord(expression.getExpressionName(), labeledElementReferenceValue, schema);
-      case Null:
-        return extractSingleValueExpressionRecord(expression.getExpressionName(), null, schema);
-      case NavigationPropertyPath:
-        String navigationPropertyPathValue = expression.asDynamic().asNavigationPropertyPath().getValue();
-        return extractSingleValueExpressionRecord(expression.getExpressionName(), navigationPropertyPathValue, schema);
-      case PropertyPath:
-        String propertyPathValue = expression.asDynamic().asPropertyPath().getValue();
-        return extractSingleValueExpressionRecord(expression.getExpressionName(), propertyPathValue, schema);
-      case Path:
-        String pathExpressionValue = expression.asDynamic().asPath().getValue();
-        return extractSingleValueExpressionRecord(expression.getExpressionName(), pathExpressionValue, schema);
-      case Apply:
-        return extractApplyExpressionRecord(fieldName, expression.asDynamic().asApply(), schema);
-      case And:
-        EdmAnd and = expression.asDynamic().asAnd();
-        EdmExpression andLeft = and.getLeftExpression();
-        EdmExpression andRight = and.getRightExpression();
-        return extractLogicalExpressionRecord(fieldName, and, andLeft, andRight, schema);
-      case Or:
-        EdmOr or = expression.asDynamic().asOr();
-        EdmExpression orLeft = or.getLeftExpression();
-        EdmExpression orRight = or.getRightExpression();
-        return extractLogicalExpressionRecord(fieldName, or, orLeft, orRight, schema);
-      case Not:
-        EdmNot not = expression.asDynamic().asNot();
-        EdmExpression value = not.getLeftExpression();
-        return extractNotExpressionRecord(fieldName, not, value, schema);
-      case Eq:
-        EdmEq eq = expression.asDynamic().asEq();
-        EdmExpression eqLeft = eq.getLeftExpression();
-        EdmExpression eqRight = eq.getRightExpression();
-        return extractLogicalExpressionRecord(fieldName, eq, eqLeft, eqRight, schema);
-      case Ne:
-        EdmNe ne = expression.asDynamic().asNe();
-        EdmExpression neLeft = ne.getLeftExpression();
-        EdmExpression neRight = ne.getRightExpression();
-        return extractLogicalExpressionRecord(fieldName, ne, neLeft, neRight, schema);
-      case Gt:
-        EdmGt gt = expression.asDynamic().asGt();
-        EdmExpression gtLeft = gt.getLeftExpression();
-        EdmExpression gtRight = gt.getRightExpression();
-        return extractLogicalExpressionRecord(fieldName, gt, gtLeft, gtRight, schema);
-      case Ge:
-        EdmGe ge = expression.asDynamic().asGe();
-        EdmExpression geLeft = ge.getLeftExpression();
-        EdmExpression geRight = ge.getRightExpression();
-        return extractLogicalExpressionRecord(fieldName, ge, geLeft, geRight, schema);
-      case Lt:
-        EdmLt lt = expression.asDynamic().asLt();
-        EdmExpression ltLeft = lt.getLeftExpression();
-        EdmExpression ltRight = lt.getRightExpression();
-        return extractLogicalExpressionRecord(fieldName, lt, ltLeft, ltRight, schema);
-      case Le:
-        EdmLe le = expression.asDynamic().asLe();
-        EdmExpression leLeft = le.getLeftExpression();
-        EdmExpression leRight = le.getRightExpression();
-        return extractLogicalExpressionRecord(fieldName, le, leLeft, leRight, schema);
-      case Cast:
-        return extractCastExpressionRecord(fieldName, expression.asDynamic().asCast(), schema);
-      case Collection:
-        return extractCollectionExpressionRecord(fieldName, expression.asDynamic().asCollection(), schema);
-      case If:
-        return extractIfExpressionRecord(fieldName, expression.asDynamic().asIf(), schema);
-      case IsOf:
-        return extractIsOfExpressionRecord(fieldName, expression.asDynamic().asIsOf(), schema);
-      case LabeledElement:
-        return extractLabeledElementExpressionRecord(fieldName, expression.asDynamic().asLabeledElement(), schema);
-      case Record:
-        return extractRecordExpressionRecord(expression.asDynamic().asRecord(), schema);
-      case UrlRef:
-        return extractUrlRefExpressionRecord(fieldName, expression.asDynamic().asUrlRef(), schema);
-      default:
-        // this should never happen
-        throw new UnexpectedFormatException(
-          String.format("Annotation expression for field '%s' is of unsupported type '%s'.", fieldName, type));
+  private StructuredRecord extractExpressionRecord(String fieldName, CsdlExpression expression, Schema schema) {
+    if (expression.isConstant()) {
+      String constantExpressionValue = expression.asConstant().getValue();
+      String typeName = expression.asConstant().getType().name();
+      return extractSingleValueExpressionRecord(typeName, constantExpressionValue, schema);
     }
+    CsdlDynamicExpression dynamic = expression.asDynamic();
+    if (dynamic.isPath()) {
+      String value = dynamic.asPath().getValue();
+      return extractSingleValueExpressionRecord(EdmExpression.EdmExpressionType.Path.name(), value, schema);
+    }
+    if (dynamic.isAnnotationPath()) {
+      String value = dynamic.asAnnotationPath().getValue();
+      return extractSingleValueExpressionRecord(EdmExpression.EdmExpressionType.AnnotationPath.name(), value, schema);
+    }
+    if (dynamic.isLabeledElementReference()) {
+      String value = dynamic.asLabeledElementReference().getValue();
+      return extractSingleValueExpressionRecord(EdmExpression.EdmExpressionType.LabeledElementReference.name(), value,
+                                                schema);
+    }
+    if (dynamic.isNavigationPropertyPath()) {
+      String value = dynamic.asNavigationPropertyPath().getValue();
+      return extractSingleValueExpressionRecord(EdmExpression.EdmExpressionType.NavigationPropertyPath.name(), value,
+                                                schema);
+    }
+    if (dynamic.isPropertyPath()) {
+      String value = dynamic.asPropertyPath().getValue();
+      return extractSingleValueExpressionRecord(EdmExpression.EdmExpressionType.PropertyPath.name(), value, schema);
+    }
+    if (dynamic.isNull()) {
+      return extractSingleValueExpressionRecord(EdmExpression.EdmExpressionType.Null.name(), null, schema);
+    }
+    if (dynamic.isApply()) {
+      return extractApplyExpressionRecord(fieldName, expression.asDynamic().asApply(), schema);
+    }
+    if (dynamic.isCast()) {
+      return extractCastExpressionRecord(fieldName, expression.asDynamic().asCast(), schema);
+    }
+    if (dynamic.isCollection()) {
+      return extractCollectionExpressionRecord(fieldName, expression.asDynamic().asCollection(), schema);
+    }
+    if (dynamic.isIf()) {
+      return extractIfExpressionRecord(fieldName, expression.asDynamic().asIf(), schema);
+    }
+    if (dynamic.isIsOf()) {
+      return extractIsOfExpressionRecord(fieldName, expression.asDynamic().asIsOf(), schema);
+    }
+    if (dynamic.isLabeledElement()) {
+      return extractLabeledElementExpressionRecord(fieldName, expression.asDynamic().asLabeledElement(), schema);
+    }
+    if (dynamic.isRecord()) {
+      return extractRecordExpressionRecord(expression.asDynamic().asRecord(), schema);
+    }
+    if (dynamic.isUrlRef()) {
+      return extractUrlRefExpressionRecord(fieldName, expression.asDynamic().asUrlRef(), schema);
+    }
+    // Expression can only be a logical at this point
+    CsdlLogicalOrComparisonExpression logical = dynamic.asLogicalOrComparison();
+    if (logical.getType() == CsdlLogicalOrComparisonExpression.LogicalOrComparisonExpressionType.Not) {
+      // Negation expressions are represented as an element edm:Not that MUST contain a single annotation expression.
+      // See 'Comparison and Logical Operators' section of
+      // https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/csprd05/odata-csdl-xml-v4.01-csprd05.html
+      // However, Olingo's EdmNot interface extends common interface for logical or comparison expressions.
+      // Thus, value expression can be accessed via either 'getLeftExpression' or 'getRightExpression'.
+      // See: AbstractEdmLogicalOrComparisonExpression#getRightExpression implementation for details
+      CsdlExpression value = logical.getLeft();
+      return extractNotExpressionRecord(fieldName, value, schema);
+    }
+
+    CsdlExpression andLeft = logical.getLeft();
+    CsdlExpression andRight = logical.getRight();
+    return extractLogicalExpressionRecord(fieldName, logical, andLeft, andRight, schema);
   }
 
-  private StructuredRecord extractLogicalExpressionRecord(String fieldName, EdmExpression expression,
-                                                          EdmExpression left, EdmExpression right, Schema schema) {
+  private StructuredRecord extractLogicalExpressionRecord(String fieldName,
+                                                          CsdlLogicalOrComparisonExpression expression,
+                                                          CsdlExpression left, CsdlExpression right, Schema schema) {
     Schema leftFieldSchema = schema.getField(SapODataConstants.EXPRESSION_LEFT_FIELD_NAME).getSchema();
     Schema rightFieldSchema = schema.getField(SapODataConstants.EXPRESSION_RIGHT_FIELD_NAME).getSchema();
-
     return StructuredRecord.builder(schema)
-      .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, expression.getExpressionName())
+      .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, expression.getType().name())
       .set(SapODataConstants.EXPRESSION_LEFT_FIELD_NAME, extractExpressionRecord(fieldName, left, leftFieldSchema))
       .set(SapODataConstants.EXPRESSION_RIGHT_FIELD_NAME, extractExpressionRecord(fieldName, right, rightFieldSchema))
       .build();
   }
 
-  private StructuredRecord extractNotExpressionRecord(String fieldName, EdmExpression expression,
-                                                      EdmExpression value, Schema schema) {
+  private StructuredRecord extractNotExpressionRecord(String fieldName, CsdlExpression value, Schema schema) {
     Schema leftFieldSchema = schema.getField(SapODataConstants.EXPRESSION_VALUE_FIELD_NAME).getSchema();
     return StructuredRecord.builder(schema)
-      .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, expression.getExpressionName())
+      .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, EdmExpression.EdmExpressionType.Not.name())
       .set(SapODataConstants.EXPRESSION_VALUE_FIELD_NAME, extractExpressionRecord(fieldName, value, leftFieldSchema))
       .build();
   }
@@ -265,43 +230,45 @@ public class ODataEntryToRecordWithMetadataTransformer extends ODataEntryToRecor
       .build();
   }
 
-  private StructuredRecord extractApplyExpressionRecord(String fieldName, EdmApply apply, Schema schema) {
+  private StructuredRecord extractApplyExpressionRecord(String fieldName, CsdlApply apply, Schema schema) {
     Schema.Field parametersField = schema.getField(SapODataConstants.EXPRESSION_PARAMETERS_FIELD_NAME);
     Schema parametersSchema = parametersField.getSchema().isNullable()
       ? parametersField.getSchema().getNonNullable() : parametersField.getSchema();
 
+    // TODO avoid duplication with Source
+    List<CsdlExpression> parameters = apply.getParameters();
     StructuredRecord.Builder builder = StructuredRecord.builder(parametersSchema);
-
-    for (EdmExpression parameterExpression : apply.getParameters()) {
-      String name = parameterExpression.getExpressionName();
-      Schema.Field parameterField = parametersSchema.getField(name);
+    for (int i = 0; i < parameters.size(); i++) {
+      CsdlExpression parameter = parameters.get(i);
+      String parameterName = String.format("%d-%s", i, ODataUtil.typeOf(parameter));
+      Schema.Field parameterField = parametersSchema.getField(parameterName);
       Schema parameterSchema = parameterField.getSchema().isNullable()
         ? parameterField.getSchema().getNonNullable() : parameterField.getSchema();
-      builder.set(name, extractExpressionRecord(fieldName, parameterExpression, parameterSchema));
+
+      builder.set(parameterName, extractExpressionRecord(fieldName, parameter, parameterSchema));
     }
 
     return StructuredRecord.builder(schema)
-      .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, apply.getExpressionName())
+      .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, EdmExpression.EdmExpressionType.Apply.name())
       .set(SapODataConstants.EXPRESSION_FUNCTION_FIELD_NAME, apply.getFunction())
       .set(SapODataConstants.EXPRESSION_PARAMETERS_FIELD_NAME, builder.build())
       .build();
   }
 
-  private StructuredRecord extractCastExpressionRecord(String fieldName, EdmCast cast, Schema schema) {
+  private StructuredRecord extractCastExpressionRecord(String fieldName, CsdlCast cast, Schema schema) {
     Schema.Field valueField = schema.getField(SapODataConstants.EXPRESSION_VALUE_FIELD_NAME);
     Schema valueSchema = valueField.getSchema().isNullable() ? valueField.getSchema().getNonNullable()
       : valueField.getSchema();
     StructuredRecord valueRecord = extractExpressionRecord(fieldName, cast.getValue(), valueSchema);
 
-    String type = cast.getType().getFullQualifiedName().getFullQualifiedNameAsString();
     String maxLength = cast.getMaxLength() != null ? cast.getMaxLength().toString() : null;
     String precision = cast.getPrecision() != null ? cast.getPrecision().toString() : null;
     String scale = cast.getScale() != null ? cast.getScale().toString() : null;
     String srid = cast.getSrid() != null ? cast.getSrid().toString() : null;
 
     return StructuredRecord.builder(schema)
-      .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, cast.getExpressionName())
-      .set(SapODataConstants.EXPRESSION_TYPE_FIELD_NAME, type)
+      .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, EdmExpression.EdmExpressionType.Cast.name())
+      .set(SapODataConstants.EXPRESSION_TYPE_FIELD_NAME, cast.getType())
       .set(SapODataConstants.EXPRESSION_MAX_LENGTH_FIELD_NAME, maxLength)
       .set(SapODataConstants.EXPRESSION_PRECISION_FIELD_NAME, precision)
       .set(SapODataConstants.EXPRESSION_SCALE_FIELD_NAME, scale)
@@ -310,12 +277,13 @@ public class ODataEntryToRecordWithMetadataTransformer extends ODataEntryToRecor
       .build();
   }
 
-  private StructuredRecord extractCollectionExpressionRecord(String fieldName, EdmCollection collection,
+  private StructuredRecord extractCollectionExpressionRecord(String fieldName, CsdlCollection collection,
                                                              Schema schema) {
+    String expressionName = EdmExpression.EdmExpressionType.Collection.name();
     Schema.Field itemsField = schema.getField(SapODataConstants.EXPRESSION_ITEMS_FIELD_NAME);
     if (itemsField == null) {
       return StructuredRecord.builder(schema)
-        .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, collection.getExpressionName())
+        .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, expressionName)
         .build();
     }
 
@@ -327,17 +295,17 @@ public class ODataEntryToRecordWithMetadataTransformer extends ODataEntryToRecor
       .collect(Collectors.toList());
 
     return StructuredRecord.builder(schema)
-      .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, collection.getExpressionName())
+      .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, expressionName)
       .set(SapODataConstants.EXPRESSION_ITEMS_FIELD_NAME, items)
       .build();
   }
 
-  private StructuredRecord extractIfExpressionRecord(String fieldName, EdmIf edmIf, Schema schema) {
+  private StructuredRecord extractIfExpressionRecord(String fieldName, CsdlIf edmIf, Schema schema) {
     Schema.Field guardField = schema.getField(SapODataConstants.EXPRESSION_GUARD_FIELD_NAME);
     Schema guardSchema = guardField.getSchema().isNullable() ? guardField.getSchema().getNonNullable()
       : guardField.getSchema();
-    StructuredRecord guardRecord = extractExpressionRecord(fieldName, edmIf.getGuard(), guardSchema);
 
+    StructuredRecord guardRecord = extractExpressionRecord(fieldName, edmIf.getGuard(), guardSchema);
     Schema.Field thenField = schema.getField(SapODataConstants.EXPRESSION_THEN_FIELD_NAME);
     Schema thenSchema = thenField.getSchema().isNullable() ? thenField.getSchema().getNonNullable()
       : thenField.getSchema();
@@ -349,28 +317,27 @@ public class ODataEntryToRecordWithMetadataTransformer extends ODataEntryToRecor
     StructuredRecord elseRecord = extractExpressionRecord(fieldName, edmIf.getElse(), elseSchema);
 
     return StructuredRecord.builder(schema)
-      .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, edmIf.getExpressionName())
+      .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, EdmExpression.EdmExpressionType.If.name())
       .set(SapODataConstants.EXPRESSION_GUARD_FIELD_NAME, guardRecord)
       .set(SapODataConstants.EXPRESSION_THEN_FIELD_NAME, thenRecord)
       .set(SapODataConstants.EXPRESSION_ELSE_FIELD_NAME, elseRecord)
       .build();
   }
 
-  private StructuredRecord extractIsOfExpressionRecord(String fieldName, EdmIsOf isOf, Schema schema) {
+  private StructuredRecord extractIsOfExpressionRecord(String fieldName, CsdlIsOf isOf, Schema schema) {
     Schema.Field valueField = schema.getField(SapODataConstants.EXPRESSION_VALUE_FIELD_NAME);
     Schema valueSchema = valueField.getSchema().isNullable() ? valueField.getSchema().getNonNullable()
       : valueField.getSchema();
     StructuredRecord valueRecord = extractExpressionRecord(fieldName, isOf.getValue(), valueSchema);
 
-    String type = isOf.getType().getFullQualifiedName().getFullQualifiedNameAsString();
     String maxLength = isOf.getMaxLength() != null ? isOf.getMaxLength().toString() : null;
     String precision = isOf.getPrecision() != null ? isOf.getPrecision().toString() : null;
     String scale = isOf.getScale() != null ? isOf.getScale().toString() : null;
     String srid = isOf.getSrid() != null ? isOf.getSrid().toString() : null;
 
     return StructuredRecord.builder(schema)
-      .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, isOf.getExpressionName())
-      .set(SapODataConstants.EXPRESSION_TYPE_FIELD_NAME, type)
+      .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, EdmExpression.EdmExpressionType.IsOf.name())
+      .set(SapODataConstants.EXPRESSION_TYPE_FIELD_NAME, isOf.getType())
       .set(SapODataConstants.EXPRESSION_MAX_LENGTH_FIELD_NAME, maxLength)
       .set(SapODataConstants.EXPRESSION_PRECISION_FIELD_NAME, precision)
       .set(SapODataConstants.EXPRESSION_SCALE_FIELD_NAME, scale)
@@ -379,7 +346,7 @@ public class ODataEntryToRecordWithMetadataTransformer extends ODataEntryToRecor
       .build();
   }
 
-  private StructuredRecord extractLabeledElementExpressionRecord(String fieldName, EdmLabeledElement labeledElement,
+  private StructuredRecord extractLabeledElementExpressionRecord(String fieldName, CsdlLabeledElement labeledElement,
                                                                  Schema schema) {
     Schema.Field valueField = schema.getField(SapODataConstants.EXPRESSION_VALUE_FIELD_NAME);
     Schema valueSchema = valueField.getSchema().isNullable() ? valueField.getSchema().getNonNullable()
@@ -387,48 +354,46 @@ public class ODataEntryToRecordWithMetadataTransformer extends ODataEntryToRecor
     StructuredRecord valueRecord = extractExpressionRecord(fieldName, labeledElement.getValue(), valueSchema);
 
     return StructuredRecord.builder(schema)
-      .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, labeledElement.getExpressionName())
+      .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, EdmExpression.EdmExpressionType.LabeledElement.name())
       .set(SapODataConstants.EXPRESSION_ELEMENT_NAME_FIELD_NAME, labeledElement.getName())
       .set(SapODataConstants.EXPRESSION_VALUE_FIELD_NAME, valueRecord)
       .build();
   }
 
-  private StructuredRecord extractUrlRefExpressionRecord(String fieldName, EdmUrlRef urlRef, Schema schema) {
+  private StructuredRecord extractUrlRefExpressionRecord(String fieldName, CsdlUrlRef urlRef, Schema schema) {
     Schema.Field valueField = schema.getField(SapODataConstants.EXPRESSION_VALUE_FIELD_NAME);
     Schema valueSchema = valueField.getSchema().isNullable() ? valueField.getSchema().getNonNullable()
       : valueField.getSchema();
     StructuredRecord valueRecord = extractExpressionRecord(fieldName, urlRef.getValue(), valueSchema);
 
     return StructuredRecord.builder(schema)
-      .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, urlRef.getExpressionName())
+      .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, EdmExpression.EdmExpressionType.UrlRef.name())
       .set(SapODataConstants.EXPRESSION_VALUE_FIELD_NAME, valueRecord)
       .build();
   }
 
-  private StructuredRecord extractRecordExpressionRecord(EdmRecord record, Schema schema) {
+  private StructuredRecord extractRecordExpressionRecord(CsdlRecord record, Schema schema) {
     Schema.Field propertyValuesField = schema.getField(SapODataConstants.EXPRESSION_PROPERTY_VALUES_FIELD_NAME);
-    List<EdmPropertyValue> propertyValues = record.getPropertyValues();
-    EdmStructuredType recordType = record.getType();
-    String type = recordType != null ? recordType.getFullQualifiedName().getFullQualifiedNameAsString() : null;
+    List<CsdlPropertyValue> propertyValues = record.getPropertyValues();
+    String type = record.getType();
     if (propertyValuesField == null || propertyValues == null || propertyValues.isEmpty()) {
       return StructuredRecord.builder(schema)
-        .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, record.getExpressionName())
+        .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, EdmExpression.EdmExpressionType.Record.name())
         .set(SapODataConstants.EXPRESSION_TYPE_FIELD_NAME, type)
         .build();
     }
-
     Schema propertyValuesSchema = propertyValuesField.getSchema().isNullable()
       ? propertyValuesField.getSchema().getNonNullable() : propertyValuesField.getSchema();
 
     return StructuredRecord.builder(schema)
-      .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, record.getExpressionName())
+      .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, EdmExpression.EdmExpressionType.Record.name())
       .set(SapODataConstants.EXPRESSION_TYPE_FIELD_NAME, type)
       .set(SapODataConstants.EXPRESSION_PROPERTY_VALUES_FIELD_NAME,
            extractRecordExpressionRecord(propertyValues, propertyValuesSchema))
       .build();
   }
 
-  private StructuredRecord extractRecordExpressionRecord(List<EdmPropertyValue> propertyValues, Schema schema) {
+  private StructuredRecord extractRecordExpressionRecord(List<CsdlPropertyValue> propertyValues, Schema schema) {
     StructuredRecord.Builder builder = StructuredRecord.builder(schema);
     propertyValues.stream()
       .filter(pv -> Objects.nonNull(schema.getField(pv.getProperty())))

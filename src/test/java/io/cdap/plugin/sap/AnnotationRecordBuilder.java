@@ -109,7 +109,7 @@ public final class AnnotationRecordBuilder {
   }
 
   protected StructuredRecord singleValueExpression(String expressionName, Object value) {
-    return StructuredRecord.builder(SapODataSchemas.constantExpressionSchema(fieldName))
+    return StructuredRecord.builder(SapODataSchemas.singleValueExpressionSchema(fieldName))
       .set(SapODataConstants.EXPRESSION_NAME_FIELD_NAME, expressionName)
       .set(SapODataConstants.EXPRESSION_VALUE_FIELD_NAME, value)
       .build();
@@ -143,19 +143,24 @@ public final class AnnotationRecordBuilder {
     }
 
     private StructuredRecord buildApplyParametersRecord() {
-      List<Schema.Field> fields = expressions.stream()
-        .map(e -> {
-          String expressionName = e.get(SapODataConstants.EXPRESSION_NAME_FIELD_NAME);
-          return Schema.Field.of(expressionName, e.getSchema());
-        })
-        .collect(Collectors.toList());
+      // TODO avoid duplication with Source
+      List<Schema.Field> fields = new ArrayList<>();
+      for (int i = 0; i < expressions.size(); i++) {
+        StructuredRecord e = expressions.get(i);
+        String expressionName = e.get(SapODataConstants.EXPRESSION_NAME_FIELD_NAME);
+        String parameterName = String.format("%d-%s", i, expressionName);
+        Schema.Field field = Schema.Field.of(parameterName, e.getSchema());
+        fields.add(field);
+      }
 
       Schema schema = Schema.recordOf(fieldName + "-parameters", fields);
       StructuredRecord.Builder builder = StructuredRecord.builder(schema);
-      expressions.forEach(e -> {
+      for (int i = 0; i < expressions.size(); i++) {
+        StructuredRecord e = expressions.get(i);
         String expressionName = e.get(SapODataConstants.EXPRESSION_NAME_FIELD_NAME);
-        builder.set(expressionName, e);
-      });
+        String parameterName = String.format("%d-%s", i, expressionName);
+        builder.set(parameterName, e);
+      }
 
       return builder.build();
     }
