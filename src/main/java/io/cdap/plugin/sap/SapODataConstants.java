@@ -18,6 +18,10 @@ package io.cdap.plugin.sap;
 
 import io.cdap.cdap.api.data.schema.Schema;
 
+import java.util.ArrayList;
+import java.util.List;
+import javax.annotation.Nullable;
+
 /**
  * SAP OData constants.
  */
@@ -249,6 +253,242 @@ public class SapODataConstants {
       Schema.Field.of(CONTENT_TYPE_FIELD_NAME, Schema.nullableOf(Schema.of(Schema.Type.STRING))),
       Schema.Field.of(READ_LINK_FIELD_NAME, Schema.nullableOf(Schema.of(Schema.Type.STRING))),
       Schema.Field.of(EDIT_LINK_FIELD_NAME, Schema.nullableOf(Schema.of(Schema.Type.STRING))));
+  }
 
+  /**
+   * OData 4 metadata annotations mapped to CDAP record with field
+   * "{@value SapODataConstants.Annotation#TERM_FIELD_NAME}" for a term name,
+   * "{@value SapODataConstants.Annotation#QUALIFIER_FIELD_NAME}" for a qualifier name,
+   * "{@value SapODataConstants.Annotation#EXPRESSION_FIELD_NAME}" for an expression record.
+   * "{@value SapODataConstants.Annotation#ANNOTATIONS_FIELD_NAME}" for a nested annotation record.
+   */
+  public static class Annotation {
+    public static final String TERM_FIELD_NAME = "term";
+    public static final String QUALIFIER_FIELD_NAME = "qualifier";
+    public static final String EXPRESSION_FIELD_NAME = "expression";
+    public static final String ANNOTATIONS_FIELD_NAME = "annotations";
+
+    public static Schema schema(String name, @Nullable Schema expressionSchema, @Nullable Schema annotationsSchema) {
+      List<Schema.Field> fields = new ArrayList<>();
+      fields.add(Schema.Field.of(TERM_FIELD_NAME, Schema.of(Schema.Type.STRING)));
+      fields.add(Schema.Field.of(QUALIFIER_FIELD_NAME, Schema.nullableOf(Schema.of(Schema.Type.STRING))));
+      if (expressionSchema != null) {
+        fields.add(Schema.Field.of(EXPRESSION_FIELD_NAME, expressionSchema));
+      }
+      if (annotationsSchema != null) {
+        fields.add(Schema.Field.of(ANNOTATIONS_FIELD_NAME, annotationsSchema));
+      }
+
+      return Schema.recordOf(name + "-annotation", fields);
+    }
+  }
+
+  /**
+   * OData 4 metadata annotation expression mapped to CDAP record with field
+   * "{@value SapODataConstants.Expression#NAME_FIELD_NAME}" for an expression name.
+   */
+  public static class Expression {
+    public static final String NAME_FIELD_NAME = "name";
+  }
+
+  /**
+   * Some of the OData 4 metadata annotation expression mapped to CDAP record with field
+   * "{@value ValuedExpression#VALUE_FIELD_NAME}" for an expression value.
+   * These expressions include:
+   * - Constant expressions
+   * - Path
+   * - AnnotationPath
+   * - LabeledElementReference
+   * - Null
+   * - NavigationPropertyPath
+   * - PropertyPath
+   * - Not
+   * - Cast
+   * - IsOf
+   * - LabeledElement
+   * - UrlRef
+   */
+  public static class ValuedExpression extends Expression {
+    public static final String VALUE_FIELD_NAME = "value";
+
+    public static final Schema SCHEMA = Schema.recordOf(
+      "single-value-expression",
+      Schema.Field.of(NAME_FIELD_NAME, Schema.of(Schema.Type.STRING)),
+      Schema.Field.of(VALUE_FIELD_NAME, Schema.nullableOf(Schema.of(Schema.Type.STRING))));
+  }
+
+  /**
+   * Some of the OData 4 metadata annotation expression mapped to CDAP record with field
+   * "{@value SapODataConstants.TypedExpression#TYPE_FIELD_NAME}" for a type name.
+   * These expressions include:
+   * - Cast
+   * - IsOf
+   * - Record
+   */
+  public static class TypedExpression extends ValuedExpression {
+    public static final String TYPE_FIELD_NAME = "type";
+  }
+
+  /**
+   * OData 4 expressions may be annotated.
+   */
+  public static class AnnotatedExpression extends TypedExpression {
+    public static final String ANNOTATIONS_FIELD_NAME = "annotations";
+  }
+
+  /**
+   * OData 4 "Apply" metadata annotation expression mapped to CDAP record with field
+   * "{@value SapODataConstants.ApplyExpression#FUNCTION_FIELD_NAME}" for a function name,
+   * "{@value SapODataConstants.ApplyExpression#PARAMETERS_FIELD_NAME}" for a parameters record.
+   */
+  public static class ApplyExpression extends Expression {
+    public static final String FUNCTION_FIELD_NAME = "function";
+    public static final String PARAMETERS_FIELD_NAME = "parameters";
+
+    public static Schema schema(String name, Schema parametersSchema) {
+      return Schema.recordOf(name + "-apply-expression",
+                             Schema.Field.of(NAME_FIELD_NAME, Schema.of(Schema.Type.STRING)),
+                             Schema.Field.of(FUNCTION_FIELD_NAME, Schema.nullableOf(Schema.of(Schema.Type.STRING))),
+                             Schema.Field.of(PARAMETERS_FIELD_NAME, parametersSchema));
+    }
+  }
+
+  /**
+   * OData 4 logical & comparison expressions mapped to CDAP record with field
+   * "{@value SapODataConstants.LogicalExpression#LEFT_FIELD_NAME}" for a left expression record,
+   * "{@value SapODataConstants.LogicalExpression#RIGHT_FIELD_NAME}" for a right expression record.
+   */
+  public static class LogicalExpression extends Expression {
+    public static final String LEFT_FIELD_NAME = "left";
+    public static final String RIGHT_FIELD_NAME = "right";
+
+    public static Schema schema(String name, Schema left, Schema right) {
+      return Schema.recordOf(name + "-logical-expression",
+                             Schema.Field.of(NAME_FIELD_NAME, Schema.of(Schema.Type.STRING)),
+                             Schema.Field.of(LEFT_FIELD_NAME, left),
+                             Schema.Field.of(RIGHT_FIELD_NAME, right));
+    }
+  }
+
+  /**
+   * OData 4 logical & comparison expressions mapped to CDAP record with field
+   * "{@value SapODataConstants.LogicalExpression#LEFT_FIELD_NAME}" for a left expression record,
+   * "{@value SapODataConstants.LogicalExpression#RIGHT_FIELD_NAME}" for a right expression record.
+   */
+  public static class NotExpression extends ValuedExpression {
+    public static Schema schema(String name, Schema value) {
+      return Schema.recordOf(name + "-not-expression",
+                             Schema.Field.of(NAME_FIELD_NAME, Schema.of(Schema.Type.STRING)),
+                             Schema.Field.of(VALUE_FIELD_NAME, value));
+    }
+  }
+
+  /**
+   * OData 4 "Cast" and "IsOf" expressions mapped to CDAP record with field
+   * "{@value CastIsOfExpression#MAX_LENGTH_FIELD_NAME}" for a maximum length of value,
+   * "{@value CastIsOfExpression#PRECISION_FIELD_NAME}" for a precision of value,
+   * "{@value CastIsOfExpression#SCALE_FIELD_NAME}" for a scale of value,
+   * "{@value CastIsOfExpression#SRID_FIELD_NAME}" for a SRID of value.
+   */
+  public static class CastIsOfExpression extends TypedExpression {
+    public static final String MAX_LENGTH_FIELD_NAME = "maxLength";
+    public static final String PRECISION_FIELD_NAME = "precision";
+    public static final String SCALE_FIELD_NAME = "scale";
+    public static final String SRID_FIELD_NAME = "srid";
+
+    public static Schema schema(String name, Schema valueSchema) {
+      return Schema.recordOf(name + "-cast-is-of-expression",
+                             Schema.Field.of(NAME_FIELD_NAME, Schema.of(Schema.Type.STRING)),
+                             Schema.Field.of(TYPE_FIELD_NAME, Schema.of(Schema.Type.STRING)),
+                             Schema.Field.of(MAX_LENGTH_FIELD_NAME, Schema.nullableOf(Schema.of(Schema.Type.STRING))),
+                             Schema.Field.of(PRECISION_FIELD_NAME, Schema.nullableOf(Schema.of(Schema.Type.STRING))),
+                             Schema.Field.of(SCALE_FIELD_NAME, Schema.nullableOf(Schema.of(Schema.Type.STRING))),
+                             Schema.Field.of(SRID_FIELD_NAME, Schema.nullableOf(Schema.of(Schema.Type.STRING))),
+                             Schema.Field.of(VALUE_FIELD_NAME, valueSchema));
+    }
+  }
+
+  /**
+   * OData 4 "Collection" expression mapped to CDAP record with field
+   * "{@value SapODataConstants.CollectionExpression#ITEMS_FIELD_NAME}" for an array of item expressions.
+   */
+  public static class CollectionExpression extends Expression {
+    public static final String ITEMS_FIELD_NAME = "items";
+
+    public static Schema schema(String name, @Nullable Schema componentSchema) {
+      List<Schema.Field> fields = new ArrayList<>();
+      fields.add(Schema.Field.of(NAME_FIELD_NAME, Schema.of(Schema.Type.STRING)));
+      if (componentSchema != null) {
+        fields.add(Schema.Field.of(ITEMS_FIELD_NAME, Schema.arrayOf(componentSchema)));
+      }
+      return Schema.recordOf(name + "-collection-expression", fields);
+    }
+  }
+
+  /**
+   * OData 4 "If" expression mapped to CDAP record with field
+   * "{@value SapODataConstants.IfExpression#GUARD_FIELD_NAME}" for a guard expression,
+   * "{@value SapODataConstants.IfExpression#THEN_FIELD_NAME}" for a then expression,
+   * "{@value SapODataConstants.IfExpression#ELSE_FIELD_NAME}" for an else expression.
+   */
+  public static class IfExpression extends Expression {
+    public static final String GUARD_FIELD_NAME = "guard";
+    public static final String THEN_FIELD_NAME = "then";
+    public static final String ELSE_FIELD_NAME = "else";
+
+    public static Schema schema(String name, Schema guardSchema, Schema thenSchema, Schema elseSchema) {
+      return Schema.recordOf(name + "-if-expression",
+                             Schema.Field.of(NAME_FIELD_NAME, Schema.of(Schema.Type.STRING)),
+                             Schema.Field.of(GUARD_FIELD_NAME, guardSchema),
+                             Schema.Field.of(THEN_FIELD_NAME, thenSchema),
+                             Schema.Field.of(ELSE_FIELD_NAME, elseSchema));
+    }
+  }
+
+  /**
+   * OData 4 "LabeledElement" expression mapped to CDAP record with field
+   * "{@value SapODataConstants.LabeledElementExpression#ELEMENT_NAME_FIELD_NAME}" for an element name.
+   */
+  public static class LabeledElementExpression extends ValuedExpression {
+    public static final String ELEMENT_NAME_FIELD_NAME = "elementName";
+
+    public static Schema schema(String name, Schema valueSchema) {
+      return Schema.recordOf(name + "-labeled-element-expression",
+                             Schema.Field.of(NAME_FIELD_NAME, Schema.of(Schema.Type.STRING)),
+                             Schema.Field.of(ELEMENT_NAME_FIELD_NAME, Schema.of(Schema.Type.STRING)),
+                             Schema.Field.of(VALUE_FIELD_NAME, valueSchema));
+    }
+  }
+
+  /**
+   * OData 4 "Record" expression mapped to CDAP record with field
+   * "{@value SapODataConstants.RecordExpression#PROPERTY_VALUES_FIELD_NAME}" for a record of property values.
+   */
+  public static class RecordExpression extends AnnotatedExpression {
+    public static final String PROPERTY_VALUES_FIELD_NAME = "propertyValues";
+
+    public static Schema schema(String name, @Nullable Schema propertiesSchema, @Nullable Schema annotationsSchema) {
+      List<Schema.Field> fields = new ArrayList<>();
+      fields.add(Schema.Field.of(NAME_FIELD_NAME, Schema.of(Schema.Type.STRING)));
+      fields.add(Schema.Field.of(TYPE_FIELD_NAME, Schema.nullableOf(Schema.of(Schema.Type.STRING))));
+      if (propertiesSchema != null) {
+        fields.add(Schema.Field.of(PROPERTY_VALUES_FIELD_NAME, propertiesSchema));
+      }
+      if (annotationsSchema != null) {
+        fields.add(Schema.Field.of(ANNOTATIONS_FIELD_NAME, annotationsSchema));
+      }
+      return Schema.recordOf(name + "-record-expression", fields);
+    }
+  }
+
+  /**
+   * UrlRef expression.
+   */
+  public static class UrlRefExpression extends ValuedExpression {
+    public static Schema schema(String name, Schema valueSchema) {
+      return Schema.recordOf(name + "-url-ref-expression",
+                             Schema.Field.of(NAME_FIELD_NAME, Schema.of(Schema.Type.STRING)),
+                             Schema.Field.of(VALUE_FIELD_NAME, valueSchema));
+    }
   }
 }

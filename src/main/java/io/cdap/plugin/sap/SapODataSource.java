@@ -45,6 +45,7 @@ import io.cdap.plugin.sap.transformer.ODataEntryToRecordTransformer;
 import io.cdap.plugin.sap.transformer.ODataEntryToRecordWithMetadataTransformer;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.olingo.commons.api.edm.annotation.EdmExpression;
+import org.apache.olingo.commons.api.edm.provider.annotation.CsdlApply;
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlExpression;
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlIf;
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlIsOf;
@@ -58,7 +59,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 
 /**
  * Plugin returns records from SAP OData service specified by URL.
@@ -171,9 +174,10 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntity, Struc
   private Schema.Field getSchemaField(PropertyMetadata propertyMetadata, boolean includeAnnotations) {
     Schema nonNullableSchema = convertPropertyType(propertyMetadata);
     Schema schema = propertyMetadata.isNullable() ? Schema.nullableOf(nonNullableSchema) : nonNullableSchema;
+    List<ODataAnnotation> annotations = propertyMetadata.getAnnotations();
 
-    return includeAnnotations && propertyMetadata.getAnnotations() != null ?
-      getFieldWithAnnotations(propertyMetadata, schema) : Schema.Field.of(propertyMetadata.getName(), schema);
+    return includeAnnotations && annotations != null && !annotations.isEmpty()
+      ? getFieldWithAnnotations(propertyMetadata, schema) : Schema.Field.of(propertyMetadata.getName(), schema);
   }
 
   private Schema.Field getFieldWithAnnotations(PropertyMetadata propertyMetadata, Schema valueSchema) {
@@ -201,14 +205,37 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntity, Struc
     OData4Annotation annotation = (OData4Annotation) oDataAnnotation;
     CsdlExpression expression = annotation.getExpression();
     Schema expressionSchema = expressionToFieldSchema(fieldName, expression);
-    return SapODataSchemas.annotationSchema(fieldName, expressionSchema);
+    Schema annotationsSchema = nestedAnnotationsSchema(annotation.getName(), annotation.getAnnotations());
+    String recordName = fieldName + "-" + annotation.getName();
+    return SapODataConstants.Annotation.schema(recordName, expressionSchema, annotationsSchema);
   }
 
-  // TODO nested annotations
-  private Schema expressionToFieldSchema(String fieldName, CsdlExpression expression) {
+  private
+  @Nullable
+  Schema nestedAnnotationsSchema(String annotationName, Map<String, OData4Annotation> annotations) {
+    if (annotations.isEmpty()) {
+      return null;
+    }
+    List<Schema.Field> fields = annotations.values().stream()
+      .map(annotation -> Schema.Field.of(annotation.getName(), annotationToFieldSchema(annotationName, annotation)))
+      .collect(Collectors.toList());
+
+    return Schema.recordOf(annotationName + "-nested-annotations", fields);
+  }
+
+  private
+  @Nullable
+  Schema expressionToFieldSchema(String fieldName, CsdlExpression expression) {
+    if (expression == null) {
+      return null;
+    }
+
     EdmExpression.EdmExpressionType type = ODataUtil.typeOf(expression);
     String recordName = String.format("%s-%s", fieldName, type);
     switch (type) {
+      case Null:
+        // Null annotations are not included. Olingo V4 client does not parse expression annotations correctly:
+        // https://issues.apache.org/jira/browse/OLINGO-1403
       case Binary:
       case Bool:
       case Date:
@@ -224,10 +251,9 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntity, Struc
       case Path:
       case AnnotationPath:
       case LabeledElementReference:
-      case Null:
       case NavigationPropertyPath:
       case PropertyPath:
-        return SapODataSchemas.singleValueExpressionSchema(fieldName);
+        return SapODataConstants.ValuedExpression.SCHEMA;
       case And:
       case Or:
       case Eq:
@@ -236,10 +262,13 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntity, Struc
       case Ge:
       case Lt:
       case Le:
+        // Annotations on logical & comparison expressionsare not included.
+        // Olingo V4 client does not parse expression annotations correctly:
+        // https://issues.apache.org/jira/browse/OLINGO-1403
         CsdlLogicalOrComparisonExpression logicalOrComparison = expression.asDynamic().asLogicalOrComparison();
         Schema andLeft = expressionToFieldSchema(fieldName, logicalOrComparison.getLeft());
         Schema andRight = expressionToFieldSchema(fieldName, logicalOrComparison.getRight());
-        return SapODataSchemas.logicalExpressionSchema(recordName, andLeft, andRight);
+        return SapODataConstants.LogicalExpression.schema(recordName, andLeft, andRight);
       case Not:
         // Negation expressions are represented as an element edm:Not that MUST contain a single annotation expression.
         // See 'Comparison and Logical Operators' section of
@@ -249,46 +278,65 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntity, Struc
         // See CsdlLogicalOrComparisonExpression#setRight implementation for details
         CsdlLogicalOrComparisonExpression not = expression.asDynamic().asLogicalOrComparison();
         Schema value = expressionToFieldSchema(fieldName, not.getLeft());
-        return SapODataSchemas.notExpressionSchema(recordName, value);
+        return SapODataConstants.NotExpression.schema(recordName, value);
       case Apply:
+        // Apply annotations are not included. Olingo V4 client does not parse expression annotations correctly:
+        // https://issues.apache.org/jira/browse/OLINGO-1403
         List<Schema.Field> parameterFields = new ArrayList<>();
-        List<CsdlExpression> parameters = expression.asDynamic().asApply().getParameters();
+        CsdlApply apply = expression.asDynamic().asApply();
+        List<CsdlExpression> parameters = apply.getParameters();
         for (int i = 0; i < parameters.size(); i++) {
           CsdlExpression parameter = parameters.get(i);
-          String parameterName = String.format("%d-%s", i, ODataUtil.typeOf(parameter));
-          Schema.Field field = Schema.Field.of(parameterName, expressionToFieldSchema(fieldName, parameter));
+          String parameterName = String.format("%s_%d", ODataUtil.typeOf(parameter), i);
+          Schema.Field field = Schema.Field.of(parameterName, expressionToFieldSchema(parameterName, parameter));
           parameterFields.add(field);
         }
         Schema parametersSchema = Schema.recordOf(fieldName + "-parameters", parameterFields);
-        return SapODataSchemas.applyExpressionSchema(fieldName, parametersSchema);
+        return SapODataConstants.ApplyExpression.schema(fieldName, parametersSchema);
       case Cast:
+        // Cast annotations are not included. Olingo V4 client does not parse expression annotations correctly:
+        // https://issues.apache.org/jira/browse/OLINGO-1403
         Schema expressionSchema = expressionToFieldSchema(fieldName, expression.asDynamic().asCast().getValue());
-        return SapODataSchemas.castExpressionSchema(fieldName, expressionSchema);
+        return SapODataConstants.CastIsOfExpression.schema(fieldName, expressionSchema);
       case Collection:
         List<CsdlExpression> items = expression.asDynamic().asCollection().getItems();
         // The values of the child expressions MUST all be type compatible.
         Schema itemSchema = items == null || items.isEmpty() ? null : expressionToFieldSchema(fieldName, items.get(0));
-        return SapODataSchemas.collectionExpressionSchema(fieldName, itemSchema);
+        return SapODataConstants.CollectionExpression.schema(fieldName, itemSchema);
       case If:
         CsdlIf csdlIf = expression.asDynamic().asIf();
         Schema guard = expressionToFieldSchema(fieldName, csdlIf.getGuard());
         Schema then = expressionToFieldSchema(fieldName, csdlIf.getThen());
         Schema elseSchema = expressionToFieldSchema(fieldName, csdlIf.getElse());
-        return SapODataSchemas.ifExpressionSchema(fieldName, guard, then, elseSchema);
+        return SapODataConstants.IfExpression.schema(fieldName, guard, then, elseSchema);
       case IsOf:
+        // IsOf annotations are not included. Olingo V4 client does not parse expression annotations correctly:
+        // https://issues.apache.org/jira/browse/OLINGO-1403
         CsdlIsOf isOf = expression.asDynamic().asIsOf();
-        return SapODataSchemas.isOfExpressionSchema(fieldName, expressionToFieldSchema(fieldName, isOf.getValue()));
+        Schema valueSchema = expressionToFieldSchema(fieldName, isOf.getValue());
+        return SapODataConstants.CastIsOfExpression.schema(fieldName, valueSchema);
       case LabeledElement:
+        // LabeledElement annotations are not included.
+        // Olingo V4 client does not parse expression annotations correctly:
+        // https://issues.apache.org/jira/browse/OLINGO-1403
         CsdlLabeledElement labeledElement = expression.asDynamic().asLabeledElement();
         Schema labeledElementSchema = expressionToFieldSchema(fieldName, labeledElement.getValue());
-        return SapODataSchemas.labeledElementExpressionSchema(fieldName, labeledElementSchema);
+        return SapODataConstants.LabeledElementExpression.schema(fieldName, labeledElementSchema);
       case Record:
         CsdlRecord record = expression.asDynamic().asRecord();
         Schema propertyValuesSchema = propertyValuesSchema(fieldName, record.getPropertyValues());
-        return SapODataSchemas.recordExpressionSchema(fieldName, propertyValuesSchema);
+        if (record.getAnnotations() == null || record.getAnnotations().isEmpty()) {
+          return SapODataConstants.RecordExpression.schema(fieldName, propertyValuesSchema, null);
+        }
+        Map<String, OData4Annotation> nestedRecordAnnotations = record.getAnnotations().stream()
+          .map(OData4Annotation::new)
+          .collect(Collectors.toMap(OData4Annotation::getName, Function.identity()));
+        Schema recordAnnotationsSchema = nestedAnnotationsSchema(recordName, nestedRecordAnnotations);
+        return SapODataConstants.RecordExpression.schema(fieldName, propertyValuesSchema, recordAnnotationsSchema);
       case UrlRef:
         CsdlUrlRef urlRef = expression.asDynamic().asUrlRef();
-        return SapODataSchemas.urlRefExpressionSchema(fieldName, expressionToFieldSchema(fieldName, urlRef.getValue()));
+        Schema urlRefValueSchema = expressionToFieldSchema(fieldName, urlRef.getValue());
+        return SapODataConstants.UrlRefExpression.schema(fieldName, urlRefValueSchema);
       default:
         // this should never happen
         throw new InvalidStageException(
@@ -309,64 +357,97 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntity, Struc
 
   private Schema convertPropertyType(PropertyMetadata propertyMetadata) {
     switch (propertyMetadata.getEdmTypeName()) {
+      case "Binary":
       case "Edm.Binary":
         return Schema.of(Schema.Type.BYTES);
+      case "Boolean":
       case "Edm.Boolean":
         return Schema.of(Schema.Type.BOOLEAN);
+      case "Byte":
       case "Edm.Byte":
         return Schema.of(Schema.Type.INT);
+      case "SByte":
       case "Edm.SByte":
         return Schema.of(Schema.Type.INT);
+      case "DateTime":
       case "Edm.DateTime":
         return Schema.of(Schema.LogicalType.TIMESTAMP_MICROS);
+      case "DateTimeOffset":
       case "Edm.DateTimeOffset":
         // Mapped to 'string' to avoid timezone information loss
         return Schema.of(Schema.Type.STRING);
+      case "Time":
       case "Edm.Time":
         return Schema.of(Schema.LogicalType.TIME_MICROS);
+      case "Decimal":
       case "Edm.Decimal":
         return Schema.decimalOf(propertyMetadata.getPrecision(), propertyMetadata.getScale());
+      case "Double":
       case "Edm.Double":
         return Schema.of(Schema.Type.DOUBLE);
+      case "Single":
       case "Edm.Single":
         return Schema.of(Schema.Type.FLOAT);
+      case "Guid":
       case "Edm.Guid":
         return Schema.of(Schema.Type.STRING);
+      case "Int16":
       case "Edm.Int16":
         return Schema.of(Schema.Type.INT);
+      case "Int32":
       case "Edm.Int32":
         return Schema.of(Schema.Type.INT);
+      case "Int64":
       case "Edm.Int64":
         return Schema.of(Schema.Type.LONG);
+      case "String":
       case "Edm.String":
         return Schema.of(Schema.Type.STRING);
+      case "GeographyPoint":
       case "Edm.GeographyPoint":
+      case "GeometryPoint":
       case "Edm.GeometryPoint":
         return SapODataConstants.Point.SCHEMA;
+      case "GeographyLineString":
       case "Edm.GeographyLineString":
+      case "GeometryLineString":
       case "Edm.GeometryLineString":
         return SapODataConstants.LineString.SCHEMA;
+      case "GeographyPolygon":
       case "Edm.GeographyPolygon":
+      case "GeometryPolygon":
       case "Edm.GeometryPolygon":
         return SapODataConstants.Polygon.SCHEMA;
+      case "GeographyMultiPoint":
       case "Edm.GeographyMultiPoint":
+      case "GeometryMultiPoint":
       case "Edm.GeometryMultiPoint":
         return SapODataConstants.MultiPoint.SCHEMA;
+      case "GeographyMultiLineString":
       case "Edm.GeographyMultiLineString":
+      case "GeometryMultiLineString":
       case "Edm.GeometryMultiLineString":
         return SapODataConstants.MultiLineString.SCHEMA;
+      case "GeographyMultiPolygon":
       case "Edm.GeographyMultiPolygon":
+      case "GeometryMultiPolygon":
       case "Edm.GeometryMultiPolygon":
         return SapODataConstants.MultiPolygon.SCHEMA;
+      case "GeographyCollection":
       case "Edm.GeographyCollection":
+      case "GeometryCollection":
       case "Edm.GeometryCollection":
         return SapODataConstants.GeospatialCollection.SCHEMA;
+      case "Date":
       case "Edm.Date":
         return Schema.of(Schema.LogicalType.TIMESTAMP_MICROS);
+      case "Duration":
       case "Edm.Duration":
         return Schema.of(Schema.Type.STRING);
+      case "Stream":
       case "Edm.Stream":
         return SapODataConstants.Stream.SCHEMA;
+      case "TimeOfDay":
       case "Edm.TimeOfDay":
         return Schema.of(Schema.LogicalType.TIME_MICROS);
       default:

@@ -52,6 +52,11 @@
           <Annotation Term="Measures.ISOCurrency" String="USD"/>
           <Annotation Term="Core.Description" String="Annotated property" />
         </Property>
+        <Property Name="NestedAnnotation" Type="Edm.Boolean" Nullable="false">
+          <Annotation Term="Measures.ISOCurrency" String="USD">
+            <Annotation Term="Core.Description" String="Nested annotation" />
+          </Annotation>
+        </Property>
         <Property Name="Targeted" Type="Edm.Boolean" Nullable="false"/>
         <Property Name="Price" Type="Edm.Boolean" Nullable="false">
           <Annotation Term="Measures.ISOCurrency" Path="Currency" />
@@ -69,7 +74,7 @@
             <EnumMember>update</EnumMember>
           </Annotation>
         </Property>
-        <!--Annotation: Canonical Functions-->
+        <!--Annotation: Apply-->
         <Property Name="CanonicalFunctionsProperty" Type="Edm.Boolean" Nullable="false">
           <Annotation Term="Core.Description">
             <Apply Function="odata.concat">
@@ -216,6 +221,16 @@
             </Record>
           </Annotation>
         </Property>
+        <!--Annotation: Record Expression with Annotation-->
+        <Property Name="RecordNestedAnnotated" Type="Edm.Boolean" Nullable="false">
+          <Annotation Term="Core.Description">
+            <Record>
+              <Annotation Term="Core.Description" String="Annotation on record" />
+              <PropertyValue Property="GivenName" Path="String"/>
+              <PropertyValue Property="Age" Path="Byte"/>
+            </Record>
+          </Annotation>
+        </Property>
         <!--Annotation: UrlRef-->
         <Property Name="UrlRefAnnotated" Type="Edm.Boolean" Nullable="false">
           <Annotation Term="Core.Description">
@@ -233,12 +248,8 @@
         <Annotation Term="Core.Description" String="Property annotated with External Targeting"/>
         <Annotation Term="SAP__common.ValueListReferences">
           <Collection>
-            <String>
-              ../dummy1/$metadata
-            </String>
-            <String>
-              ../dummy2/$metadata
-            </String>
+            <String>../dummy1/$metadata</String>
+            <String>../dummy2/$metadata</String>
           </Collection>
         </Annotation>
       </Annotations>

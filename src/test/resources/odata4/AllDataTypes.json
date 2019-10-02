@@ -424,6 +424,7 @@
       },
 
       "MultipleAnnotated": false,
+      "NestedAnnotation": false,
       "Targeted": false,
       "Price": false,
       "Currency": false,
@@ -445,6 +446,7 @@
       "IsOfAnnotated": false,
       "LabeledElementAnnotated": false,
       "RecordAnnotated": false,
+      "RecordNestedAnnotated": false,
       "UrlRefAnnotated": false
     },
     {
@@ -868,6 +870,7 @@
         ]
       },
       "MultipleAnnotated": false,
+      "NestedAnnotation": false,
       "Targeted": false,
       "Price": false,
       "Currency": false,
@@ -889,6 +892,7 @@
       "IsOfAnnotated": false,
       "LabeledElementAnnotated": false,
       "RecordAnnotated": false,
+      "RecordNestedAnnotated": false,
       "UrlRefAnnotated": false
     }
   ]

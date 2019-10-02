@@ -74,6 +74,28 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
   }
 
   @Test
+  public void testNestedAnnotation() throws Exception {
+    StructuredRecord nestedAnnotation = AnnotationRecordBuilder.builder("MultipleAnnotated")
+      .setTerm(DESCRIPTION_TERM)
+      .withConstantExpression(EdmExpression.EdmExpressionType.String, "Nested annotation")
+      .build();
+
+    StructuredRecord expectedCurrency = AnnotationRecordBuilder.builder("NestedAnnotation")
+      .setTerm(CURRENCY_TERM)
+      .withConstantExpression(EdmExpression.EdmExpressionType.String, "USD")
+      .withAnnotation("core_description", nestedAnnotation)
+      .build();
+
+    Map<String, String> properties = sourceProperties("$select=NestedAnnotation");
+    List<StructuredRecord> records = getPipelineResults(properties);
+    Assert.assertEquals(2, records.size());
+    for (StructuredRecord actualRecord : records) {
+      StructuredRecord fieldRecord = actualRecord.get("NestedAnnotation");
+      assertAnnotationEquals(expectedCurrency, fieldRecord, "measures_isocurrency");
+    }
+  }
+
+  @Test
   public void testApplyExpressionAnnotation() throws Exception {
     StructuredRecord expected = AnnotationRecordBuilder.builder("CanonicalFunctionsProperty")
       .setTerm(DESCRIPTION_TERM)
@@ -380,6 +402,31 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
   }
 
   @Test
+  public void testRecordExpressionNestedAnnotation() throws Exception {
+    StructuredRecord nestedAnnotation = AnnotationRecordBuilder.builder("RecordNestedAnnotated-nested")
+      .setTerm(DESCRIPTION_TERM)
+      .withConstantExpression(EdmExpression.EdmExpressionType.String, "Annotation on record")
+      .build();
+
+    StructuredRecord expected = AnnotationRecordBuilder.builder("RecordNestedAnnotated")
+      .setTerm(DESCRIPTION_TERM)
+      .withRecordExpression()
+      .withProperty("GivenName", EdmExpression.EdmExpressionType.Path, "String")
+      .withProperty("Age", EdmExpression.EdmExpressionType.Path, "Byte")
+      .withAnnotation("core_description", nestedAnnotation)
+      .add()
+      .build();
+
+    Map<String, String> properties = sourceProperties("$select=RecordNestedAnnotated");
+    List<StructuredRecord> records = getPipelineResults(properties);
+    Assert.assertEquals(2, records.size());
+    for (StructuredRecord actualRecord : records) {
+      StructuredRecord fieldRecord = actualRecord.get("RecordNestedAnnotated");
+      assertAnnotationEquals(expected, fieldRecord, "core_description");
+    }
+  }
+
+  @Test
   public void testUrlRefExpressionAnnotation() throws Exception {
     StructuredRecord expected = AnnotationRecordBuilder.builder("UrlRefAnnotated")
       .setTerm(DESCRIPTION_TERM)
@@ -397,11 +444,43 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     }
   }
 
+  @Test
+  public void testExternalTargetingAnnotations() throws Exception {
+    StructuredRecord expectedCurrency = AnnotationRecordBuilder.builder("Targeted")
+      .setTerm(CURRENCY_TERM)
+      .withConstantExpression(EdmExpression.EdmExpressionType.String, "USD")
+      .build();
+
+    StructuredRecord expectedDescription = AnnotationRecordBuilder.builder("Targeted")
+      .setTerm(DESCRIPTION_TERM)
+      .withConstantExpression(EdmExpression.EdmExpressionType.String, "Property annotated with External Targeting")
+      .build();
+
+    StructuredRecord expectedValueReferencesList = AnnotationRecordBuilder.builder("Targeted")
+      .setTerm("SAP__common.ValueListReferences")
+      .withCollectionExpression()
+      .withItem(EdmExpression.EdmExpressionType.String, "../dummy1/$metadata")
+      .withItem(EdmExpression.EdmExpressionType.String, "../dummy2/$metadata")
+      .add()
+      .build();
+
+    Map<String, String> properties = sourceProperties("$select=Targeted");
+    List<StructuredRecord> records = getPipelineResults(properties);
+    Assert.assertEquals(2, records.size());
+    for (StructuredRecord actualRecord : records) {
+      StructuredRecord fieldRecord = actualRecord.get("Targeted");
+      assertAnnotationEquals(expectedCurrency, fieldRecord, "measures_isocurrency");
+      assertAnnotationEquals(expectedDescription, fieldRecord, "core_description");
+      assertAnnotationEquals(expectedValueReferencesList, fieldRecord, "sap__common_valuelistreferences");
+    }
+  }
+
   private void assertAnnotationEquals(StructuredRecord expected, StructuredRecord fieldRecord, String annotation) {
     Assert.assertNotNull(fieldRecord);
     StructuredRecord annotationsRecord = fieldRecord.get(SapODataConstants.METADATA_ANNOTATIONS_FIELD_NAME);
     Assert.assertNotNull(annotationsRecord);
     StructuredRecord actual = annotationsRecord.get(annotation);
+
     Assert.assertEquals(expected, actual);
   }
 

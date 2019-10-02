@@ -256,6 +256,7 @@
         </d:GeometryCollection>
 
         <d:MultipleAnnotated m:type="Edm.Boolean">true</d:MultipleAnnotated>
+        <d:NestedAnnotation m:type="Edm.Boolean">true</d:NestedAnnotation>
         <d:Targeted m:type="Edm.Boolean">true</d:Targeted>
         <d:Price m:type="Edm.Boolean">true</d:Price>
         <d:Currency m:type="Edm.Boolean">true</d:Currency>
@@ -277,6 +278,7 @@
         <d:IsOfAnnotated m:type="Edm.Boolean">true</d:IsOfAnnotated>
         <d:LabeledElementAnnotated m:type="Edm.Boolean">true</d:LabeledElementAnnotated>
         <d:RecordAnnotated m:type="Edm.Boolean">true</d:RecordAnnotated>
+        <d:RecordNestedAnnotated m:type="Edm.Boolean">true</d:RecordNestedAnnotated>
         <d:UrlRefAnnotated m:type="Edm.Boolean">true</d:UrlRefAnnotated>
       </m:properties>
     </content>
@@ -530,6 +532,7 @@
           </gml:MultiGeometry>
         </d:GeometryCollection>
         <d:MultipleAnnotated m:type="Edm.Boolean">true</d:MultipleAnnotated>
+        <d:NestedAnnotation m:type="Edm.Boolean">true</d:NestedAnnotation>
         <d:Targeted m:type="Edm.Boolean">true</d:Targeted>
         <d:Price m:type="Edm.Boolean">true</d:Price>
         <d:Currency m:type="Edm.Boolean">true</d:Currency>
@@ -551,6 +554,7 @@
         <d:IsOfAnnotated m:type="Edm.Boolean">true</d:IsOfAnnotated>
         <d:LabeledElementAnnotated m:type="Edm.Boolean">true</d:LabeledElementAnnotated>
         <d:RecordAnnotated m:type="Edm.Boolean">true</d:RecordAnnotated>
+        <d:RecordNestedAnnotated m:type="Edm.Boolean">true</d:RecordNestedAnnotated>
         <d:UrlRefAnnotated m:type="Edm.Boolean">true</d:UrlRefAnnotated>
       </m:properties>
     </content>

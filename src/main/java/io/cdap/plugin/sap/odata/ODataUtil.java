@@ -22,7 +22,7 @@ import org.apache.olingo.commons.api.edm.provider.annotation.CsdlDynamicExpressi
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlExpression;
 
 /**
- * OData annotation metadata.
+ * OData utility methods.
  */
 public class ODataUtil {
 

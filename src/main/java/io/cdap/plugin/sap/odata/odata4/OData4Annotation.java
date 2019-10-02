@@ -21,6 +21,12 @@ import io.cdap.plugin.sap.odata.ODataAnnotation;
 import org.apache.olingo.commons.api.edm.provider.CsdlAnnotation;
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlExpression;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 /**
  * OData annotation metadata.
  */
@@ -42,6 +48,22 @@ public class OData4Annotation extends ODataAnnotation {
 
   public CsdlExpression getExpression() {
     return annotation.getExpression();
+  }
+
+  /**
+   * Returns map of nested annotations by name. Empty map will be returned if there is no nested annotations.
+   *
+   * @return map of nested annotations by name. Empty map will be returned if there is no nested annotations.
+   */
+  public Map<String, OData4Annotation> getAnnotations() {
+    List<CsdlAnnotation> annotations = annotation.getAnnotations();
+    if (annotations == null || annotations.isEmpty()) {
+      return Collections.emptyMap();
+    }
+
+    return annotations.stream()
+      .map(OData4Annotation::new)
+      .collect(Collectors.toMap(OData4Annotation::getName, Function.identity()));
   }
 
   /**
