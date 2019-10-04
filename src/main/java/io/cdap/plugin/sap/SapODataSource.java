@@ -32,6 +32,7 @@ import io.cdap.cdap.etl.api.batch.BatchSource;
 import io.cdap.cdap.etl.api.batch.BatchSourceContext;
 import io.cdap.cdap.etl.api.validation.InvalidStageException;
 import io.cdap.plugin.common.LineageRecorder;
+import io.cdap.plugin.sap.odata.ComplexPropertyMetadata;
 import io.cdap.plugin.sap.odata.EntityType;
 import io.cdap.plugin.sap.odata.GenericODataClient;
 import io.cdap.plugin.sap.odata.ODataAnnotation;
@@ -172,7 +173,7 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntity, Struc
   }
 
   private Schema.Field getSchemaField(PropertyMetadata propertyMetadata, boolean includeAnnotations) {
-    Schema nonNullableSchema = convertPropertyType(propertyMetadata);
+    Schema nonNullableSchema = propertyToSchema(propertyMetadata);
     Schema schema = propertyMetadata.isNullable() ? Schema.nullableOf(nonNullableSchema) : nonNullableSchema;
     List<ODataAnnotation> annotations = propertyMetadata.getAnnotations();
 
@@ -229,7 +230,6 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntity, Struc
     if (expression == null) {
       return null;
     }
-
     EdmExpression.EdmExpressionType type = ODataUtil.typeOf(expression);
     String recordName = String.format("%s-%s", fieldName, type);
     switch (type) {
@@ -354,9 +354,19 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntity, Struc
 
     return Schema.recordOf(fieldName + "-property-values", fields);
   }
+  private Schema propertyToSchema(PropertyMetadata propertyMetadata) {
+    Schema schema = propertyTypeToSchema(propertyMetadata);
+    return propertyMetadata.isCollection() ? Schema.arrayOf(schema) : schema;
+  }
 
-  private Schema convertPropertyType(PropertyMetadata propertyMetadata) {
-    switch (propertyMetadata.getEdmTypeName()) {
+  private Schema propertyTypeToSchema(PropertyMetadata propertyMetadata) {
+    if (propertyMetadata.isComplex()) {
+      return convertComplexProperty((ComplexPropertyMetadata) propertyMetadata);
+    }
+    if (propertyMetadata.isEnum()) {
+      return Schema.of(Schema.Type.STRING);
+    }
+    switch (propertyMetadata.getType()) {
       case "Binary":
       case "Edm.Binary":
         return Schema.of(Schema.Type.BYTES);
@@ -453,7 +463,14 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntity, Struc
       default:
         // this should never happen
         throw new InvalidStageException(String.format("Field '%s' is of unsupported type '%s'.",
-                                                      propertyMetadata.getName(), propertyMetadata.getEdmTypeName()));
+                                                      propertyMetadata.getName(), propertyMetadata.getType()));
     }
+  }
+
+  private Schema convertComplexProperty(ComplexPropertyMetadata propertyMetadata) {
+    List<Schema.Field> fields = propertyMetadata.getProperties().stream()
+      .map(p -> Schema.Field.of(p.getName(), propertyToSchema(p)))
+      .collect(Collectors.toList());
+    return Schema.recordOf(propertyMetadata.getName() + "-complex-type-values", fields);
   }
 }

@@ -11,7 +11,34 @@
     <edmx:Include Namespace="Org.OData.Core.V1" Alias="Core"/>
   </edmx:Reference>
   <edmx:DataServices>
-    <Schema Namespace="TestService" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+    <Schema Namespace="TestService" xmlns="http://docs.oasis-open.org/odata/ns/edm" Alias="self">
+      <EnumType Name="PersonGender">
+        <Member Name="Male" Value="0"/>
+        <Member Name="Female" Value="1"/>
+        <Member Name="Unknown" Value="2"/>
+      </EnumType>
+      <ComplexType Name="City">
+        <Property Name="CountryRegion" Type="Edm.String" Nullable="false"/>
+        <Property Name="Name" Type="Edm.String" Nullable="false"/>
+        <Property Name="Region" Type="Edm.String" Nullable="false"/>
+      </ComplexType>
+      <ComplexType Name="Location" OpenType="true">
+        <Property Name="Address" Type="Edm.String" Nullable="false"/>
+        <Property Name="City" Type="TestService.City" Nullable="false"/>
+      </ComplexType>
+      <ComplexType Name="HomeAddress" BaseType="TestService.Location">
+        <Property Name="FamilyName" Type="Edm.String"/>
+      </ComplexType>
+      <TypeDefinition Name="Length" UnderlyingType="Edm.Int32">
+        <Annotation Term="Org.OData.Measures.V1.Unit" String="Centimeters" />
+      </TypeDefinition>
+      <TypeDefinition Name="Weight" UnderlyingType="Edm.Int32">
+        <Annotation Term="Org.OData.Measures.V1.Unit" String="Kilograms" />
+      </TypeDefinition>
+      <ComplexType Name="Size">
+        <Property Name="Height" Type="self.Length" />
+        <Property Name="Weight" Type="self.Weight" />
+      </ComplexType>
       <EntityType Name="AllDataTypesEntity">
         <Key>
           <PropertyRef Name="Int32"/>
@@ -47,6 +74,14 @@
         <Property Name="GeometryMultiLineString" Type="Edm.GeometryMultiLineString" SRID="4326"/>
         <Property Name="GeometryMultiPolygon" Type="Edm.GeometryMultiPolygon" SRID="4326"/>
         <Property Name="GeometryCollection" Type="Edm.GeometryCollection" SRID="4326"/>
+        <!--Collection-->
+        <Property Name="Emails" Type="Collection(Edm.String)" Nullable="false"/>
+        <!--Complex types-->
+        <Property Name="Address" Type="TestService.Location" Nullable="false"/>
+        <Property Name="HomeAddress" Type="TestService.HomeAddress" Nullable="false"/>
+        <Property Name="Size" Type="TestService.Size" Nullable="false"/>
+        <!--Enum Type-->
+          <Property Name="Gender" Type="TestService.PersonGender" Nullable="false"/>
         <!--Annotated properties-->
         <Property Name="MultipleAnnotated" Type="Edm.Boolean" Nullable="false">
           <Annotation Term="Measures.ISOCurrency" String="USD"/>
@@ -243,6 +278,7 @@
           <NavigationPropertyBinding Path="Parent" Target="People"/>
         </EntitySet>
       </EntityContainer>
+      <!--todo also use alias: self-->
       <Annotations Target="TestService.AllDataTypesEntity/Targeted">
         <Annotation Term="Measures.ISOCurrency" String="USD"/>
         <Annotation Term="Core.Description" String="Property annotated with External Targeting"/>

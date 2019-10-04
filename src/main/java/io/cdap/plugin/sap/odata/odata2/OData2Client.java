@@ -132,7 +132,8 @@ public class OData2Client extends ODataClient {
       .map(a -> new OData2Annotation(a.getName(), a.getText()))
       .collect(Collectors.toList());
 
-    return new PropertyMetadata(property.getName(), type, nullable, precision, scale, annotations);
+    // todo is collection?
+    return new PropertyMetadata(property.getName(), type, false, nullable, precision, scale, annotations);
   }
 
   private void initMetadata() {

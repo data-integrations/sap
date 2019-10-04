@@ -254,7 +254,32 @@
             </gml:geometryMembers>
           </gml:MultiGeometry>
         </d:GeometryCollection>
-
+        <d:Address m:type="#TestService.Location">
+          <d:Address>187 Suffolk Ln.</d:Address>
+          <d:City m:type="#TestService.City">
+            <d:CountryRegion>United States</d:CountryRegion>
+            <d:Name>Boise</d:Name>
+            <d:Region>ID</d:Region>
+          </d:City>
+        </d:Address>
+        <d:HomeAddress m:type="#TestService.HomeAddress">
+          <d:Address>187 Suffolk Ln.</d:Address>
+          <d:City m:type="#TestService.City">
+            <d:CountryRegion>United States</d:CountryRegion>
+            <d:Name>Boise</d:Name>
+            <d:Region>ID</d:Region>
+          </d:City>
+          <d:FamilyName>Test</d:FamilyName>
+        </d:HomeAddress>
+        <d:Size m:type="#TestService.Size">
+          <d:Height m:type="Edm.Int32">12</d:Height>
+          <d:Weight m:type="Edm.Int32">10</d:Weight>
+        </d:Size>
+        <d:Gender m:type="#TestService.PersonGender">Male</d:Gender>
+        <d:Emails m:type="#Collection(String)">
+          <m:element>Russell@example.com</m:element>
+          <m:element>Russell@contoso.com</m:element>
+        </d:Emails>
         <d:MultipleAnnotated m:type="Edm.Boolean">true</d:MultipleAnnotated>
         <d:NestedAnnotation m:type="Edm.Boolean">true</d:NestedAnnotation>
         <d:Targeted m:type="Edm.Boolean">true</d:Targeted>
@@ -531,6 +556,32 @@
             </gml:geometryMembers>
           </gml:MultiGeometry>
         </d:GeometryCollection>
+        <d:Address m:type="#TestService.Location">
+          <d:Address>187 Suffolk Ln.</d:Address>
+          <d:City m:type="#TestService.City">
+            <d:CountryRegion>United States</d:CountryRegion>
+            <d:Name>Boise</d:Name>
+            <d:Region>ID</d:Region>
+          </d:City>
+        </d:Address>
+        <d:HomeAddress m:type="#TestService.HomeAddress">
+          <d:Address>187 Suffolk Ln.</d:Address>
+          <d:City m:type="#TestService.City">
+            <d:CountryRegion>United States</d:CountryRegion>
+            <d:Name>Boise</d:Name>
+            <d:Region>ID</d:Region>
+          </d:City>
+          <d:FamilyName>Test</d:FamilyName>
+        </d:HomeAddress>
+        <d:Size m:type="#TestService.Size">
+          <d:Height m:type="Edm.Int32">12</d:Height>
+          <d:Weight m:type="Edm.Int32">10</d:Weight>
+        </d:Size>
+        <d:Gender m:type="#TestService.PersonGender">Male</d:Gender>
+        <d:Emails m:type="#Collection(String)">
+          <m:element>Russell@example.com</m:element>
+          <m:element>Russell@contoso.com</m:element>
+        </d:Emails>
         <d:MultipleAnnotated m:type="Edm.Boolean">true</d:MultipleAnnotated>
         <d:NestedAnnotation m:type="Edm.Boolean">true</d:NestedAnnotation>
         <d:Targeted m:type="Edm.Boolean">true</d:Targeted>

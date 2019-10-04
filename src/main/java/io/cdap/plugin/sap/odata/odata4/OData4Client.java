@@ -36,17 +36,14 @@ import org.apache.olingo.commons.api.edm.provider.CsdlAnnotation;
 import org.apache.olingo.commons.api.edm.provider.CsdlAnnotations;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
 import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
-import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import javax.ws.rs.core.MediaType;
 
@@ -89,65 +86,70 @@ public class OData4Client extends ODataClient {
     // the case of missing vocabulary references: https://issues.apache.org/jira/browse/OLINGO-1130
     XMLMetadataRequest request = client.getRetrieveRequestFactory().getXMLMetadataRequest(rootUrl);
     request.setAccept(MediaType.APPLICATION_XML);
-
     ODataRetrieveResponse<XMLMetadata> response = request.execute();
     XMLMetadata metadata = response.getBody();
     CsdlSchema schema = metadata.getSchemas().stream()
       .filter(s -> s.getEntityContainer() != null && s.getEntityContainer().getEntitySet(entitySetName) != null)
       .findFirst()
       .orElseThrow(() -> new ODataException(String.format("Entity set '%s' does not exist in SAP", entitySetName)));
-    CsdlEntitySet entitySet = schema.getEntityContainer().getEntitySet(entitySetName);
-    FullQualifiedName entityTypeFQN = entitySet.getTypeFQN();
-    CsdlEntityType entityType = metadata.getSchema(entityTypeFQN.getNamespace()).getEntityType(entityTypeFQN.getName());
 
-    String typeName = entityTypeFQN.getName();
-    Map<String, List<CsdlAnnotation>> externalTargetingAnnotations = externalTargetingAnnotations(schema, typeName);
-    List<PropertyMetadata> properties = new ArrayList<>();
-    for (CsdlProperty property : entityType.getProperties()) {
-      List<CsdlAnnotation> externalAnnotations = externalTargetingAnnotations.get(property.getName());
-      PropertyMetadata propertyMetadata = csdlToProperty(property, externalAnnotations);
-      properties.add(propertyMetadata);
-    }
+    CsdlEntityType entityType = getCsdlEntityType(schema, entitySetName);
+    List<PropertyMetadata> properties = getProperties(schema, entityType);
 
     return new EntityType(entityType.getName(), properties);
   }
 
-  private Map<String, List<CsdlAnnotation>> externalTargetingAnnotations(CsdlSchema schema, String entityTypeName) {
-    List<CsdlAnnotations> annotations = schema.getAnnotationGroups();
-    if (annotations == null || annotations.isEmpty()) {
+  private CsdlEntityType getCsdlEntityType(CsdlSchema schema, String entitySetName) {
+    CsdlEntitySet entitySet = schema.getEntityContainer().getEntitySet(entitySetName);
+    FullQualifiedName entityTypeFQN = entitySet.getTypeFQN();
+    return schema.getEntityType(entityTypeFQN.getName());
+  }
+
+  private List<PropertyMetadata> getProperties(CsdlSchema schema, CsdlEntityType entityType) {
+    Map<String, List<ODataAnnotation>> targetingAnnotations = getTargetingAnnotations(schema, entityType);
+    return entityType.getProperties().stream()
+      .map(p -> {
+        List<ODataAnnotation> externalTargetingAnnotations = targetingAnnotations.get(p.getName());
+        return PropertyMetadata.valueOf(schema, p, externalTargetingAnnotations);
+      })
+      .collect(Collectors.toList());
+  }
+
+  /**
+   * Retrieves map of external targeting annotations grouped by property name.
+   *
+   * @param schema     csdl schema.
+   * @param entityType csdl entity type.
+   * @return map of external targeting annotations grouped by property name.
+   */
+  private Map<String, List<ODataAnnotation>> getTargetingAnnotations(CsdlSchema schema, CsdlEntityType entityType) {
+    List<CsdlAnnotations> annotationGroups = schema.getAnnotationGroups();
+    if (annotationGroups == null || annotationGroups.isEmpty()) {
       return Collections.emptyMap();
     }
     // Target starts either with namespace or its alias.
-    String entityTypeNameFQN = String.format("%s.%s", schema.getNamespace(), entityTypeName);
-    String entityTypeNameWithAlias = String.format("%s.%s", schema.getAlias(), entityTypeName);
-    return annotations.stream()
+    String entityTypeNameFQN = String.format("%s.%s", schema.getNamespace(), entityType.getName());
+    String entityTypeNameWithAlias = String.format("%s.%s", schema.getAlias(), entityType.getName());
+    return annotationGroups.stream()
       .filter(a -> a.getTarget().startsWith(entityTypeNameFQN) || a.getTarget().startsWith(entityTypeNameWithAlias))
-      .collect(Collectors.toMap(a -> {
-        String targetFQN = a.getTarget();
-        return targetFQN.substring(targetFQN.lastIndexOf("/") + 1);
-      }, CsdlAnnotations::getAnnotations));
+      .collect(Collectors.toMap(this::targetName, a -> csdlToOData4Annotations(a.getAnnotations())));
   }
 
-  private PropertyMetadata csdlToProperty(CsdlProperty property, List<CsdlAnnotation> externalAnnotations) {
-    String type = property.getType();
-    boolean nullable = property.isNullable();
-    Integer precision = property.getPrecision();
-    Integer scale = property.getScale();
-    List<CsdlAnnotation> annotations = property.getAnnotations();
+  /**
+   * Returns simple target name, which is targeted property name without namespace.
+   *
+   * @param annotationGroup targeting annotation group.
+   * @return simple target name, which is targeted property name without namespace.
+   */
+  private String targetName(CsdlAnnotations annotationGroup) {
+    String targetFQN = annotationGroup.getTarget();
+    return targetFQN.substring(targetFQN.lastIndexOf("/") + 1);
+  }
 
-    if (annotations == null && externalAnnotations == null) {
-      return new PropertyMetadata(property.getName(), type, nullable, precision, scale, null);
+  private List<ODataAnnotation> csdlToOData4Annotations(List<CsdlAnnotation> annotations) {
+    if (annotations == null) {
+      return null;
     }
-
-    Stream<CsdlAnnotation> annotationStream = annotations != null && externalAnnotations == null ? annotations.stream()
-      : annotations == null ? externalAnnotations.stream()
-      : Stream.concat(annotations.stream(), externalAnnotations.stream());
-
-    // include metadata annotations
-    List<ODataAnnotation> oDataAnnotations = annotationStream
-      .map(OData4Annotation::new)
-      .collect(Collectors.toList());
-
-    return new PropertyMetadata(property.getName(), type, nullable, precision, scale, oDataAnnotations);
+    return annotations.stream().map(OData4Annotation::new).collect(Collectors.toList());
   }
 }

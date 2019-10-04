@@ -447,7 +447,19 @@
       "LabeledElementAnnotated": false,
       "RecordAnnotated": false,
       "RecordNestedAnnotated": false,
-      "UrlRefAnnotated": false
+      "UrlRefAnnotated": false,
+      "Address": {"Address":"187 Suffolk Ln.","City":{"CountryRegion":"United States","Name":"Boise","Region":"ID"}},
+      "HomeAddress": {
+        "Address":"187 Suffolk Ln.",
+        "City":{"CountryRegion":"United States","Name":"Boise","Region":"ID"},
+        "FamilyName": "Test"
+      },
+      "Size" : {
+        "Height": 12,
+        "Weight": 10
+      },
+      "Gender": "Male",
+      "Emails":["Russell@example.com","Russell@contoso.com"]
     },
     {
       "Binary@odata.type": "#Binary",
@@ -893,7 +905,19 @@
       "LabeledElementAnnotated": false,
       "RecordAnnotated": false,
       "RecordNestedAnnotated": false,
-      "UrlRefAnnotated": false
+      "UrlRefAnnotated": false,
+      "Address": {"Address":"187 Suffolk Ln.","City":{"CountryRegion":"United States","Name":"Boise","Region":"ID"}},
+      "HomeAddress": {
+        "Address":"187 Suffolk Ln.",
+        "City":{"CountryRegion":"United States","Name":"Boise","Region":"ID"},
+        "FamilyName": "Test"
+      },
+      "Size" : {
+        "Height": 12,
+        "Weight": 10
+      },
+      "Gender": "Male",
+      "Emails":["Russell@example.com","Russell@contoso.com"]
     }
   ]
 }
