@@ -287,7 +287,7 @@ public class SapOData2SourceETLTest extends BaseSapODataSourceETLTest {
     List<Schema.Field> actualFields = actualRecord.getSchema().getFields();
     Assert.assertNotNull(actualFields);
     for (Schema.Field actualField : actualFields) {
-      Assert.assertEquals(actualField.getSchema().getType(), Schema.Type.RECORD);
+      Assert.assertEquals(Schema.Type.RECORD, actualField.getSchema().getType());
       StructuredRecord annotatedValueRecord = actualRecord.get(actualField.getName());
 
       Schema annotatedValueSchema = annotatedValueRecord.getSchema();

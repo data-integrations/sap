@@ -5,6 +5,18 @@
   <edmx:DataServices m:DataServiceVersion="2.0">
     <Schema Namespace="ZGW100_XX_S2_SRV" xml:lang="en" sap:schema-version="1"
             xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+      <ComplexType Name="City">
+        <Property Name="CountryRegion" Type="Edm.String" Nullable="false"/>
+        <Property Name="Name" Type="Edm.String" Nullable="false"/>
+        <Property Name="Region" Type="Edm.String" Nullable="false"/>
+      </ComplexType>
+      <ComplexType Name="Location" OpenType="true">
+        <Property Name="Address" Type="Edm.String" Nullable="false"/>
+        <Property Name="City" Type="ZGW100_XX_S2_SRV.City" Nullable="false"/>
+      </ComplexType>
+      <ComplexType Name="HomeAddress" BaseType="ZGW100_XX_S2_SRV.Location">
+        <Property Name="FamilyName" Type="Edm.String" Nullable="false"/>
+      </ComplexType>
       <EntityType Name="SalesOrder" sap:content-version="1">
         <Key>
           <PropertyRef Name="SoId"/>
@@ -66,6 +78,11 @@
         <Property Name="DateTime" Type="Edm.DateTime" Nullable="false" sap:label="Date Time"
                   sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
         <Property Name="DateTimeOffset" Type="Edm.DateTimeOffset" Nullable="false" sap:label="Date Time Offset"
+                  sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+        <!--Complex types-->
+        <Property Name="Address" Type="ZGW100_XX_S2_SRV.Location" Nullable="false" sap:label="Address"
+                  sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+        <Property Name="HomeAddress" Type="ZGW100_XX_S2_SRV.HomeAddress" Nullable="false" sap:label="Home Address"
                   sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
       </EntityType>
       <EntityType Name="SalesOrderItem" sap:content-version="1">

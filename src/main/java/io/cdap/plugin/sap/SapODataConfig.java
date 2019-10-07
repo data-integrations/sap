@@ -92,7 +92,7 @@ public class SapODataConfig extends PluginConfig {
   private String schema;
 
   @Name(SapODataConstants.INCLUDE_METADATA_ANNOTATIONS)
-  @Description("Whether the plugin should read SAP metadata annotations and include them to each CDAP record.")
+  @Description("Whether the plugin should read SAP metadata annotations and include them to each record.")
   private boolean includeMetadataAnnotations;
 
   public SapODataConfig(String referenceName, String url, String resourcePath, String query, String user,

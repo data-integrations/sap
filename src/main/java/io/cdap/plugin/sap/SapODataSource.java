@@ -211,9 +211,7 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntity, Struc
     return SapODataConstants.Annotation.schema(recordName, expressionSchema, annotationsSchema);
   }
 
-  private
-  @Nullable
-  Schema nestedAnnotationsSchema(String annotationName, Map<String, OData4Annotation> annotations) {
+  private @Nullable Schema nestedAnnotationsSchema(String annotationName, Map<String, OData4Annotation> annotations) {
     if (annotations.isEmpty()) {
       return null;
     }
@@ -224,9 +222,7 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntity, Struc
     return Schema.recordOf(annotationName + "-nested-annotations", fields);
   }
 
-  private
-  @Nullable
-  Schema expressionToFieldSchema(String fieldName, CsdlExpression expression) {
+  private @Nullable Schema expressionToFieldSchema(String fieldName, CsdlExpression expression) {
     if (expression == null) {
       return null;
     }
@@ -354,6 +350,7 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntity, Struc
 
     return Schema.recordOf(fieldName + "-property-values", fields);
   }
+
   private Schema propertyToSchema(PropertyMetadata propertyMetadata) {
     Schema schema = propertyTypeToSchema(propertyMetadata);
     return propertyMetadata.isCollection() ? Schema.arrayOf(schema) : schema;
@@ -361,7 +358,7 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntity, Struc
 
   private Schema propertyTypeToSchema(PropertyMetadata propertyMetadata) {
     if (propertyMetadata.isComplex()) {
-      return convertComplexProperty((ComplexPropertyMetadata) propertyMetadata);
+      return convertComplexProperty(propertyMetadata.getName(), (ComplexPropertyMetadata) propertyMetadata);
     }
     if (propertyMetadata.isEnum()) {
       return Schema.of(Schema.Type.STRING);
@@ -467,10 +464,10 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntity, Struc
     }
   }
 
-  private Schema convertComplexProperty(ComplexPropertyMetadata propertyMetadata) {
+  private Schema convertComplexProperty(String name, ComplexPropertyMetadata propertyMetadata) {
     List<Schema.Field> fields = propertyMetadata.getProperties().stream()
       .map(p -> Schema.Field.of(p.getName(), propertyToSchema(p)))
       .collect(Collectors.toList());
-    return Schema.recordOf(propertyMetadata.getName() + "-complex-type-values", fields);
+    return Schema.recordOf(name + "-complex-type-values", fields);
   }
 }

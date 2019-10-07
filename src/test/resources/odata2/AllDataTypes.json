@@ -22,7 +22,13 @@
         "String": "Some string",
         "Time": "PT11H10M59S",
         "DateTime": "1984-12-08T01:01:01",
-        "DateTimeOffset": "2002-10-10T17:00:01+01:00"
+        "DateTimeOffset": "2002-10-10T17:00:01+01:00",
+        "Address": {"Address":"187 Suffolk Ln.","City":{"CountryRegion":"United States","Name":"Boise","Region":"ID"}},
+        "HomeAddress": {
+          "Address":"187 Suffolk Ln.",
+          "City":{"CountryRegion":"United States","Name":"Boise","Region":"ID"},
+          "FamilyName": "Test"
+        }
       },
       {
         "__metadata": {
@@ -45,7 +51,13 @@
         "String": "Some string",
         "Time": "PT11H10M59S",
         "DateTime": "1984-12-08T01:01:01",
-        "DateTimeOffset": "2002-10-10T17:00:01+01:00"
+        "DateTimeOffset": "2002-10-10T17:00:01+01:00",
+        "Address": {"Address":"187 Suffolk Ln.","City":{"CountryRegion":"United States","Name":"Boise","Region":"ID"}},
+        "HomeAddress": {
+          "Address":"187 Suffolk Ln.",
+          "City":{"CountryRegion":"United States","Name":"Boise","Region":"ID"},
+          "FamilyName": "Test"
+        }
       },
       {
         "__metadata": {
@@ -68,7 +80,13 @@
         "String": "Some string",
         "Time": "PT11H10M59S",
         "DateTime": "1984-12-08T01:01:01",
-        "DateTimeOffset": "2002-10-10T17:00:01+01:00"
+        "DateTimeOffset": "2002-10-10T17:00:01+01:00",
+        "Address": {"Address":"187 Suffolk Ln.","City":{"CountryRegion":"United States","Name":"Boise","Region":"ID"}},
+        "HomeAddress": {
+          "Address":"187 Suffolk Ln.",
+          "City":{"CountryRegion":"United States","Name":"Boise","Region":"ID"},
+          "FamilyName": "Test"
+        }
       }
     ]
   }

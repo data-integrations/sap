@@ -278,7 +278,6 @@
           <NavigationPropertyBinding Path="Parent" Target="People"/>
         </EntitySet>
       </EntityContainer>
-      <!--todo also use alias: self-->
       <Annotations Target="TestService.AllDataTypesEntity/Targeted">
         <Annotation Term="Measures.ISOCurrency" String="USD"/>
         <Annotation Term="Core.Description" String="Property annotated with External Targeting"/>

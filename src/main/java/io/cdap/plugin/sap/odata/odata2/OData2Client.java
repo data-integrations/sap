@@ -17,13 +17,11 @@
 package io.cdap.plugin.sap.odata.odata2;
 
 import io.cdap.plugin.sap.odata.EntityType;
-import io.cdap.plugin.sap.odata.ODataAnnotation;
 import io.cdap.plugin.sap.odata.ODataClient;
 import io.cdap.plugin.sap.odata.ODataEntity;
 import io.cdap.plugin.sap.odata.PropertyMetadata;
 import io.cdap.plugin.sap.odata.exception.ODataException;
 import org.apache.olingo.odata2.api.edm.Edm;
-import org.apache.olingo.odata2.api.edm.EdmAnnotationAttribute;
 import org.apache.olingo.odata2.api.edm.EdmEntitySet;
 import org.apache.olingo.odata2.api.edm.EdmEntityType;
 import org.apache.olingo.odata2.api.edm.EdmException;
@@ -43,7 +41,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.core.HttpHeaders;
@@ -113,27 +110,14 @@ public class OData2Client extends ODataClient {
       List<PropertyMetadata> properties = new ArrayList<>();
       for (String propertyName : edmEntityType.getPropertyNames()) {
         EdmProperty property = (EdmProperty) edmEntityType.getProperty(propertyName);
-        properties.add(edmToProperty(property));
+        PropertyMetadata propertyMetadata = PropertyMetadata.valueOf(property);
+        properties.add(propertyMetadata);
       }
 
       return new EntityType(edmEntityType.getName(), properties);
     } catch (EdmException e) {
       throw new ODataException("Unable to get entity set type: " + e.getMessage(), e);
     }
-  }
-
-  private PropertyMetadata edmToProperty(EdmProperty property) throws EdmException {
-    String type = property.getType().getName();
-    boolean nullable = property.getFacets().isNullable();
-    Integer precision = property.getFacets().getPrecision();
-    Integer scale = property.getFacets().getScale();
-    List<EdmAnnotationAttribute> annotationAttributes = property.getAnnotations().getAnnotationAttributes();
-    List<ODataAnnotation> annotations = annotationAttributes == null ? null : annotationAttributes.stream()
-      .map(a -> new OData2Annotation(a.getName(), a.getText()))
-      .collect(Collectors.toList());
-
-    // todo is collection?
-    return new PropertyMetadata(property.getName(), type, false, nullable, precision, scale, annotations);
   }
 
   private void initMetadata() {

@@ -16,13 +16,22 @@
 
 package io.cdap.plugin.sap.odata;
 
+import io.cdap.plugin.sap.odata.odata2.OData2Annotation;
+import io.cdap.plugin.sap.odata.odata2.OData2ComplexPropertyMetadata;
 import io.cdap.plugin.sap.odata.odata4.OData4Annotation;
+import io.cdap.plugin.sap.odata.odata4.OData4ComplexPropertyMetadata;
 import org.apache.olingo.commons.api.edm.provider.CsdlAnnotation;
 import org.apache.olingo.commons.api.edm.provider.CsdlComplexType;
 import org.apache.olingo.commons.api.edm.provider.CsdlEnumType;
 import org.apache.olingo.commons.api.edm.provider.CsdlProperty;
 import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
 import org.apache.olingo.commons.api.edm.provider.CsdlTypeDefinition;
+import org.apache.olingo.odata2.api.edm.EdmAnnotationAttribute;
+import org.apache.olingo.odata2.api.edm.EdmComplexType;
+import org.apache.olingo.odata2.api.edm.EdmException;
+import org.apache.olingo.odata2.api.edm.EdmProperty;
+import org.apache.olingo.odata2.api.edm.EdmType;
+import org.apache.olingo.odata2.api.edm.EdmTypeKind;
 
 import java.util.Collections;
 import java.util.List;
@@ -39,14 +48,13 @@ public class PropertyMetadata {
   private final String type;
   private final boolean isNullable;
   private final boolean isCollection;
+  private final List<ODataAnnotation> annotations;
 
   @Nullable
   private final Integer precision;
 
   @Nullable
   private final Integer scale;
-
-  protected List<ODataAnnotation> annotations;
 
   public PropertyMetadata(String name, String type, boolean isCollection, boolean isNullable, Integer precision,
                           Integer scale, List<ODataAnnotation> annotations) {
@@ -57,6 +65,25 @@ public class PropertyMetadata {
     this.precision = precision;
     this.scale = scale;
     this.annotations = annotations;
+  }
+
+  public static PropertyMetadata valueOf(EdmProperty property) throws EdmException {
+    boolean nullable = property.getFacets().isNullable();
+    Integer precision = property.getFacets().getPrecision();
+    Integer scale = property.getFacets().getScale();
+    List<EdmAnnotationAttribute> annotationAttributes = property.getAnnotations().getAnnotationAttributes();
+    List<ODataAnnotation> annotations = annotationAttributes == null ? null : annotationAttributes.stream()
+      .map(a -> new OData2Annotation(a.getName(), a.getText()))
+      .collect(Collectors.toList());
+
+    EdmType type = property.getType();
+    if (type.getKind() == EdmTypeKind.COMPLEX) {
+      EdmComplexType complexType = ((EdmComplexType) property.getType());
+      return new OData2ComplexPropertyMetadata(property.getName(), type.getName(), false, nullable,
+                                               precision, scale, annotations, complexType);
+    }
+
+    return new PropertyMetadata(property.getName(), type.getName(), false, nullable, precision, scale, annotations);
   }
 
   public static PropertyMetadata valueOf(CsdlSchema schema, CsdlProperty property,
@@ -75,8 +102,8 @@ public class PropertyMetadata {
     String simplePropertyName = property.getTypeAsFQNObject().getName();
     CsdlComplexType complexType = schema.getComplexType(simplePropertyName);
     if (complexType != null) {
-      return new ComplexPropertyMetadata(name, type, isCollection, isNullable, precision, scale, annotations, schema,
-                                         complexType);
+      return new OData4ComplexPropertyMetadata(name, type, isCollection, isNullable, precision, scale, annotations,
+                                               schema, complexType);
     }
 
     CsdlTypeDefinition typeDefinition = schema.getTypeDefinition(simplePropertyName);

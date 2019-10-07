@@ -189,13 +189,13 @@ public class ODataEntryToRecordTransformer {
 
   private StructuredRecord extractComplexValue(Map<String, Object> complexValue, Schema schema) {
     StructuredRecord.Builder builder = StructuredRecord.builder(schema);
-    complexValue.entrySet().forEach(e -> {
-      String fieldName = e.getKey();
-      Schema.Field field = schema.getField(fieldName);
+    schema.getFields().forEach(field -> {
+      String fieldName = field.getName();
       Schema fieldSchema = field.getSchema().isNullable() ? field.getSchema().getNonNullable() : field.getSchema();
-      Object extractedValue = extractValue(fieldName, e.getValue(), fieldSchema);
+      Object extractedValue = extractValue(fieldName, complexValue.get(fieldName), fieldSchema);
       builder.set(fieldName, extractedValue);
     });
+
     return builder.build();
   }
 
