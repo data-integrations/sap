@@ -39,7 +39,7 @@ https://www.odata.org/documentation/odata-version-3-0/url-conventions/
 **Output Schema:** Specifies the schema of the documents.
 
 
-Data Types Mapping
+OData V2 Data Types Mapping
 ----------
 
     | OData V2 Data Type              | CDAP Schema Data Type                             |
@@ -59,3 +59,35 @@ Data Types Mapping
     | Edm.String                      | string                                            |
     | Edm.Time                        | time                                              |
     | Edm.DateTimeOffset              | string formatted as 2019-08-29T14:52:08.155+02:00 |
+
+For more information, see [OData V2 Primitive Data Types].
+
+[OData V2 Primitive Data Types]:
+https://www.odata.org/documentation/odata-version-2-0/overview/
+
+
+OData V4 Data Types Mapping
+----------
+
+    | OData V4 Data Type              | CDAP Schema Data Type | Comment                                           |
+    | ------------------------------- | --------------------- | ------------------------------------------------- |
+    | Edm.Binary                      | bytes                 |                                                   |
+    | Edm.Boolean                     | boolean               |                                                   |
+    | Edm.Byte                        | int                   |                                                   |
+    | Edm.DateTimeOffset              | string                | Timestamp string in the following format:         |
+    |                                 |                       | 2019-08-29T14:52:08.155+02:00                     |
+    | Edm.Decimal                     | decimal               |                                                   |
+    | Edm.Double                      | double                |                                                   |
+    | Edm.Guid                        | string                |                                                   |
+    | Edm.Int16                       | int                   |                                                   |
+    | Edm.Int32                       | int                   |                                                   |
+    | Edm.Int64                       | long                  |                                                   |
+    | Edm.SByte                       | int                   |                                                   |
+    | Edm.Single                      | float                 |                                                   |
+    | Edm.String                      | string                |                                                   |
+
+
+For more information, see [OData V4 Primitive Data Types].
+
+[The GeoJSON Format]:
+https://tools.ietf.org/html/rfc7946

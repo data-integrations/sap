@@ -15,13 +15,13 @@
  */
 package io.cdap.plugin.sap;
 
+import io.cdap.plugin.sap.odata.ODataEntity;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.olingo.odata2.api.ep.entry.ODataEntry;
 
 import java.util.Collections;
 import java.util.List;
@@ -29,15 +29,15 @@ import java.util.List;
 /**
  * InputFormat for mapreduce job, which provides a single split of data.
  */
-public class ODataEntryInputFormat extends InputFormat {
+public class ODataEntityInputFormat extends InputFormat {
   @Override
   public List<InputSplit> getSplits(JobContext jobContext) {
     return Collections.singletonList(new NoOpSplit());
   }
 
   @Override
-  public RecordReader<NullWritable, ODataEntry> createRecordReader(
+  public RecordReader<NullWritable, ODataEntity> createRecordReader(
     InputSplit inputSplit, TaskAttemptContext taskAttemptContext) {
-    return new ODataEntryRecordReader();
+    return new ODataEntityRecordReader();
   }
 }

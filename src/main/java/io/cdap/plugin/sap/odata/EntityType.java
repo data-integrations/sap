@@ -13,19 +13,29 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package io.cdap.plugin.sap.exception;
+
+package io.cdap.plugin.sap.odata;
+
+import java.util.List;
 
 /**
- * Runtime OData execution exception thrown when there were errors during execution of OData requests.
+ * OData entity type metadata.
  */
-public class ODataException extends RuntimeException {
+public class EntityType {
 
-  public ODataException(String message) {
-    super(message);
+  private final String name;
+  private final List<PropertyMetadata> properties;
+
+  public EntityType(String name, List<PropertyMetadata> properties) {
+    this.name = name;
+    this.properties = properties;
   }
 
-  public ODataException(String message, Throwable cause) {
-    super(message, cause);
+  public String getName() {
+    return name;
   }
 
+  public List<PropertyMetadata> getProperties() {
+    return properties;
+  }
 }

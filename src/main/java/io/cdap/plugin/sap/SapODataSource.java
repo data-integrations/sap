@@ -32,15 +32,13 @@ import io.cdap.cdap.etl.api.batch.BatchSource;
 import io.cdap.cdap.etl.api.batch.BatchSourceContext;
 import io.cdap.cdap.etl.api.validation.InvalidStageException;
 import io.cdap.plugin.common.LineageRecorder;
-import io.cdap.plugin.sap.exception.ODataException;
+import io.cdap.plugin.sap.odata.EntityType;
+import io.cdap.plugin.sap.odata.GenericODataClient;
+import io.cdap.plugin.sap.odata.ODataEntity;
+import io.cdap.plugin.sap.odata.PropertyMetadata;
+import io.cdap.plugin.sap.odata.exception.ODataException;
+import io.cdap.plugin.sap.transformer.ODataEntryToRecordTransformer;
 import org.apache.hadoop.io.NullWritable;
-import org.apache.olingo.odata2.api.edm.EdmEntityType;
-import org.apache.olingo.odata2.api.edm.EdmException;
-import org.apache.olingo.odata2.api.edm.EdmProperty;
-import org.apache.olingo.odata2.api.edm.EdmTyped;
-import org.apache.olingo.odata2.api.ep.entry.ODataEntry;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,7 +48,7 @@ import java.util.stream.Collectors;
 @Plugin(type = BatchSource.PLUGIN_TYPE)
 @Name(SapODataConstants.PLUGIN_NAME)
 @Description("Read data from SAP OData service.")
-public class SapODataSource extends BatchSource<NullWritable, ODataEntry, StructuredRecord> {
+public class SapODataSource extends BatchSource<NullWritable, ODataEntity, StructuredRecord> {
 
   private final SapODataConfig config;
   private ODataEntryToRecordTransformer transformer;
@@ -66,7 +64,7 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntry, Struct
     config.validate(collector);
     try {
       // API call validation
-      new OData2Client(config.getUrl(), config.getUser(), config.getPassword())
+      new GenericODataClient(config.getUrl(), config.getUser(), config.getPassword())
         .getEntitySetType(config.getResourcePath());
     } catch (ODataException e) {
       collector.addFailure("Unable to connect to OData Service: " + e.getMessage(), null)
@@ -91,7 +89,7 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntry, Struct
     config.validate(collector);
     try {
       // API call validation
-      new OData2Client(config.getUrl(), config.getUser(), config.getPassword())
+      new GenericODataClient(config.getUrl(), config.getUser(), config.getPassword())
         .getEntitySetType(config.getResourcePath());
     } catch (ODataException e) {
       collector.addFailure("Unable to connect to OData Service: " + e.getMessage(), null)
@@ -119,39 +117,33 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntry, Struct
   }
 
   @Override
-  public void transform(KeyValue<NullWritable, ODataEntry> input, Emitter<StructuredRecord> emitter) {
-    ODataEntry entity = input.getValue();
+  public void transform(KeyValue<NullWritable, ODataEntity> input, Emitter<StructuredRecord> emitter) {
+    ODataEntity entity = input.getValue();
     emitter.emit(transformer.transform(entity));
   }
 
   public Schema getSchema() {
-    OData2Client oData2Client = new OData2Client(config.getUrl(), config.getUser(), config.getPassword());
+    GenericODataClient oDataClient = new GenericODataClient(config.getUrl(), config.getUser(), config.getPassword());
     try {
-      EdmEntityType edmEntityType = oData2Client.getEntitySetType(config.getResourcePath());
-      List<String> selectProperties = config.getSelectProperties();
-      List<Schema.Field> fields = new ArrayList<>();
-      for (String propertyName : edmEntityType.getPropertyNames()) {
-        if (!selectProperties.isEmpty() && !selectProperties.contains(propertyName)) {
-          continue;
-        }
-        EdmTyped property = edmEntityType.getProperty(propertyName);
-        fields.add(getSchemaField(property));
-      }
+      EntityType entityType = oDataClient.getEntitySetType(config.getResourcePath());
+      List<Schema.Field> fields = entityType.getProperties().stream()
+        .filter(p -> config.getSelectProperties().isEmpty() || config.getSelectProperties().contains(p.getName()))
+        .map(this::getSchemaField)
+        .collect(Collectors.toList());
       return Schema.recordOf("output", fields);
-    } catch (EdmException | ODataException e) {
+    } catch (ODataException e) {
       throw new InvalidStageException("Unable to get details about the entity type: " + e.getMessage(), e);
     }
   }
 
-  private Schema.Field getSchemaField(EdmTyped edmTyped) throws EdmException {
-    Schema nonNullableSchema = convertPropertyType(edmTyped);
-    EdmProperty property = (EdmProperty) edmTyped;
-    Schema schema = property.getFacets().isNullable() ? Schema.nullableOf(nonNullableSchema) : nonNullableSchema;
-    return Schema.Field.of(edmTyped.getName(), schema);
+  private Schema.Field getSchemaField(PropertyMetadata propertyMetadata) {
+    Schema nonNullableSchema = convertPropertyType(propertyMetadata);
+    Schema schema = propertyMetadata.isNullable() ? Schema.nullableOf(nonNullableSchema) : nonNullableSchema;
+    return Schema.Field.of(propertyMetadata.getName(), schema);
   }
 
-  private Schema convertPropertyType(EdmTyped edmTyped) throws EdmException {
-    switch (edmTyped.getType().getName()) {
+  private Schema convertPropertyType(PropertyMetadata propertyMetadata) {
+    switch (propertyMetadata.getEdmTypeName()) {
       case "Binary":
         return Schema.of(Schema.Type.BYTES);
       case "Boolean":
@@ -168,8 +160,7 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntry, Struct
       case "Time":
         return Schema.of(Schema.LogicalType.TIME_MICROS);
       case "Decimal":
-        EdmProperty property = (EdmProperty) edmTyped;
-        return Schema.decimalOf(property.getFacets().getPrecision(), property.getFacets().getScale());
+        return Schema.decimalOf(propertyMetadata.getPrecision(), propertyMetadata.getScale());
       case "Double":
         return Schema.of(Schema.Type.DOUBLE);
       case "Single":
@@ -185,9 +176,8 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntry, Struct
       case "String":
         return Schema.of(Schema.Type.STRING);
       default:
-        // this should never happen
-        throw new InvalidStageException(String.format("Field '%s' is of unsupported type '%s'.", edmTyped.getName(),
-                                                      edmTyped.getType().getName()));
+        throw new InvalidStageException(String.format("Field '%s' is of unsupported type '%s'.",
+                                                      propertyMetadata.getName(), propertyMetadata.getEdmTypeName()));
     }
   }
 }

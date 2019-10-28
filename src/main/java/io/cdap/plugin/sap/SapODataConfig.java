@@ -27,7 +27,6 @@ import io.cdap.cdap.api.plugin.PluginConfig;
 import io.cdap.cdap.etl.api.FailureCollector;
 import io.cdap.plugin.common.Constants;
 import io.cdap.plugin.common.IdUtils;
-import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -44,8 +43,6 @@ import javax.annotation.Nullable;
 public class SapODataConfig extends PluginConfig {
 
   private static final String QUESTION_MARK = "?";
-  private static final String QUERY_OPTIONS_DELIMITER = "&";
-  private static final String QUERY_OPTIONS_NAME_VALUE_DELIMITER = "=";
 
   private static final Set<Schema.Type> SUPPORTED_SIMPLE_TYPES = ImmutableSet.of(Schema.Type.BOOLEAN, Schema.Type.INT,
                                                                                  Schema.Type.FLOAT, Schema.Type.DOUBLE,

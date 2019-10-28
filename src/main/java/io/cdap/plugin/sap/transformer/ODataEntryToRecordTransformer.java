@@ -14,17 +14,21 @@
  * the License.
  */
 
-package io.cdap.plugin.sap;
+package io.cdap.plugin.sap.transformer;
 
 import io.cdap.cdap.api.data.format.StructuredRecord;
 import io.cdap.cdap.api.data.format.UnexpectedFormatException;
 import io.cdap.cdap.api.data.schema.Schema;
+import io.cdap.plugin.sap.odata.ODataEntity;
 import org.apache.olingo.odata2.api.edm.EdmLiteralKind;
 import org.apache.olingo.odata2.api.edm.EdmSimpleTypeException;
 import org.apache.olingo.odata2.api.ep.entry.ODataEntry;
 import org.apache.olingo.odata2.core.edm.EdmDateTimeOffset;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.MathContext;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -34,7 +38,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Transforms {@link ODataEntry} to {@link StructuredRecord}.
+ * Transforms {@link ODataEntity} to {@link StructuredRecord}.
  */
 public class ODataEntryToRecordTransformer {
 
@@ -47,16 +51,16 @@ public class ODataEntryToRecordTransformer {
   /**
    * Transforms given {@link ODataEntry} to {@link StructuredRecord}.
    *
-   * @param oDataEntry ODataEntry to be transformed.
-   * @return {@link StructuredRecord} that corresponds to the given {@link ODataEntry}.
+   * @param oDataEntity ODataEntity to be transformed.
+   * @return {@link StructuredRecord} that corresponds to the given {@link ODataEntity}.
    */
-  public StructuredRecord transform(ODataEntry oDataEntry) {
+  public StructuredRecord transform(ODataEntity oDataEntity) {
     StructuredRecord.Builder builder = StructuredRecord.builder(schema);
     for (Schema.Field field : schema.getFields()) {
       Schema nonNullableSchema = field.getSchema().isNullable() ?
         field.getSchema().getNonNullable() : field.getSchema();
       String fieldName = field.getName();
-      Object value = oDataEntry.getProperties().get(fieldName);
+      Object value = oDataEntity.getProperties().get(fieldName);
       builder.set(fieldName, extractValue(fieldName, value, nonNullableSchema));
     }
     return builder.build();
@@ -78,24 +82,21 @@ public class ODataEntryToRecordTransformer {
     if (fieldLogicalType != null) {
       switch (fieldLogicalType) {
         case TIMESTAMP_MILLIS:
-          // Edm.DateTime
-          ensureTypeValid(fieldName, value, GregorianCalendar.class);
-          return extractTimestampMillis((GregorianCalendar) value);
+          ensureTypeValid(fieldName, value, Calendar.class, Timestamp.class);
+          return extractTimestampMillis(value);
         case TIMESTAMP_MICROS:
-          // Edm.DateTime
-          ensureTypeValid(fieldName, value, GregorianCalendar.class);
-          return extractTimestampMicros((GregorianCalendar) value);
+          ensureTypeValid(fieldName, value, Calendar.class, Timestamp.class);
+          return extractTimestampMicros(value);
         case TIME_MILLIS:
-          // Edm.Time
-          ensureTypeValid(fieldName, value, GregorianCalendar.class);
-          return extractTimeMillis((GregorianCalendar) value);
+          ensureTypeValid(fieldName, value, GregorianCalendar.class, Timestamp.class);
+          return extractTimeMillis(value);
         case TIME_MICROS:
-          // Edm.Time
-          ensureTypeValid(fieldName, value, GregorianCalendar.class);
-          return extractTimeMicros((GregorianCalendar) value);
+          ensureTypeValid(fieldName, value, GregorianCalendar.class, Timestamp.class);
+          return extractTimeMicros(value);
         case DECIMAL:
-          ensureTypeValid(fieldName, value, BigDecimal.class);
-          return extractDecimal(fieldName, (BigDecimal) value, schema);
+          ensureTypeValid(fieldName, value, BigDecimal.class, BigInteger.class, Double.class, Float.class, Byte.class,
+                          Short.class, Integer.class, Long.class);
+          return extractDecimal(fieldName, value, schema);
         default:
           throw new UnexpectedFormatException(String.format("Field '%s' is of unsupported type '%s'", fieldName,
                                                             fieldLogicalType.getToken()));
@@ -105,34 +106,30 @@ public class ODataEntryToRecordTransformer {
     Schema.Type fieldType = schema.getType();
     switch (fieldType) {
       case BOOLEAN:
-        // Edm.Boolean
         ensureTypeValid(fieldName, value, Boolean.class);
         return value;
       case INT:
-        // Edm.Byte, Edm.Int16, Edm.Int32, Edm.SByte
-        ensureTypeValid(fieldName, value, Short.class, Byte.class, Integer.class);
+        ensureTypeValid(fieldName, value, Short.class, Byte.class, Integer.class, Long.class, BigInteger.class);
         return ((Number) value).intValue();
       case FLOAT:
-        // Edm.Single
-        ensureTypeValid(fieldName, value, Float.class);
-        return value;
+        ensureTypeValid(fieldName, value, Float.class, Double.class, BigDecimal.class, Byte.class, Short.class,
+                        Integer.class, Long.class);
+        return ((Number) value).floatValue();
       case DOUBLE:
-        // Edm.Double
-        ensureTypeValid(fieldName, value, Double.class);
-        return value;
+        ensureTypeValid(fieldName, value, Double.class, Float.class, BigDecimal.class, Byte.class, Short.class,
+                        Integer.class, Long.class);
+        return ((Number) value).doubleValue();
       case BYTES:
-        // Edm.Binary
         ensureTypeValid(fieldName, value, byte[].class);
         return value;
       case LONG:
-        // Edm.Int64
-        ensureTypeValid(fieldName, value, Long.class);
-        return value;
+        ensureTypeValid(fieldName, value, Long.class, Byte.class, Short.class, Integer.class, BigInteger.class);
+        return ((Number) value).longValue();
       case STRING:
-        // Edm.String, Edm.Guid, Edm.DateTimeOffset
-        ensureTypeValid(fieldName, value, String.class, UUID.class, Calendar.class);
-        if (value instanceof Calendar) {
-          return extractDateTimeOffset(fieldName, (Calendar) value);
+        ensureTypeValid(fieldName, value, String.class, UUID.class, Calendar.class, Timestamp.class, BigDecimal.class);
+        if (value instanceof Calendar || value instanceof Timestamp) {
+          // Olingo V4 uses Timestamp for 'Edm.DateTimeOffset'
+          return extractDateTimeOffset(fieldName, value);
         }
         return value.toString();
       default:
@@ -141,39 +138,44 @@ public class ODataEntryToRecordTransformer {
     }
   }
 
-  private String extractDateTimeOffset(String fieldName, Calendar value) {
+  private String extractDateTimeOffset(String fieldName, Object value) {
     try {
       return EdmDateTimeOffset.getInstance().valueToString(value, EdmLiteralKind.DEFAULT, null);
     } catch (EdmSimpleTypeException e) {
-      throw new UnexpectedFormatException(String.format("Unsupported value for '%s' field: '%s'", fieldName, value));
+      throw new UnexpectedFormatException(String.format("Unsupported value for '%s' field: '%s'", fieldName, value), e);
     }
   }
 
-  private int extractTimeMillis(GregorianCalendar value) {
-    long nanos = value.toZonedDateTime().toLocalTime().toNanoOfDay();
+  private int extractTimeMillis(Object value) {
+    long nanos = value instanceof GregorianCalendar
+      ? ((GregorianCalendar) value).toZonedDateTime().toLocalTime().toNanoOfDay()
+      : ((Timestamp) value).toLocalDateTime().toLocalTime().toNanoOfDay();
     return Math.toIntExact(TimeUnit.NANOSECONDS.toMillis(nanos));
   }
 
-  private long extractTimeMicros(GregorianCalendar value) {
-    long nanos = value.toZonedDateTime().toLocalTime().toNanoOfDay();
+  private long extractTimeMicros(Object value) {
+    long nanos = value instanceof GregorianCalendar
+      ? ((GregorianCalendar) value).toZonedDateTime().toLocalTime().toNanoOfDay()
+      : ((Timestamp) value).toLocalDateTime().toLocalTime().toNanoOfDay();
     return TimeUnit.NANOSECONDS.toMicros(nanos);
   }
 
-  private long extractTimestampMillis(Calendar value) {
-    Instant instant = value.toInstant();
+  private long extractTimestampMillis(Object value) {
+    Instant instant = value instanceof Calendar ? ((Calendar) value).toInstant() : ((Timestamp) value).toInstant();
     long millis = TimeUnit.SECONDS.toMillis(instant.getEpochSecond());
     return Math.addExact(millis, TimeUnit.NANOSECONDS.toMillis(instant.getNano()));
   }
 
-  private long extractTimestampMicros(Calendar value) {
-    Instant instant = value.toInstant();
+  private long extractTimestampMicros(Object value) {
+    Instant instant = value instanceof Calendar ? ((Calendar) value).toInstant() : ((Timestamp) value).toInstant();
     long micros = TimeUnit.SECONDS.toMicros(instant.getEpochSecond());
     return Math.addExact(micros, TimeUnit.NANOSECONDS.toMicros(instant.getNano()));
   }
 
-  private byte[] extractDecimal(String fieldName, BigDecimal decimal, Schema schema) {
+  private byte[] extractDecimal(String fieldName, Object value, Schema schema) {
     int schemaPrecision = schema.getPrecision();
     int schemaScale = schema.getScale();
+    BigDecimal decimal = extractBigDecimal(value, schema);
     if (decimal.precision() > schemaPrecision) {
       throw new UnexpectedFormatException(
         String.format("Field '%s' has precision '%s' which is higher than schema precision '%s'.",
@@ -189,6 +191,40 @@ public class ODataEntryToRecordTransformer {
     return decimal.setScale(schemaScale).unscaledValue().toByteArray();
   }
 
+  /**
+   * Extracts {@link BigDecimal} value of 'EDM.Decimal' since EDM.Decimal can be represented by multiple Java types
+   * in Olingo V4: {@link BigDecimal}, {@link BigInteger}, {@link Double}, {@link Float}, {@link Byte}, {@link Short},
+   * {@link Integer}, {@link Long}.
+   *
+   * For more information see:
+   * <a href="https://olingo.apache.org/javadoc/odata4/org/apache/olingo/commons/api/edm/EdmPrimitiveType.html">
+   *   EdmPrimitiveType
+   * </a>
+   *
+   * @param value 'EDM.Decimal' value of one of the following Java types {@link BigDecimal}, {@link BigInteger},
+   * {@link Double}, {@link Float}, {@link Byte}, {@link Short}, {@link Integer}, {@link Long}.
+   * @param schema field schema.
+   * @return {@link BigDecimal} representation of the provided 'EDM.Decimal' value.
+   */
+  private BigDecimal extractBigDecimal(Object value, Schema schema) {
+    if (value instanceof BigDecimal) {
+      return (BigDecimal) value;
+    }
+    if (value instanceof BigInteger) {
+      return new BigDecimal((BigInteger) value);
+    }
+    if (value instanceof Double || value instanceof Float) {
+      double doubleValue = ((Number) value).doubleValue();
+      int precision = schema.getPrecision();
+      int scale = schema.getScale();
+      return new BigDecimal(doubleValue, new MathContext(precision)).setScale(scale, BigDecimal.ROUND_HALF_EVEN);
+    }
+
+    // Byte, Short, Integer, Long
+    long longValue = ((Number) value).longValue();
+    return new BigDecimal(longValue);
+  }
+
   private void ensureTypeValid(String fieldName, Object value, Class... expectedTypes) {
     for (Class expectedType : expectedTypes) {
       if (expectedType.isInstance(value)) {
@@ -200,7 +236,7 @@ public class ODataEntryToRecordTransformer {
       .map(Class::getName)
       .collect(Collectors.joining(", "));
     throw new UnexpectedFormatException(
-      String.format("Document field '%s' is expected to be of type '%s', but found a '%s'.", fieldName,
+      String.format("SAP field '%s' is expected to be of type '%s', but found a '%s'.", fieldName,
                     expectedTypeNames, value.getClass().getSimpleName()));
   }
 }

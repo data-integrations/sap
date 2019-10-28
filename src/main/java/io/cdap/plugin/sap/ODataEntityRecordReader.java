@@ -17,26 +17,26 @@ package io.cdap.plugin.sap;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.cdap.plugin.sap.odata.GenericODataClient;
+import io.cdap.plugin.sap.odata.ODataEntity;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.olingo.odata2.api.ep.entry.ODataEntry;
-import org.apache.olingo.odata2.api.ep.feed.ODataFeed;
 
 import java.io.IOException;
 import java.util.Iterator;
 
 /**
- * RecordReader implementation, which reads OData v2 entries.
+ * RecordReader implementation, which reads OData entries
  */
-public class ODataEntryRecordReader extends RecordReader<NullWritable, ODataEntry> {
+public class ODataEntityRecordReader extends RecordReader<NullWritable, ODataEntity> {
 
   private static final Gson gson = new GsonBuilder().create();
 
-  private Iterator<ODataEntry> iterator;
-  private ODataEntry value;
+  private Iterator<ODataEntity> iterator;
+  private ODataEntity value;
 
   /**
    * Initialize an iterator and config.
@@ -50,9 +50,8 @@ public class ODataEntryRecordReader extends RecordReader<NullWritable, ODataEntr
     String configJson = conf.get(ODataEntryInputFormatProvider.PROPERTY_CONFIG_JSON);
     SapODataConfig config = gson.fromJson(configJson, SapODataConfig.class);
 
-    OData2Client oData2Client = new OData2Client(config.getUrl(), config.getUser(), config.getPassword());
-    ODataFeed feed = oData2Client.queryEntitySet(config.getResourcePath(), config.getQuery());
-    iterator = feed.getEntries().iterator();
+    GenericODataClient client = new GenericODataClient(config.getUrl(), config.getUser(), config.getPassword());
+    iterator = client.queryEntitySet(config.getResourcePath(), config.getQuery());
   }
 
   @Override
@@ -70,7 +69,7 @@ public class ODataEntryRecordReader extends RecordReader<NullWritable, ODataEntr
   }
 
   @Override
-  public ODataEntry getCurrentValue() {
+  public ODataEntity getCurrentValue() {
     return value;
   }
 
