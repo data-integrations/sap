@@ -47,7 +47,8 @@ public class SapODataConfig extends PluginConfig {
   private static final Set<Schema.Type> SUPPORTED_SIMPLE_TYPES = ImmutableSet.of(Schema.Type.BOOLEAN, Schema.Type.INT,
                                                                                  Schema.Type.FLOAT, Schema.Type.DOUBLE,
                                                                                  Schema.Type.BYTES, Schema.Type.LONG,
-                                                                                 Schema.Type.STRING);
+                                                                                 Schema.Type.STRING, Schema.Type.ARRAY,
+                                                                                 Schema.Type.RECORD);
 
   private static final Set<Schema.LogicalType> SUPPORTED_LOGICAL_TYPES = ImmutableSet.of(
     Schema.LogicalType.DECIMAL, Schema.LogicalType.TIMESTAMP_MILLIS, Schema.LogicalType.TIMESTAMP_MICROS,
@@ -179,7 +180,7 @@ public class SapODataConfig extends PluginConfig {
     try {
       return schema == null ? null : Schema.parseJson(schema);
     } catch (IOException e) {
-      // this should not happen, since schema string comes from UI
+      // this should not happen, since SCHEMA string comes from UI
       throw Throwables.propagate(e);
     }
   }
@@ -230,6 +231,10 @@ public class SapODataConfig extends PluginConfig {
       Schema nonNullableSchema = field.getSchema().isNullable() ?
         field.getSchema().getNonNullable() : field.getSchema();
       Schema.Type type = nonNullableSchema.getType();
+      if (type == Schema.Type.RECORD) {
+        // validate record SCHEMA recursively
+        validateSchema(nonNullableSchema, collector);
+      }
       Schema.LogicalType logicalType = nonNullableSchema.getLogicalType();
       if (!SUPPORTED_SIMPLE_TYPES.contains(type) && !SUPPORTED_LOGICAL_TYPES.contains(logicalType)) {
         String supportedTypeNames = Stream.concat(

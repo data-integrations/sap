@@ -19,7 +19,20 @@ package io.cdap.plugin.sap.transformer;
 import io.cdap.cdap.api.data.format.StructuredRecord;
 import io.cdap.cdap.api.data.format.UnexpectedFormatException;
 import io.cdap.cdap.api.data.schema.Schema;
+import io.cdap.plugin.sap.SapODataConstants;
 import io.cdap.plugin.sap.odata.ODataEntity;
+import io.cdap.plugin.sap.odata.StreamProperty;
+import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
+import org.apache.olingo.commons.api.edm.geo.ComposedGeospatial;
+import org.apache.olingo.commons.api.edm.geo.Geospatial;
+import org.apache.olingo.commons.api.edm.geo.GeospatialCollection;
+import org.apache.olingo.commons.api.edm.geo.LineString;
+import org.apache.olingo.commons.api.edm.geo.MultiLineString;
+import org.apache.olingo.commons.api.edm.geo.MultiPoint;
+import org.apache.olingo.commons.api.edm.geo.MultiPolygon;
+import org.apache.olingo.commons.api.edm.geo.Point;
+import org.apache.olingo.commons.api.edm.geo.Polygon;
+import org.apache.olingo.commons.core.edm.primitivetype.EdmDuration;
 import org.apache.olingo.odata2.api.edm.EdmLiteralKind;
 import org.apache.olingo.odata2.api.edm.EdmSimpleTypeException;
 import org.apache.olingo.odata2.api.ep.entry.ODataEntry;
@@ -30,8 +43,11 @@ import java.math.BigInteger;
 import java.math.MathContext;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -131,11 +147,179 @@ public class ODataEntryToRecordTransformer {
           // Olingo V4 uses Timestamp for 'Edm.DateTimeOffset'
           return extractDateTimeOffset(fieldName, value);
         }
+        if (value instanceof BigDecimal) {
+          return extractDuration(fieldName, (BigDecimal) value);
+        }
         return value.toString();
+      case RECORD:
+        ensureTypeValid(fieldName, value, Geospatial.class, StreamProperty.class);
+        if (value instanceof StreamProperty) {
+          return extractStream((StreamProperty) value);
+        }
+        return extractGeospatial(fieldName, (Geospatial) value);
       default:
         throw new UnexpectedFormatException(String.format("Field '%s' is of unsupported type '%s'", fieldName,
                                                           fieldType.name().toLowerCase()));
     }
+  }
+
+  private StructuredRecord extractStream(StreamProperty streamProperty) {
+    return StructuredRecord.builder(SapODataConstants.Stream.SCHEMA)
+      .set(SapODataConstants.Stream.ETAG_FIELD_NAME, streamProperty.getMediaEtag())
+      .set(SapODataConstants.Stream.CONTENT_TYPE_FIELD_NAME, streamProperty.getMediaContentType())
+      .set(SapODataConstants.Stream.READ_LINK_FIELD_NAME, streamProperty.getMediaReadLink())
+      .set(SapODataConstants.Stream.EDIT_LINK_FIELD_NAME, streamProperty.getMediaEditLink())
+      .build();
+  }
+
+  private StructuredRecord extractGeospatial(String fieldName, Geospatial geospatial) {
+    Geospatial.Type geoType = geospatial.getGeoType();
+    switch (geoType) {
+      case POINT:
+        return extractPoint((Point) geospatial);
+      case LINESTRING:
+        return extractLineString((LineString) geospatial);
+      case POLYGON:
+        return extractPolygon((Polygon) geospatial);
+      case MULTIPOINT:
+        return extractMultiPoint((MultiPoint) geospatial);
+      case MULTILINESTRING:
+        return extractMultiLineString((MultiLineString) geospatial);
+      case MULTIPOLYGON:
+        return extractMultiPolygon((MultiPolygon) geospatial);
+      case GEOSPATIALCOLLECTION:
+        return extractGeospatialCollectionRecord(fieldName, (GeospatialCollection) geospatial);
+      default:
+        // this should never happen
+        throw new UnexpectedFormatException(String.format("Field '%s' is of unsupported geospatial type '%s'.",
+                                                          fieldName, geoType));
+    }
+  }
+
+  private StructuredRecord extractGeospatialCollectionRecord(String fieldName, GeospatialCollection collection) {
+    List<StructuredRecord> points = new ArrayList<>();
+    List<StructuredRecord> lineStrings = new ArrayList<>();
+    List<StructuredRecord> polygons = new ArrayList<>();
+    List<StructuredRecord> multiPoints = new ArrayList<>();
+    List<StructuredRecord> multiLineStrings = new ArrayList<>();
+    List<StructuredRecord> multiPolygons = new ArrayList<>();
+    collection.iterator().forEachRemaining(g -> {
+      switch (g.getGeoType()) {
+        case POINT:
+          points.add(extractGeospatial(fieldName, g));
+          break;
+        case LINESTRING:
+          lineStrings.add(extractGeospatial(fieldName, g));
+          break;
+        case POLYGON:
+          polygons.add(extractGeospatial(fieldName, g));
+          break;
+        case MULTIPOINT:
+          multiPoints.add(extractGeospatial(fieldName, g));
+          break;
+        case MULTILINESTRING:
+          multiLineStrings.add(extractGeospatial(fieldName, g));
+          break;
+        case MULTIPOLYGON:
+          multiPolygons.add(extractGeospatial(fieldName, g));
+          break;
+      }
+    });
+
+    return StructuredRecord.builder(SapODataConstants.GeospatialCollection.SCHEMA)
+      .set(SapODataConstants.GeospatialCollection.TYPE_FIELD_NAME, "GeometryCollection")
+      .set(SapODataConstants.GeospatialCollection.DIMENSION_FIELD_NAME, collection.getDimension().name())
+      .set(SapODataConstants.GeospatialCollection.POINTS_FIELD_NAME, points)
+      .set(SapODataConstants.GeospatialCollection.LINE_STRINGS_FIELD_NAME, lineStrings)
+      .set(SapODataConstants.GeospatialCollection.POLYGONS_FIELD_NAME, polygons)
+      .set(SapODataConstants.GeospatialCollection.MULTI_POINTS_FIELD_NAME, multiPoints)
+      .set(SapODataConstants.GeospatialCollection.MULTI_LINE_STRINGS_FIELD_NAME, multiLineStrings)
+      .set(SapODataConstants.GeospatialCollection.MULTI_POLYGONS_FIELD_NAME, multiPolygons)
+      .build();
+  }
+
+  private StructuredRecord extractPoint(Point point) {
+    return StructuredRecord.builder(SapODataConstants.Point.SCHEMA)
+      .set(SapODataConstants.Point.DIMENSION_FIELD_NAME, point.getDimension().name())
+      .set(SapODataConstants.Point.X_FIELD_NAME, point.getX())
+      .set(SapODataConstants.Point.Y_FIELD_NAME, point.getY())
+      .set(SapODataConstants.Point.Z_FIELD_NAME, point.getZ())
+      .build();
+  }
+
+  private StructuredRecord extractLineString(ComposedGeospatial<Point> lineString) {
+    List<StructuredRecord> coordinates = new ArrayList<>();
+    Iterator<Point> pointIterator = lineString.iterator();
+    if (pointIterator != null) {
+      pointIterator.forEachRemaining(p -> coordinates.add(extractPoint(p)));
+    }
+    // "LineString" and "MultiPoint" schemas are the same. Type name is required to distinguish them
+    return StructuredRecord.builder(SapODataConstants.LineString.SCHEMA)
+      .set(SapODataConstants.LineString.TYPE_FIELD_NAME, "LineString")
+      .set(SapODataConstants.LineString.DIMENSION_FIELD_NAME, lineString.getDimension().name())
+      .set(SapODataConstants.LineString.COORDINATES_FIELD_NAME, coordinates)
+      .build();
+  }
+
+  private StructuredRecord extractPolygon(Polygon polygon) {
+    List<StructuredRecord> exterior = new ArrayList<>();
+    if (polygon.getExterior() != null && polygon.getExterior().iterator() != null) {
+      polygon.getExterior().iterator().forEachRemaining(point -> exterior.add(extractPoint(point)));
+    }
+    List<StructuredRecord> interior = new ArrayList<>();
+    for (int i = 0; i < polygon.getNumberOfInteriorRings(); i++) {
+      interior.add(extractLineString(polygon.getInterior(i)));
+    }
+
+    return StructuredRecord.builder(SapODataConstants.Polygon.SCHEMA)
+      .set(SapODataConstants.Polygon.TYPE_FIELD_NAME, "Polygon")
+      .set(SapODataConstants.Polygon.DIMENSION_FIELD_NAME, polygon.getDimension().name())
+      .set(SapODataConstants.Polygon.EXTERIOR_FIELD_NAME, exterior)
+      .set(SapODataConstants.Polygon.INTERIOR_FIELD_NAME, interior)
+      .set(SapODataConstants.Polygon.NUMBER_OF_INTERIOR_RINGS_FIELD_NAME, polygon.getNumberOfInteriorRings())
+      .build();
+  }
+
+  private StructuredRecord extractMultiPoint(MultiPoint multiPoint) {
+    List<StructuredRecord> coordinates = new ArrayList<>();
+    Iterator<Point> pointIterator = multiPoint.iterator();
+    if (pointIterator != null) {
+      pointIterator.forEachRemaining(p -> coordinates.add(extractPoint(p)));
+    }
+    // "LineString" and "MultiPoint" schemas are the same. Type name is required to distinguish them
+    return StructuredRecord.builder(SapODataConstants.MultiPoint.SCHEMA)
+      .set(SapODataConstants.MultiPoint.TYPE_FIELD_NAME, "MultiPoint")
+      .set(SapODataConstants.MultiPoint.DIMENSION_FIELD_NAME, multiPoint.getDimension().name())
+      .set(SapODataConstants.MultiPoint.COORDINATES_FIELD_NAME, coordinates)
+      .build();
+  }
+
+  private StructuredRecord extractMultiLineString(MultiLineString multiLineString) {
+    List<StructuredRecord> coordinates = new ArrayList<>();
+    Iterator<LineString> lineStringIterator = multiLineString.iterator();
+    if (lineStringIterator != null) {
+      lineStringIterator.forEachRemaining(ls -> coordinates.add(extractLineString(ls)));
+    }
+
+    return StructuredRecord.builder(SapODataConstants.MultiLineString.SCHEMA)
+      .set(SapODataConstants.MultiLineString.TYPE_FIELD_NAME, "MultiLineString")
+      .set(SapODataConstants.MultiLineString.DIMENSION_FIELD_NAME, multiLineString.getDimension().name())
+      .set(SapODataConstants.MultiLineString.COORDINATES_FIELD_NAME, coordinates)
+      .build();
+  }
+
+  private StructuredRecord extractMultiPolygon(MultiPolygon multiPolygon) {
+    List<StructuredRecord> coordinates = new ArrayList<>();
+    Iterator<Polygon> polygonIterator = multiPolygon.iterator();
+    if (polygonIterator != null) {
+      polygonIterator.forEachRemaining(polygon -> coordinates.add(extractPolygon(polygon)));
+    }
+
+    return StructuredRecord.builder(SapODataConstants.MultiPolygon.SCHEMA)
+      .set(SapODataConstants.MultiPolygon.TYPE_FIELD_NAME, "MultiPolygon")
+      .set(SapODataConstants.MultiPolygon.DIMENSION_FIELD_NAME, multiPolygon.getDimension().name())
+      .set(SapODataConstants.MultiPolygon.COORDINATES_FIELD_NAME, coordinates)
+      .build();
   }
 
   private String extractDateTimeOffset(String fieldName, Object value) {
@@ -143,6 +327,17 @@ public class ODataEntryToRecordTransformer {
       return EdmDateTimeOffset.getInstance().valueToString(value, EdmLiteralKind.DEFAULT, null);
     } catch (EdmSimpleTypeException e) {
       throw new UnexpectedFormatException(String.format("Unsupported value for '%s' field: '%s'", fieldName, value), e);
+    }
+  }
+
+  private String extractDuration(String fieldName, BigDecimal decimal) {
+    try {
+      int precision = decimal.precision();
+      int scale = decimal.scale();
+      return EdmDuration.getInstance().valueToString(decimal, true, null, precision, scale, true);
+    } catch (EdmPrimitiveTypeException e) {
+      String errorMessage = String.format("Unsupported value for '%s' field: '%s'", fieldName, decimal);
+      throw new UnexpectedFormatException(errorMessage, e);
     }
   }
 
@@ -195,14 +390,14 @@ public class ODataEntryToRecordTransformer {
    * Extracts {@link BigDecimal} value of 'EDM.Decimal' since EDM.Decimal can be represented by multiple Java types
    * in Olingo V4: {@link BigDecimal}, {@link BigInteger}, {@link Double}, {@link Float}, {@link Byte}, {@link Short},
    * {@link Integer}, {@link Long}.
-   *
+   * <p>
    * For more information see:
    * <a href="https://olingo.apache.org/javadoc/odata4/org/apache/olingo/commons/api/edm/EdmPrimitiveType.html">
-   *   EdmPrimitiveType
+   * EdmPrimitiveType
    * </a>
    *
-   * @param value 'EDM.Decimal' value of one of the following Java types {@link BigDecimal}, {@link BigInteger},
-   * {@link Double}, {@link Float}, {@link Byte}, {@link Short}, {@link Integer}, {@link Long}.
+   * @param value  'EDM.Decimal' value of one of the following Java types {@link BigDecimal}, {@link BigInteger},
+   *               {@link Double}, {@link Float}, {@link Byte}, {@link Short}, {@link Integer}, {@link Long}.
    * @param schema field schema.
    * @return {@link BigDecimal} representation of the provided 'EDM.Decimal' value.
    */
