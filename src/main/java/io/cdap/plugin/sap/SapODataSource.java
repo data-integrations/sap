@@ -211,7 +211,8 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntity, Struc
     return SapODataConstants.Annotation.schema(recordName, expressionSchema, annotationsSchema);
   }
 
-  private @Nullable Schema nestedAnnotationsSchema(String annotationName, Map<String, OData4Annotation> annotations) {
+  @Nullable
+  private Schema nestedAnnotationsSchema(String annotationName, Map<String, OData4Annotation> annotations) {
     if (annotations.isEmpty()) {
       return null;
     }
@@ -222,7 +223,8 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntity, Struc
     return Schema.recordOf(annotationName + "-nested-annotations", fields);
   }
 
-  private @Nullable Schema expressionToFieldSchema(String fieldName, CsdlExpression expression) {
+  @Nullable
+  private Schema expressionToFieldSchema(String fieldName, CsdlExpression expression) {
     if (expression == null) {
       return null;
     }

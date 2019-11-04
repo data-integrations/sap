@@ -371,9 +371,8 @@ public class SapODataConstants {
   }
 
   /**
-   * OData 4 logical & comparison expressions mapped to CDAP record with field
-   * "{@value SapODataConstants.LogicalExpression#LEFT_FIELD_NAME}" for a left expression record,
-   * "{@value SapODataConstants.LogicalExpression#RIGHT_FIELD_NAME}" for a right expression record.
+   * OData 4 "Not" expressions mapped to CDAP record with field
+   * "{@value SapODataConstants.LogicalExpression#VALUE_FIELD_NAME}" for a value expression record.
    */
   public static class NotExpression extends ValuedExpression {
     public static Schema schema(String name, Schema value) {

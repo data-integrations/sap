@@ -33,7 +33,83 @@ see [OData URL components].
 https://www.odata.org/documentation/odata-version-3-0/url-conventions/
 
 **Include Metadata Annotations:** Whether the plugin should read SAP metadata annotations and include them to each
-record.
+record. In this case, each property mapped to a record with exactly two fields:
+- value - for OData property value.
+- metadata-annotations - metadata annotations record.
+
+OData V4 metadata annotations mapped to a record with fields that correspond to the property attributes.
+For example, for property, annotated as:
+```
+<Property Name="BuyerName" Type="Edm.String" Nullable="false" MaxLength="80" sap:label="Company"
+                  sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+```
+an entry with property value `true` will be read as the following record:
+```
+value: true
+metadata-annotations:
+  creatable: false
+  updatable: false
+  sortable: false
+  filterable: false
+```
+
+OData V4 metadata annotations mapped to a record with the following fields:
+- term - a simple identifier, such as "UI.DisplayName" or "Core.Description", etc.
+- qualifier - a term can be applied multiple times to the same model element by providing a qualifier to distinguish
+ the annotations.
+- expression - record that corresponds to a constant expression or a dynamic expression.
+- annotations - record that corresponds to nested annotations.
+
+For example, for property, annotated as:
+```
+<Property Name="RecordNestedAnnotated" Type="Edm.Boolean" Nullable="false">
+  <Annotation Term="Core.Description">
+    <Annotation Term="Core.Description" Qualifier="nested" String="Nested annotation">
+    <Record>
+      <Annotation Term="Core.Description" Qualifier="onrecord" String="Annotation on record" />
+      <PropertyValue Property="GivenName" Path="String"/>
+      <PropertyValue Property="Age" Path="Byte"/>
+    </Record>
+  </Annotation>
+</Property>
+```
+an entry with property value `true` will be read as the following record:
+```
+value: true
+metadata-annotations:
+ core_description:
+  term: "Core.Description"
+  qualifier: null
+  expression:
+    name: "Record"
+    type: null
+    propertyValues:
+      GivenName:
+        name: "Path"
+        value: "SomeProperty1"
+      Age:
+        name: "Path"
+        value: "SomeProperty2"
+    annotations:
+      onrecord_core_description:
+        term: "Core.Description"
+        qualifier: "onrecord"
+        expression:
+          name: "String"
+          value: "Annotation on record"
+  annotations:
+    nested_core_description:
+      term: "Core.Description"
+      qualifier: "nested"
+      expression:
+        name: "String"
+        value: "Nested annotation"
+```
+
+For more information, see [OData V4 Annotations].
+
+[OData V4 Annotations]:
+https://docs.oasis-open.org/odata/odata-csdl-xml/v4.01/csprd05/odata-csdl-xml-v4.01-csprd05.html#sec_Annotation
 
 **Username:** Username for basic authentication.
 
