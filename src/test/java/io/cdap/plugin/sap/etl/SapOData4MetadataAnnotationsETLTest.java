@@ -67,9 +67,9 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     List<StructuredRecord> records = getPipelineResults(properties);
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
-      StructuredRecord fieldRecord = actualRecord.get("MultipleAnnotated");
-      assertAnnotationEquals(expectedCurrency, fieldRecord, "measures_isocurrency");
-      assertAnnotationEquals(expectedDescription, fieldRecord, "core_description");
+
+      assertAnnotationEquals(expectedCurrency, actualRecord, "MultipleAnnotated", "measures_isocurrency");
+      assertAnnotationEquals(expectedDescription, actualRecord, "MultipleAnnotated", "core_description");
     }
   }
 
@@ -90,8 +90,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     List<StructuredRecord> records = getPipelineResults(properties);
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
-      StructuredRecord fieldRecord = actualRecord.get("NestedAnnotation");
-      assertAnnotationEquals(expectedCurrency, fieldRecord, "measures_isocurrency");
+      assertAnnotationEquals(expectedCurrency, actualRecord, "NestedAnnotation", "measures_isocurrency");
     }
   }
 
@@ -112,9 +111,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     List<StructuredRecord> records = getPipelineResults(properties);
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
-      StructuredRecord fieldRecord = actualRecord.get("CanonicalFunctionsProperty");
-      Assert.assertNotNull(fieldRecord);
-      assertAnnotationEquals(expected, fieldRecord, "core_description");
+      assertAnnotationEquals(expected, actualRecord, "CanonicalFunctionsProperty", "core_description");
     }
   }
 
@@ -132,8 +129,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     List<StructuredRecord> records = getPipelineResults(properties);
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
-      StructuredRecord fieldRecord = actualRecord.get("AndAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "core_description");
+      assertAnnotationEquals(expected, actualRecord, "AndAnnotated", "core_description");
     }
   }
 
@@ -151,8 +147,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     List<StructuredRecord> records = getPipelineResults(properties);
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
-      StructuredRecord fieldRecord = actualRecord.get("OrAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "core_description");
+      assertAnnotationEquals(expected, actualRecord, "OrAnnotated", "core_description");
     }
   }
 
@@ -169,8 +164,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     List<StructuredRecord> records = getPipelineResults(properties);
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
-      StructuredRecord fieldRecord = actualRecord.get("NotAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "core_description");
+      assertAnnotationEquals(expected, actualRecord, "NotAnnotated", "core_description");
     }
   }
 
@@ -188,8 +182,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     List<StructuredRecord> records = getPipelineResults(properties);
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
-      StructuredRecord fieldRecord = actualRecord.get("EqAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "core_description");
+      assertAnnotationEquals(expected, actualRecord, "EqAnnotated", "core_description");
     }
   }
 
@@ -207,8 +200,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     List<StructuredRecord> records = getPipelineResults(properties);
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
-      StructuredRecord fieldRecord = actualRecord.get("NeAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "core_description");
+      assertAnnotationEquals(expected, actualRecord, "NeAnnotated", "core_description");
     }
   }
 
@@ -226,8 +218,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     List<StructuredRecord> records = getPipelineResults(properties);
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
-      StructuredRecord fieldRecord = actualRecord.get("GtAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "core_description");
+      assertAnnotationEquals(expected, actualRecord, "GtAnnotated", "core_description");
     }
   }
 
@@ -245,8 +236,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     List<StructuredRecord> records = getPipelineResults(properties);
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
-      StructuredRecord fieldRecord = actualRecord.get("GeAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "core_description");
+      assertAnnotationEquals(expected, actualRecord, "GeAnnotated", "core_description");
     }
   }
 
@@ -264,8 +254,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     List<StructuredRecord> records = getPipelineResults(properties);
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
-      StructuredRecord fieldRecord = actualRecord.get("LtAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "core_description");
+      assertAnnotationEquals(expected, actualRecord, "LtAnnotated", "core_description");
     }
   }
 
@@ -283,8 +272,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     List<StructuredRecord> records = getPipelineResults(properties);
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
-      StructuredRecord fieldRecord = actualRecord.get("LeAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "core_description");
+      assertAnnotationEquals(expected, actualRecord, "LeAnnotated", "core_description");
     }
   }
 
@@ -301,8 +289,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     List<StructuredRecord> records = getPipelineResults(properties);
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
-      StructuredRecord fieldRecord = actualRecord.get("CastAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "core_description");
+      assertAnnotationEquals(expected, actualRecord, "CastAnnotated", "core_description");
     }
   }
 
@@ -321,8 +308,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     List<StructuredRecord> records = getPipelineResults(properties);
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
-      StructuredRecord fieldRecord = actualRecord.get("CollectionAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "core_description");
+      assertAnnotationEquals(expected, actualRecord, "CollectionAnnotated", "core_description");
     }
   }
 
@@ -341,8 +327,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     List<StructuredRecord> records = getPipelineResults(properties);
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
-      StructuredRecord fieldRecord = actualRecord.get("IfAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "core_description");
+      assertAnnotationEquals(expected, actualRecord, "IfAnnotated", "core_description");
     }
   }
 
@@ -359,8 +344,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     List<StructuredRecord> records = getPipelineResults(properties);
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
-      StructuredRecord fieldRecord = actualRecord.get("IsOfAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "core_description");
+      assertAnnotationEquals(expected, actualRecord, "IsOfAnnotated", "core_description");
     }
   }
 
@@ -377,8 +361,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     List<StructuredRecord> records = getPipelineResults(properties);
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
-      StructuredRecord fieldRecord = actualRecord.get("LabeledElementAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "core_description");
+      assertAnnotationEquals(expected, actualRecord, "LabeledElementAnnotated", "core_description");
     }
   }
 
@@ -396,8 +379,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     List<StructuredRecord> records = getPipelineResults(properties);
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
-      StructuredRecord fieldRecord = actualRecord.get("RecordAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "core_description");
+      assertAnnotationEquals(expected, actualRecord, "RecordAnnotated", "core_description");
     }
   }
 
@@ -421,8 +403,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     List<StructuredRecord> records = getPipelineResults(properties);
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
-      StructuredRecord fieldRecord = actualRecord.get("RecordNestedAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "core_description");
+      assertAnnotationEquals(expected, actualRecord, "RecordNestedAnnotated", "core_description");
     }
   }
 
@@ -439,8 +420,7 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     List<StructuredRecord> records = getPipelineResults(properties);
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
-      StructuredRecord fieldRecord = actualRecord.get("UrlRefAnnotated");
-      assertAnnotationEquals(expected, fieldRecord, "core_description");
+      assertAnnotationEquals(expected, actualRecord, "UrlRefAnnotated", "core_description");
     }
   }
 
@@ -468,19 +448,19 @@ public class SapOData4MetadataAnnotationsETLTest extends BaseSapODataSourceETLTe
     List<StructuredRecord> records = getPipelineResults(properties);
     Assert.assertEquals(2, records.size());
     for (StructuredRecord actualRecord : records) {
-      StructuredRecord fieldRecord = actualRecord.get("Targeted");
-      assertAnnotationEquals(expectedCurrency, fieldRecord, "measures_isocurrency");
-      assertAnnotationEquals(expectedDescription, fieldRecord, "core_description");
-      assertAnnotationEquals(expectedValueReferencesList, fieldRecord, "sap__common_valuelistreferences");
+      assertAnnotationEquals(expectedCurrency, actualRecord, "Targeted", "measures_isocurrency");
+      assertAnnotationEquals(expectedDescription, actualRecord, "Targeted", "core_description");
+      assertAnnotationEquals(expectedValueReferencesList, actualRecord, "Targeted", "sap__common_valuelistreferences");
     }
   }
 
-  private void assertAnnotationEquals(StructuredRecord expected, StructuredRecord fieldRecord, String annotation) {
+  private void assertAnnotationEquals(StructuredRecord expected, StructuredRecord actualRecord, String fieldName,
+                                      String annotation) {
+    Assert.assertNotNull(actualRecord);
+    StructuredRecord metadataRecord = actualRecord.get(SapODataConstants.METADATA_FIELD_NAME);
+    StructuredRecord fieldRecord = metadataRecord.get(fieldName);
     Assert.assertNotNull(fieldRecord);
-    StructuredRecord annotationsRecord = fieldRecord.get(SapODataConstants.METADATA_ANNOTATIONS_FIELD_NAME);
-    Assert.assertNotNull(annotationsRecord);
-    StructuredRecord actual = annotationsRecord.get(annotation);
-
+    StructuredRecord actual = fieldRecord.get(annotation);
     Assert.assertEquals(expected, actual);
   }
 

@@ -17,6 +17,7 @@ package io.cdap.plugin.sap.etl;
 
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.cdap.cdap.api.data.format.StructuredRecord;
 import io.cdap.cdap.api.data.schema.Schema;
@@ -54,26 +55,34 @@ public class SapOData2SourceETLTest extends BaseSapODataSourceETLTest {
     Schema.Field.of("Time", Schema.of(Schema.LogicalType.TIME_MICROS)),
     Schema.Field.of("DateTimeOffset", Schema.of(Schema.Type.STRING)));
 
+  private static final Schema METADATA_SCHEMA = Schema.recordOf(
+    "metadata",
+    valueWithMetadataAnnotationsField("Id"),
+    valueWithMetadataAnnotationsField("Binary"),
+    valueWithMetadataAnnotationsField("Boolean"),
+    valueWithMetadataAnnotationsField("Byte"),
+    valueWithMetadataAnnotationsField("Decimal"),
+    valueWithMetadataAnnotationsField("Double"),
+    valueWithMetadataAnnotationsField("Single"),
+    valueWithMetadataAnnotationsField("Guid"),
+    valueWithMetadataAnnotationsField("Int16"),
+    valueWithMetadataAnnotationsField("Int32"),
+    valueWithMetadataAnnotationsField("Int64"),
+    valueWithMetadataAnnotationsField("SByte"),
+    valueWithMetadataAnnotationsField("String"),
+    valueWithMetadataAnnotationsField("DateTime"),
+    valueWithMetadataAnnotationsField("Time"),
+    valueWithMetadataAnnotationsField("DateTimeOffset"));
+
   private static final Schema SCHEMA_WITH_METADATA_ANNOTATIONS = Schema.recordOf(
     "schema",
-    valueWithMetadataAnnotationsField("Id", Schema.of(Schema.Type.STRING)),
-    valueWithMetadataAnnotationsField("Binary", Schema.of(Schema.Type.BYTES)),
-    valueWithMetadataAnnotationsField("Boolean", Schema.of(Schema.Type.BOOLEAN)),
-    valueWithMetadataAnnotationsField("Byte", Schema.of(Schema.Type.INT)),
-    valueWithMetadataAnnotationsField("Decimal", Schema.decimalOf(16, 3)),
-    valueWithMetadataAnnotationsField("Double", Schema.of(Schema.Type.DOUBLE)),
-    valueWithMetadataAnnotationsField("Single", Schema.of(Schema.Type.FLOAT)),
-    valueWithMetadataAnnotationsField("Guid", Schema.of(Schema.Type.STRING)),
-    valueWithMetadataAnnotationsField("Int16", Schema.of(Schema.Type.INT)),
-    valueWithMetadataAnnotationsField("Int32", Schema.of(Schema.Type.INT)),
-    valueWithMetadataAnnotationsField("Int64", Schema.of(Schema.Type.LONG)),
-    valueWithMetadataAnnotationsField("SByte", Schema.of(Schema.Type.INT)),
-    valueWithMetadataAnnotationsField("String", Schema.of(Schema.Type.STRING)),
-    valueWithMetadataAnnotationsField("DateTime", Schema.of(Schema.LogicalType.TIMESTAMP_MICROS)),
-    valueWithMetadataAnnotationsField("Time", Schema.of(Schema.LogicalType.TIME_MICROS)),
-    valueWithMetadataAnnotationsField("DateTimeOffset", Schema.of(Schema.Type.STRING)));
+    new ImmutableList.Builder<Schema.Field>()
+      .addAll(SCHEMA.getFields())
+      .add(Schema.Field.of(SapODataConstants.METADATA_FIELD_NAME, METADATA_SCHEMA))
+      .build()
+  );
 
-  private static Schema.Field valueWithMetadataAnnotationsField(String fieldName, Schema valueSchema) {
+  private static Schema.Field valueWithMetadataAnnotationsField(String fieldName) {
     Schema sapMetadataSchema = Schema.recordOf(fieldName + "-metadata",
                                                Schema.Field.of("label", Schema.of(Schema.Type.STRING)),
                                                Schema.Field.of("creatable", Schema.of(Schema.Type.STRING)),
@@ -81,10 +90,7 @@ public class SapOData2SourceETLTest extends BaseSapODataSourceETLTest {
                                                Schema.Field.of("sortable", Schema.of(Schema.Type.STRING)),
                                                Schema.Field.of("filterable", Schema.of(Schema.Type.STRING)));
 
-    return Schema.Field.of(fieldName, Schema.recordOf(
-      fieldName + "-value-metadata",
-      Schema.Field.of(SapODataConstants.VALUE_FIELD_NAME, valueSchema),
-      Schema.Field.of(SapODataConstants.METADATA_ANNOTATIONS_FIELD_NAME, sapMetadataSchema)));
+    return Schema.Field.of(fieldName, sapMetadataSchema);
   }
 
   @Before
@@ -284,17 +290,11 @@ public class SapOData2SourceETLTest extends BaseSapODataSourceETLTest {
   }
 
   private void assertMetadataAnnotationsIncluded(StructuredRecord actualRecord) {
-    List<Schema.Field> actualFields = actualRecord.getSchema().getFields();
-    Assert.assertNotNull(actualFields);
-    for (Schema.Field actualField : actualFields) {
-      Assert.assertEquals(Schema.Type.RECORD, actualField.getSchema().getType());
-      StructuredRecord annotatedValueRecord = actualRecord.get(actualField.getName());
-
-      Schema annotatedValueSchema = annotatedValueRecord.getSchema();
-      Schema.Field metadataField = annotatedValueSchema.getField(SapODataConstants.METADATA_ANNOTATIONS_FIELD_NAME);
-      Assert.assertNotNull(metadataField);
-      Assert.assertEquals(metadataField.getSchema().getType(), Schema.Type.RECORD);
-      StructuredRecord annotations = annotatedValueRecord.get(metadataField.getName());
+    Assert.assertNotNull(actualRecord);
+    StructuredRecord metadataRecord = actualRecord.get(SapODataConstants.METADATA_FIELD_NAME);
+    Assert.assertNotNull(metadataRecord);
+    for (Schema.Field metadataField : metadataRecord.getSchema().getFields()) {
+      StructuredRecord annotations = metadataRecord.get(metadataField.getName());
       Assert.assertEquals("false", annotations.get("creatable"));
       Assert.assertEquals("false", annotations.get("updatable"));
       Assert.assertEquals("false", annotations.get("sortable"));

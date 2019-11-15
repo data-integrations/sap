@@ -43,7 +43,6 @@ import io.cdap.plugin.sap.odata.exception.ODataException;
 import io.cdap.plugin.sap.odata.odata2.OData2Annotation;
 import io.cdap.plugin.sap.odata.odata4.OData4Annotation;
 import io.cdap.plugin.sap.transformer.ODataEntryToRecordTransformer;
-import io.cdap.plugin.sap.transformer.ODataEntryToRecordWithMetadataTransformer;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.olingo.commons.api.edm.annotation.EdmExpression;
 import org.apache.olingo.commons.api.edm.provider.annotation.CsdlApply;
@@ -136,7 +135,7 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntity, Struc
     super.initialize(context);
     Schema schema = context.getOutputSchema();
     this.transformer = config.isIncludeMetadataAnnotations()
-      ? new ODataEntryToRecordWithMetadataTransformer(schema, getMetadataAnnotations())
+      ? new ODataEntryToRecordTransformer(schema, getMetadataAnnotations())
       : new ODataEntryToRecordTransformer(schema);
   }
 
@@ -150,10 +149,26 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntity, Struc
     GenericODataClient oDataClient = new GenericODataClient(config.getUrl(), config.getUser(), config.getPassword());
     try {
       EntityType entityType = oDataClient.getEntitySetType(config.getResourcePath());
-      List<Schema.Field> fields = entityType.getProperties().stream()
-        .filter(p -> config.getSelectProperties().isEmpty() || config.getSelectProperties().contains(p.getName()))
-        .map(propertyMetadata -> getSchemaField(propertyMetadata, config.isIncludeMetadataAnnotations()))
-        .collect(Collectors.toList());
+      List<Schema.Field> fields = new ArrayList<>();
+      List<Schema.Field> metadataFields = new ArrayList<>();
+      for (PropertyMetadata p : entityType.getProperties()) {
+        if (!config.getSelectProperties().isEmpty() && !config.getSelectProperties().contains(p.getName())) {
+          continue;
+        }
+        Schema.Field field = getField(p);
+        if (config.isIncludeMetadataAnnotations() && !p.getAnnotations().isEmpty()) {
+          Schema.Field metadataField = getMetadataField(p);
+          metadataFields.add(metadataField);
+        }
+        fields.add(field);
+      }
+
+      if (!metadataFields.isEmpty()) {
+        Schema.Field metadata = Schema.Field.of(SapODataConstants.METADATA_FIELD_NAME,
+                                                Schema.recordOf("record-metadata", metadataFields));
+        fields.add(metadata);
+      }
+
       return Schema.recordOf("output", fields);
     } catch (ODataException e) {
       throw new InvalidStageException("Unable to get details about the entity type: " + e.getMessage(), e);
@@ -172,28 +187,19 @@ public class SapODataSource extends BatchSource<NullWritable, ODataEntity, Struc
     }
   }
 
-  private Schema.Field getSchemaField(PropertyMetadata propertyMetadata, boolean includeAnnotations) {
+  private Schema.Field getField(PropertyMetadata propertyMetadata) {
     Schema nonNullableSchema = propertyToSchema(propertyMetadata);
     Schema schema = propertyMetadata.isNullable() ? Schema.nullableOf(nonNullableSchema) : nonNullableSchema;
-    List<ODataAnnotation> annotations = propertyMetadata.getAnnotations();
-
-    return includeAnnotations && annotations != null && !annotations.isEmpty()
-      ? getFieldWithAnnotations(propertyMetadata, schema) : Schema.Field.of(propertyMetadata.getName(), schema);
+    return Schema.Field.of(propertyMetadata.getName(), schema);
   }
 
-  private Schema.Field getFieldWithAnnotations(PropertyMetadata propertyMetadata, Schema valueSchema) {
+  private Schema.Field getMetadataField(PropertyMetadata propertyMetadata) {
     String propertyName = propertyMetadata.getName();
     List<ODataAnnotation> annotations = propertyMetadata.getAnnotations();
     List<Schema.Field> fields = annotations.stream()
       .map(annotation -> Schema.Field.of(annotation.getName(), annotationToFieldSchema(propertyName, annotation)))
       .collect(Collectors.toList());
-    Schema.Field metadataField = Schema.Field.of(SapODataConstants.METADATA_ANNOTATIONS_FIELD_NAME,
-                                                 Schema.recordOf(propertyName + "-metadata-record", fields));
-
-    Schema valueWithMetadataSchema = Schema.recordOf(propertyName + "-value-with-metadata-record",
-                                                     Schema.Field.of(SapODataConstants.VALUE_FIELD_NAME, valueSchema),
-                                                     metadataField);
-    return Schema.Field.of(propertyName, valueWithMetadataSchema);
+    return Schema.Field.of(propertyName, Schema.recordOf(propertyName + "-metadata-record", fields));
   }
 
   private Schema annotationToFieldSchema(String fieldName, ODataAnnotation oDataAnnotation) {
