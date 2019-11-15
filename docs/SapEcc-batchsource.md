@@ -33,24 +33,39 @@ see [OData URL components].
 https://www.odata.org/documentation/odata-version-3-0/url-conventions/
 
 **Include Metadata Annotations:** Whether the plugin should read SAP metadata annotations and include them to each
-record. In this case, each property mapped to a record with exactly two fields:
-- value - for OData property value.
-- metadata-annotations - metadata annotations record.
+record. In this case, all of the metadata is added as a separate 'metadata' field.
 
-OData V4 metadata annotations mapped to a record with fields that correspond to the property attributes.
-For example, for property, annotated as:
+OData V2 metadata annotations mapped to a record with fields that correspond to the property attributes.
+For example, entity type with properties, annotated as:
 ```
-<Property Name="BuyerName" Type="Edm.String" Nullable="false" MaxLength="80" sap:label="Company"
-                  sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<EntityType Name="SalesOrder" sap:content-version="1">
+  <Key>
+    <PropertyRef Name="SoId"/>
+  </Key>
+  <Property Name="SoId" Type="Edm.String" Nullable="false" MaxLength="10" sap:label="Sales Order ID"
+            sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+  <Property Name="BuyerName" Type="Edm.String" Nullable="false" MaxLength="80" sap:label="Full Name"
+                    sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+</EntityType>
 ```
-an entry with property value `true` will be read as the following record:
+an entry with property values `"1"`, `"Some Name"`(for `SoId` and `BuyerName` respectively) will be read as the
+following record:
 ```
-value: true
-metadata-annotations:
-  creatable: false
-  updatable: false
-  sortable: false
-  filterable: false
+SoId: "1"
+BuyerName: "Some Name"
+metadata:
+  SoId:
+    label: "Sales Order ID"
+    creatable: false
+    updatable: false
+    sortable: false
+    filterable: false
+  BuyerName:
+    label: "Full Name"
+    creatable: false
+    updatable: false
+    sortable: false
+    filterable: false
 ```
 
 OData V4 metadata annotations mapped to a record with the following fields:
@@ -60,50 +75,59 @@ OData V4 metadata annotations mapped to a record with the following fields:
 - expression - record that corresponds to a constant expression or a dynamic expression.
 - annotations - record that corresponds to nested annotations.
 
-For example, for property, annotated as:
+For example, entity type with properties, annotated as:
 ```
-<Property Name="RecordNestedAnnotated" Type="Edm.Boolean" Nullable="false">
-  <Annotation Term="Core.Description">
-    <Annotation Term="Core.Description" Qualifier="nested" String="Nested annotation">
-    <Record>
-      <Annotation Term="Core.Description" Qualifier="onrecord" String="Annotation on record" />
-      <PropertyValue Property="GivenName" Path="String"/>
-      <PropertyValue Property="Age" Path="Byte"/>
-    </Record>
-  </Annotation>
-</Property>
+<EntityType Name="SomeEntity">
+  <Key>
+    <PropertyRef Name="ID"/>
+  </Key>
+  <Property Name="ID" Type="Edm.Int32" Nullable="false" MaxLength="Max" FixedLength="false"/>
+  <Property Name="RecordNestedAnnotated" Type="Edm.Boolean" Nullable="false">
+    <Annotation Term="Core.Description">
+      <Annotation Term="Core.Description" Qualifier="nested" String="Nested annotation">
+      <Record>
+        <Annotation Term="Core.Description" Qualifier="onrecord" String="Annotation on record" />
+        <PropertyValue Property="GivenName" Path="String"/>
+        <PropertyValue Property="Age" Path="Byte"/>
+      </Record>
+    </Annotation>
+  </Property>
+</EntityType>
 ```
-an entry with property value `true` will be read as the following record:
+an entry with property values `123`, `true`(for `ID` and `RecordNestedAnnotated` respectively) will be read as the
+following record:
 ```
-value: true
-metadata-annotations:
- core_description:
-  term: "Core.Description"
-  qualifier: null
-  expression:
-    name: "Record"
-    type: null
-    propertyValues:
-      GivenName:
-        name: "Path"
-        value: "SomeProperty1"
-      Age:
-        name: "Path"
-        value: "SomeProperty2"
+ID: 123
+RecordNestedAnnotated: true
+metadata:
+  RecordNestedAnnotated:
+    core_description:
+    term: "Core.Description"
+    qualifier: null
+    expression:
+      name: "Record"
+      type: null
+      propertyValues:
+        GivenName:
+          name: "Path"
+          value: "SomeProperty1"
+        Age:
+          name: "Path"
+          value: "SomeProperty2"
+      annotations:
+        onrecord_core_description:
+          term: "Core.Description"
+          qualifier: "onrecord"
+          expression:
+            name: "String"
+            value: "Annotation on record"
     annotations:
-      onrecord_core_description:
+      nested_core_description:
         term: "Core.Description"
-        qualifier: "onrecord"
+        qualifier: "nested"
         expression:
           name: "String"
-          value: "Annotation on record"
-  annotations:
-    nested_core_description:
-      term: "Core.Description"
-      qualifier: "nested"
-      expression:
-        name: "String"
-        value: "Nested annotation"
+          value: "Nested annotation"
 ```
 
 For more information, see [OData V4 Annotations].

@@ -147,7 +147,7 @@ public class ODataEntryToRecordTransformer {
    * EdmSimpleType
    * </a>
    */
-  protected Object extractValue(String fieldName, Object value, Schema schema) {
+  private Object extractValue(String fieldName, Object value, Schema schema) {
     if (value == null) {
       return null;
     }
