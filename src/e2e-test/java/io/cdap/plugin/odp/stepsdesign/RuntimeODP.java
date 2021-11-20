@@ -111,8 +111,7 @@ public class RuntimeODP implements CdfHelper {
 
   @When("Username and Password is provided")
   public void usernameAndPasswordIsProvided() throws IOException {
-//    ODPActions.enterUserNamePassword(System.getenv("AUTH_USERNAME"), System.getenv("AUTH_PASSWORD"));
-    ODPActions.enterUserNamePassword("dhiraj", "Google@123");
+    ODPActions.enterUserNamePassword(System.getenv("AUTH_USERNAME"), System.getenv("AUTH_PASSWORD"));
 
   }
 
