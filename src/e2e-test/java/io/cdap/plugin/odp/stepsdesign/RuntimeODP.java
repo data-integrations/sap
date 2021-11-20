@@ -111,7 +111,9 @@ public class RuntimeODP implements CdfHelper {
 
   @When("Username and Password is provided")
   public void usernameAndPasswordIsProvided() throws IOException {
-    ODPActions.enterUserNamePassword(System.getenv("AUTH_USERNAME"), System.getenv("AUTH_PASSWORD"));
+//    ODPActions.enterUserNamePassword(System.getenv("AUTH_USERNAME"), System.getenv("AUTH_PASSWORD"));
+    ODPActions.enterUserNamePassword("dhiraj", "Google@123");
+
   }
 
 
@@ -124,9 +126,8 @@ public class RuntimeODP implements CdfHelper {
   public void validateTheSchemaCreated() throws InterruptedException {
     ODPActions.getSchema();
     WebDriverWait wait = new WebDriverWait(SeleniumDriver.getDriver(), 20000);
-    wait.until(
-      webDriver -> ExpectedConditions.numberOfElementsToBeMoreThan
-        (By.xpath("//*[@placeholder=\"Field name\"]"),2));
+    wait.until(ExpectedConditions.numberOfElementsToBeMoreThan
+      (By.xpath("//*[@placeholder=\"Field name\"]"), 2));
   }
 
   @Then("Close the ODP Properties")
@@ -246,10 +247,9 @@ public class RuntimeODP implements CdfHelper {
   public void waitTillODPPipelineIsInRunningState() {
     Boolean bool = true;
     WebDriverWait wait = new WebDriverWait(SeleniumDriver.getDriver(), 1000000);
-    wait.until(
-      webDriver -> ExpectedConditions.or(
-        ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@data-cy='Succeeded']")),
-        ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@data-cy='Failed']"))));
+    wait.until(ExpectedConditions.or(
+      ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@data-cy='Succeeded']")),
+      ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@data-cy='Failed']"))));
   }
 
   @Then("Open Logs of ODP Pipeline")
@@ -316,10 +316,9 @@ public class RuntimeODP implements CdfHelper {
     Boolean bool = true;
     WebDriverWait wait = new WebDriverWait(SeleniumDriver.getDriver(), 1000000);
     SeleniumDriver.getDriver().get(SeleniumDriver.getDriver().getCurrentUrl());
-    wait.until(
-      webDriver -> ExpectedConditions.or(
-        ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@data-cy='Succeeded']")),
-        ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@data-cy='Failed']"))));
+    wait.until(ExpectedConditions.or(
+      ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@data-cy='Succeeded']")),
+      ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@data-cy='Failed']"))));
   }
 
   @Then("Verify the full load transfer is successful")
@@ -331,13 +330,11 @@ public class RuntimeODP implements CdfHelper {
   public void openLogsOfODPPipelineToCaptureDeltaLogs() throws InterruptedException, FileNotFoundException {
     PrintWriter out = new PrintWriter(BeforeActions.myObj);
     WebDriverWait wait = new WebDriverWait(SeleniumDriver.getDriver(), 10000);
-    wait.until(
-      webDriver -> ExpectedConditions.refreshed(ExpectedConditions.
-                                                  visibilityOfElementLocated(By.xpath("//*[@class=\"run-logs-btn\"]"))));
+    wait.until(ExpectedConditions.refreshed(ExpectedConditions.visibilityOfElementLocated(By.
+      xpath("//*[@class=\"run-logs-btn\"]"))));
     CdfPipelineRunAction.logsClick();
-    wait.until(
-      webDriver -> ExpectedConditions.refreshed(ExpectedConditions.
-                                                  visibilityOfElementLocated(By.xpath("(//*[@type=\"button\"])[7]"))));
+    wait.until(ExpectedConditions.refreshed(ExpectedConditions.visibilityOfElementLocated(By.
+      xpath("(//*[@type=\"button\"])[7]"))));
     deltaLog = CdfPipelineRunAction.captureRawLogs();
     BeforeActions.scenario.write(deltaLog);
     out.println(rawLog.concat("********************+delta" + deltaLog));

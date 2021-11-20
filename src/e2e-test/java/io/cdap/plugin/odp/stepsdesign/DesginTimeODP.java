@@ -24,9 +24,7 @@ public class DesginTimeODP {
   public void connectionIsEstablished() throws InterruptedException {
     CdfGcsActions.getSchema();
     WebDriverWait wait = new WebDriverWait(SeleniumDriver.getDriver(), 20000);
-    wait.until(
-      webDriver -> ExpectedConditions.numberOfElementsToBeMoreThan
-        (By.xpath("//*[@placeholder=\"Field name\"]"),2));
+    wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.xpath("//*[@placeholder=\"Field name\"]"), 2));
     Assert.assertEquals(true, CDAPUtils.schemaValidation());
   }
 
