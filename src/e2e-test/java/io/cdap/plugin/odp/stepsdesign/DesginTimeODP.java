@@ -1,15 +1,33 @@
+/*
+ * Copyright © 2021 Cask Data, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package io.cdap.plugin.odp.stepsdesign;
 
 import io.cdap.e2e.pages.actions.CdfGcsActions;
 import io.cdap.e2e.utils.SeleniumDriver;
+import io.cdap.e2e.utils.SeleniumHelper;
 import io.cdap.plugin.odp.actions.ODPActions;
 import io.cdap.plugin.odp.locators.ODPLocators;
 import io.cdap.plugin.odp.utils.CDAPUtils;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -19,6 +37,8 @@ import java.io.IOException;
  * DesginTimeODP.
  */
 public class DesginTimeODP {
+
+  private static final String A = "a";
 
   @Then("Connection is established")
   public void connectionIsEstablished() throws InterruptedException {
@@ -40,9 +60,8 @@ public class DesginTimeODP {
   @When("User has selected Sap client macro to configure")
   public void userHasSelectedSapClientMacroToConfigure() {
     ODPLocators.macros.get(0).click();
-    ODPLocators.sapClient.sendKeys(Keys.chord(Keys.CONTROL, "a"));
+    ODPLocators.sapClient.sendKeys(Keys.chord(Keys.CONTROL, A));
     ODPLocators.sapClient.sendKeys("${client}");
-
   }
 
   @Then("User is validate without any error")
@@ -54,67 +73,62 @@ public class DesginTimeODP {
   @When("User has selected Sap language macro to configure")
   public void userHasSelectedSapLagMacroToConfigure() {
     ODPLocators.macros.get(1).click();
-    ODPLocators.language.sendKeys(Keys.chord(Keys.CONTROL, "a"));
+    ODPLocators.language.sendKeys(Keys.chord(Keys.CONTROL, A));
     ODPLocators.language.sendKeys("${lang}");
   }
 
   @When("User has selected Sap server as host macro to configure")
   public void userHasSelectedSapServerAsHostMacroToConfigure() {
     ODPLocators.macros.get(2).click();
-    ODPLocators.sapApplicationServerHost.sendKeys(Keys.chord(Keys.CONTROL, "a"));
+    ODPLocators.sapApplicationServerHost.sendKeys(Keys.chord(Keys.CONTROL, A));
     ODPLocators.sapApplicationServerHost.sendKeys("${host}");
   }
 
   @When("User has selected System Number macro to configure")
   public void userHasSelectedSystemNumberMacroToConfigure() {
     ODPLocators.macros.get(3).click();
-    ODPLocators.systemNumber.sendKeys(Keys.chord(Keys.CONTROL, "a"));
+    ODPLocators.systemNumber.sendKeys(Keys.chord(Keys.CONTROL, A));
     ODPLocators.systemNumber.sendKeys("${sysnr}");
   }
 
   @When("User has selected datasource macro to configure")
   public void userHasSelectedDatasourceMacroToConfigure() {
     ODPLocators.macros.get(5).click();
-    ODPLocators.dataSourceName.sendKeys(Keys.chord(Keys.CONTROL, "a"));
+    ODPLocators.dataSourceName.sendKeys(Keys.chord(Keys.CONTROL, A));
     ODPLocators.dataSourceName.sendKeys("${dsname}");
   }
 
   @When("User has selected gcsPath macro to configure")
   public void userHasSelectedGcsPathMacroToConfigure() {
     ODPLocators.macros.get(10).click();
-    ODPLocators.gcsPath.sendKeys(Keys.chord(Keys.CONTROL, "a"));
+    ODPLocators.gcsPath.sendKeys(Keys.chord(Keys.CONTROL, A));
     ODPLocators.gcsPath.sendKeys("${gcs}");
   }
 
   @When("User has selected Sap msHost macro to configure")
   public void userHasSelectedSapMsHostMacroToConfigure() {
     ODPLocators.macros.get(2).click();
-    ODPLocators.msHost.sendKeys(Keys.chord(Keys.CONTROL, "a"));
+    ODPLocators.msHost.sendKeys(Keys.chord(Keys.CONTROL, A));
     ODPLocators.msHost.sendKeys("${msHOst}");
   }
 
   @When("User has selected Sap msServ macro to configure")
   public void userHasSelectedSapMsServMacroToConfigure() {
     ODPLocators.macros.get(4).click();
-    ODPLocators.portNumber.sendKeys(Keys.chord(Keys.CONTROL, "a"));
+    ODPLocators.portNumber.sendKeys(Keys.chord(Keys.CONTROL, A));
     ODPLocators.portNumber.sendKeys("${portN0}");
   }
 
   @When("User has selected UserName and Password macro to configure")
   public void userHasSelectedUserNameAndPasswordMacroToConfigure() {
     ODPLocators.macros.get(10).click();
-    ODPLocators.usernameCredentials.sendKeys(Keys.chord(Keys.CONTROL, "a"));
+    ODPLocators.usernameCredentials.sendKeys(Keys.chord(Keys.CONTROL, A));
     ODPLocators.usernameCredentials.sendKeys("${userName}");
   }
 
-
   @When("data source as {string} is added")
   public void dataSourceAsIsAdded(String datasource) throws InterruptedException {
-
-    for (int i = 0; i < 15; i++) {
-      ODPLocators.dataSourceName.sendKeys(Keys.BACK_SPACE);
-    }
-    ODPLocators.dataSourceName.sendKeys(datasource);
+    SeleniumHelper.replaceElementValue(ODPLocators.dataSourceName, datasource);
     ODPLocators.validateButton.click();
     ODPLocators.successMessage.isDisplayed();
   }

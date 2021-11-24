@@ -1,3 +1,18 @@
+/*
+ * Copyright © 2021 Cask Data, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package io.cdap.plugin.odp.stepsdesign;
 
 import io.cdap.e2e.pages.actions.CdfSysAdminActions;
@@ -24,10 +39,8 @@ import java.util.HashMap;
 public class Security implements CdfHelper {
 
   String arr[] = new String[11];
-  HashMap map = new HashMap();
-  public static int countarr = 0;
-  static boolean errorExist;
-  public static String color;
+  private static int countarr = 0;
+  private static boolean errorExist;
 
   @Given("Open {string} link to configure macros")
   public void openLinkToConfigureMacros(String link) throws IOException {
@@ -41,7 +54,6 @@ public class Security implements CdfHelper {
     }
   }
 
-
   @Then("Select {string} service to configure")
   public void selectServiceToConfigure(String service) {
     CdfSysAdminActions.selectMacroAPIService(service);
@@ -50,20 +62,14 @@ public class Security implements CdfHelper {
   @Then("enter variable for {string} of the macro")
   public void enterVariableForOfTheMacro(String arg0) {
     countarr = arg0.length();
-    for (int i = 0; i < 100; i++) {
-      CdfSysAdminLocators.apiInputURI.sendKeys(Keys.BACK_SPACE);
-    }
+    CDAPUtils.clearField(CdfSysAdminLocators.apiInputURI);
     CdfSysAdminActions.enterURI("namespaces/default/securekeys/" + arg0);
   }
 
   @Then("enter the {string} of the service")
   public void enterTheOfTheService(String request) throws IOException {
-
-    for (int i = 0; i <= 100; i++) {
-      CdfSysAdminLocators.requestBody.sendKeys(Keys.BACK_SPACE);
-    }
+    CDAPUtils.clearField(CdfSysAdminLocators.requestBody);
     CdfSysAdminActions.enterRequestBody(CDAPUtils.getPluginProp(request));
-
   }
 
   @Then("send request and verify success message")
@@ -82,20 +88,19 @@ public class Security implements CdfHelper {
   @Then("enter the macro variable in fields")
   public void enterTheMacroVariableInFields() throws InterruptedException {
     ODPActions.clickAllMacroElements();
-    for (int i = 0; i < 10; i++) {
-      ODPLocators.usernameCredentials.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.macroPass.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.sapClient.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.systemNumber.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.sapApplicationServerHost.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.dataSourceName.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.packageSize.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.splitRow.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.gcsPath.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.projectID.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.language.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.extractType.sendKeys(Keys.BACK_SPACE);
-    }
+    CDAPUtils.clearField(ODPLocators.usernameCredentials);
+    CDAPUtils.clearField(ODPLocators.macroPass);
+    CDAPUtils.clearField(ODPLocators.sapClient);
+    CDAPUtils.clearField(ODPLocators.systemNumber);
+    CDAPUtils.clearField(ODPLocators.sapApplicationServerHost);
+    CDAPUtils.clearField(ODPLocators.dataSourceName);
+    CDAPUtils.clearField(ODPLocators.packageSize);
+    CDAPUtils.clearField(ODPLocators.splitRow);
+    CDAPUtils.clearField(ODPLocators.gcsPath);
+    CDAPUtils.clearField(ODPLocators.projectID);
+    CDAPUtils.clearField(ODPLocators.language);
+    CDAPUtils.clearField(ODPLocators.extractType);
+
     ODPActions.clickMacroElement(4);
     ODPActions.clickMacroElement(10);
     ODPActions.clickMacroElement(11);
@@ -117,24 +122,23 @@ public class Security implements CdfHelper {
   @Then("enter the secured created variable")
   public void enterTheSecuredCreatedVariable() throws InterruptedException {
     ODPActions.clickAllMacroElements();
-    for (int i = 0; i < 4; i++) {
-      ODPLocators.sapClient.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.language.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.sapApplicationServerHost.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.systemNumber.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.sapRouter.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.dataSourceName.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.extractType.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.usernameCredentials.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.macroPass.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.gcsProjectID.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.packageSize.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.splitRow.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.gcsPath.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.subsName.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.filterEqualMacros.sendKeys(Keys.BACK_SPACE);
-      ODPLocators.filterEqualMacros.sendKeys(Keys.BACK_SPACE);
-    }
+    CDAPUtils.clearField(ODPLocators.sapClient);
+    CDAPUtils.clearField(ODPLocators.language);
+    CDAPUtils.clearField(ODPLocators.sapApplicationServerHost);
+    CDAPUtils.clearField(ODPLocators.systemNumber);
+    CDAPUtils.clearField(ODPLocators.sapRouter);
+    CDAPUtils.clearField(ODPLocators.dataSourceName);
+    CDAPUtils.clearField(ODPLocators.extractType);
+    CDAPUtils.clearField(ODPLocators.usernameCredentials);
+    CDAPUtils.clearField(ODPLocators.macroPass);
+    CDAPUtils.clearField(ODPLocators.gcsProjectID);
+    CDAPUtils.clearField(ODPLocators.packageSize);
+    CDAPUtils.clearField(ODPLocators.splitRow);
+    CDAPUtils.clearField(ODPLocators.gcsPath);
+    CDAPUtils.clearField(ODPLocators.subsName);
+    CDAPUtils.clearField(ODPLocators.filterEqualMacros);
+    CDAPUtils.clearField(ODPLocators.filterEqualMacros);
+
     ODPActions.clickMacroElement(4);
     ODPActions.clickMacroElement(10);
     ODPActions.clickMacroElement(11);
@@ -159,21 +163,12 @@ public class Security implements CdfHelper {
   @Then("enter the {string} of the service username and password")
   public void enterTheOfTheServiceUsernameAndPassword(String request) throws IOException {
     try {
-      for (int i = 0; i <= 100; i++) {
-        CdfSysAdminLocators.requestBody.sendKeys(Keys.BACK_SPACE);
-      }
+      CDAPUtils.clearField(CdfSysAdminLocators.requestBody);
     } finally {
-      for (int i = 0; i <= 100; i++) {
-        CdfSysAdminLocators.requestBody.sendKeys(Keys.BACK_SPACE);
-      }
+      CDAPUtils.clearField(CdfSysAdminLocators.requestBody);
     }
-
-//    CdfSysAdminActions.enterRequestBody("\"description\": \"secure login creds\",\"data\": \""+System.getenv(request)+
-//            "\",\"properties\": {}}");
-
     CdfSysAdminActions.enterRequestBody("{\"description\": \"secure login creds\",\"data\": \"" + CDAPUtils.
       getPluginProp(request) + "\",\"properties\": {}}");
-
   }
 
   @When("Username {string} and Password {string} is provided")

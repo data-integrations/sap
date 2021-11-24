@@ -1,6 +1,22 @@
+/*
+ * Copyright © 2021 Cask Data, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package io.cdap.plugin.odp.actions;
 
 import io.cdap.e2e.utils.SeleniumDriver;
+import io.cdap.e2e.utils.SeleniumHelper;
 import io.cdap.plugin.odp.locators.ODPLocators;
 import io.cdap.plugin.odp.utils.CDAPUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -14,12 +30,13 @@ import java.util.UUID;
  * ODPActions.
  */
 public class ODPActions {
-  public static ODPLocators odpLocators = null;
+  public static ODPLocators odpLocators;
+  private static JavascriptExecutor js;
 
   static {
-    odpLocators = PageFactory.initElements(SeleniumDriver.getDriver(), ODPLocators.class);
+    js = (JavascriptExecutor) SeleniumDriver.getDriver();
+    odpLocators = SeleniumHelper.getPropertiesLocators(ODPLocators.class);
   }
-
 
   public static void selectODPSource() {
     odpLocators.sapODPSource.click();
@@ -34,15 +51,16 @@ public class ODPActions {
     String packSize, String msServ, String systemID, String lgrp) throws IOException, InterruptedException {
     odpLocators.referenceName.sendKeys(UUID.randomUUID().toString());
     odpLocators.sapClient.sendKeys(CDAPUtils.getPluginProp(client));
-    if (CDAPUtils.getPluginProp(msServ) != null) {
+    if (null != CDAPUtils.getPluginProp(msServ)) {
       /*For load connection*/
       odpLocators.loadServer.click();
-      odpLocators.msHost.sendKeys(CDAPUtils.getPluginProp(asHost) != null ?
+      odpLocators.msHost.sendKeys(null != CDAPUtils.getPluginProp(asHost) ?
                                     CDAPUtils.getPluginProp(asHost) : StringUtils.EMPTY);
-      odpLocators.portNumber.sendKeys(CDAPUtils.getPluginProp(msServ));
-      odpLocators.systemID.sendKeys(CDAPUtils.getPluginProp(systemID) != null ?
+      odpLocators.portNumber.sendKeys(null != CDAPUtils.getPluginProp(msServ) ?
+                                        CDAPUtils.getPluginProp(msServ) : StringUtils.EMPTY);
+      odpLocators.systemID.sendKeys(null != CDAPUtils.getPluginProp(systemID) ?
                                       CDAPUtils.getPluginProp(systemID) : StringUtils.EMPTY);
-      ODPLocators.logonGroup.sendKeys(CDAPUtils.getPluginProp(lgrp) != null ?
+      odpLocators.logonGroup.sendKeys(null != CDAPUtils.getPluginProp(lgrp) ?
                                         CDAPUtils.getPluginProp(lgrp) : StringUtils.EMPTY);
     } else {
       /*For direct connection*/
@@ -50,11 +68,10 @@ public class ODPActions {
       odpLocators.sapApplicationServerHost.sendKeys(CDAPUtils.getPluginProp(asHost));
     }
     odpLocators.dataSourceName.sendKeys(CDAPUtils.getPluginProp(dsName));
-    JavascriptExecutor js = (JavascriptExecutor) SeleniumDriver.getDriver();
-    js.executeScript("window.scrollBy(0,350)", "");
+    js.executeScript("window.scrollBy(0,350)", StringUtils.EMPTY);
     odpLocators.gcsPath.sendKeys(CDAPUtils.getPluginProp(gcsPath));
     odpLocators.splitRow.sendKeys(CDAPUtils.getPluginProp(splitRow));
-    odpLocators.packageSize.sendKeys(CDAPUtils.getPluginProp(packSize) != null ?
+    odpLocators.packageSize.sendKeys(null != CDAPUtils.getPluginProp(packSize) ?
                                        CDAPUtils.getPluginProp(packSize) : StringUtils.EMPTY);
   }
 
@@ -65,11 +82,10 @@ public class ODPActions {
     odpLocators.systemNumber.sendKeys(CDAPUtils.getPluginProp(sysnr));
     odpLocators.sapApplicationServerHost.sendKeys(CDAPUtils.getPluginProp(asHost));
     odpLocators.dataSourceName.sendKeys(CDAPUtils.getPluginProp(dsName));
-    JavascriptExecutor js = (JavascriptExecutor) SeleniumDriver.getDriver();
-    js.executeScript("window.scrollBy(0,350)", "");
+    js.executeScript("window.scrollBy(0,350)", StringUtils.EMPTY);
     odpLocators.gcsPath.sendKeys(CDAPUtils.getPluginProp(gcsPath));
     odpLocators.splitRow.sendKeys(CDAPUtils.getPluginProp(splitRow));
-    odpLocators.packageSize.sendKeys(CDAPUtils.getPluginProp(packSize) != null ?
+    odpLocators.packageSize.sendKeys(null != CDAPUtils.getPluginProp(packSize) ?
                                        CDAPUtils.getPluginProp(packSize) : StringUtils.EMPTY);
   }
 
@@ -82,10 +98,10 @@ public class ODPActions {
     odpLocators.msHost.sendKeys(CDAPUtils.getPluginProp(asHost));
     odpLocators.portNumber.sendKeys(CDAPUtils.getPluginProp(msServ));
     odpLocators.systemID.sendKeys(CDAPUtils.getPluginProp(systemID));
-    ODPLocators.logonGroup.sendKeys(CDAPUtils.getPluginProp(lgrp));
+    odpLocators.logonGroup.sendKeys(CDAPUtils.getPluginProp(lgrp));
     odpLocators.dataSourceName.sendKeys(CDAPUtils.getPluginProp(dsName));
-    JavascriptExecutor js = (JavascriptExecutor) SeleniumDriver.getDriver();
-    js.executeScript("window.scrollBy(0,350)", "");
+
+    js.executeScript("window.scrollBy(0,350)", StringUtils.EMPTY);
     odpLocators.gcsPath.sendKeys(CDAPUtils.getPluginProp(gcsPath));
     odpLocators.splitRow.sendKeys(CDAPUtils.getPluginProp(splitrow));
     odpLocators.packageSize.sendKeys(CDAPUtils.getPluginProp(packageSize));
@@ -109,15 +125,13 @@ public class ODPActions {
   }
 
   public static void clickAllMacroElements() {
-
-    int a = odpLocators.macros.size();
-
-    for (int i = 0; i < a - 1; i++) {
-      odpLocators.macros.get(i).click();
+    int size = odpLocators.macros.size();
+    for (int count = 0; count < size - 1; count++) {
+      odpLocators.macros.get(count).click();
     }
   }
 
-  public static void clickMacroElement(int i) throws InterruptedException {
-    odpLocators.macros.get(i).click();
+  public static void clickMacroElement(int location) throws InterruptedException {
+    odpLocators.macros.get(location).click();
   }
 }

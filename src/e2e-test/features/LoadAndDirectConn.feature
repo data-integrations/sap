@@ -1,3 +1,16 @@
+# Copyright © 2021 Cask Data, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
 Feature: Optional Properties
 
   @LOADnDIR
@@ -5,7 +18,7 @@ Feature: Optional Properties
     Given Open CDF application to configure pipeline
     When Source is SAP ODP
     When Target is BigQuery for ODP data transfer
-    When Configure Connection "S4client" "S4sysnr" "S4asHost" "allTypeDsName" "S4gcsPath" "S4Splitrow" "S4pkgSize" "load.S4msServ" "load.S4systemID" "load.S4Lgrp"
+    When Configure Connection "s4Client" "s4Sysnr" "s4AsHost" "allTypeDsName" "s4GcsPath" "s4Splitrow" "s4PkgSize" "load.S4msServ" "load.S4systemID" "load.S4Lgrp"
     When Username and Password is provided
     When Run one Mode is Sync mode
     Then Validate the Schema created

@@ -1,9 +1,22 @@
+# Copyright © 2021 Cask Data, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
 @Security
 Feature: Secured macros can be configured and used for the login credentials
 
   @Security-TC-ODP-SECU-01
   Scenario: User is able to configure security macros with auth user and no errors while validating the credentials plus connection parameter
-    Given Open "HTTP_CALL" link to configure macros
+    Given Open "httpCall" link to configure macros
     Then Select "PUT" service to configure
     Then enter variable for "testuserqa" of the macro
     Then enter the "AUTH_USERNAME" of the service username and password
@@ -42,7 +55,7 @@ Feature: Secured macros can be configured and used for the login credentials
     When Source is SAP ODP
     When Target is BigQuery for ODP data transfer
     Then link source and target
-    When Configure Direct Connection "S4client" "S4sysnr" "S4asHost" "S4dsName" "S4gcsPath" "S4Splitrow" "S4pkgSize"
+    When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "s4DsName" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     Then enter the secured created variable
     Then Close the ODP Properties
     Then Enter the BigQuery Properties for ODP datasource "tableDemo"
@@ -50,7 +63,7 @@ Feature: Secured macros can be configured and used for the login credentials
     Then Save and Deploy ODP Pipeline
     Then Run the ODP Pipeline in Runtime
     Then Wait till ODP pipeline is in running state
-    Then Create the "4" records with "RFC_2LIS_VAHDR" in the ODP datasource from JCO
+    Then Create the "4" records with "rfc.2lis.vahdr" in the ODP datasource from JCO
     Then Open Logs of ODP Pipeline
     Then Verify the ODP pipeline status is "Succeeded"
     Then validate successMessage is displayed for the ODP pipeline
@@ -62,7 +75,7 @@ Feature: Secured macros can be configured and used for the login credentials
     Given Open CDF application to configure pipeline
     When Source is SAP ODP
     When Target is BigQuery for ODP data transfer
-    When Configure Direct Connection "S4client" "S4sysnr" "S4asHost" "S4dsName" "S4gcsPath" "S4Splitrow" "S4pkgSize"
+    When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "s4DsName" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     When Username "testNoAuthUsername" and Password "testNoAuthPwd" is provided
     When Run one Mode is Sync mode
     Then RFC auth error is displayed "rfc_error"

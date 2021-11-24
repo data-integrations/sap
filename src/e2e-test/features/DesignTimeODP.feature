@@ -1,10 +1,23 @@
+# Copyright © 2021 Cask Data, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
 Feature: Design Time ODP Scenario
 
   @ODP @DesignTime-TC-ODP-DSGN-01(Direct)
   Scenario:User configured direct connection parameters and Security parameters by providing values on SAP UI(ENV)
     Given Open CDF application to configure pipeline
     When Source is SAP ODP
-    When Configure Direct Connection "S4client" "S4sysnr" "S4asHost" "S4dsName" "S4gcsPath" "S4Splitrow" "S4pkgSize"
+    When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "s4DsName" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     When Username and Password is provided
     Then Connection is established
 
@@ -12,7 +25,7 @@ Feature: Design Time ODP Scenario
   Scenario:User configured Load connection parameters and Security parameters by providing values on SAP UI(ENV)
     Given Open CDF application to configure pipeline
     When Source is SAP ODP
-    When LoadProp "S4client" "S4asHost" "S4msServ" "S4systemID" "S4dsName" "S4gcsPath" "S4Splitrow" "S4pkgSize" "S4Lgrp"
+    When LoadProp "s4Client" "s4AsHost" "s4MsServ" "s4SystemId" "s4DsName" "s4GcsPath" "s4Splitrow" "s4PkgSize" "s4Lgrp"
     When Username and Password is provided
     Then Connection is established
 
@@ -20,7 +33,7 @@ Feature: Design Time ODP Scenario
   Scenario: User is able to configure Security parameters using macros in direct connection
     Given Open CDF application to configure pipeline
     When Source is SAP ODP
-    When Configure Direct Connection "S4client" "S4sysnr" "S4asHost" "S4dsName" "S4gcsPath" "S4Splitrow" "S4pkgSize"
+    When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "s4DsName" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     When Username and Password is provided
     When User has selected Sap client macro to configure
     Then User is validate without any error
@@ -39,7 +52,7 @@ Feature: Design Time ODP Scenario
   Scenario: User is able to configure Security parameters using macros in load connection
     Given Open CDF application to configure pipeline
     When Source is SAP ODP
-    When LoadProp "S4client" "S4msHost" "S4msServ" "S4systemID" "S4dsName" "S4gcsPath" "S4Splitrow" "S4pkgSize" "S4Lgrp"
+    When LoadProp "s4Client" "s4MsHost" "s4MsServ" "s4SystemId" "s4DsName" "s4GcsPath" "s4Splitrow" "s4PkgSize" "s4Lgrp"
     When Username and Password is provided
     When User has selected Sap msHost macro to configure
     Then User is validate without any error
@@ -52,7 +65,7 @@ Feature: Design Time ODP Scenario
   Scenario:User is able to get the schema of the datasources supporting all the datatype
     Given Open CDF application to configure pipeline
     When Source is SAP ODP
-    When Configure Direct Connection "S4client" "S4sysnr" "S4asHost" "dsAllDataType" "S4gcsPath" "S4Splitrow" "S4pkgSize"
+    When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "dsAllDataType" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     When Username and Password is provided
     Then Validate the Schema created
 
@@ -61,15 +74,15 @@ Feature: Design Time ODP Scenario
   Scenario Outline: User is able to get the schema of the SAP Datasource
     Given Open CDF application to configure pipeline
     When Source is SAP ODP
-    When Configure Direct Connection "S4client" "S4sysnr" "S4asHost" "S4dsName" "S4gcsPath" "S4Splitrow" "S4pkgSize"
+    When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "s4DsName" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     When Username and Password is provided
     When data source as "<datasource>" is added
     Then Validate the Schema created
     Examples:
-      |datasource|
-      |2LIS_02_ITM|
-      |2LIS_11_VAITM|
-      |0MATERIAL_LPRH_HIER|
+      | datasource          |
+      | 2LIS_02_ITM         |
+      | 2LIS_11_VAITM       |
+      | 0MATERIAL_LPRH_HIER |
 
 
 
