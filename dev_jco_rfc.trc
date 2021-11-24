@@ -1,0 +1,84 @@
+
+**** Error file opened at 20211123 095433 Coordinated Universal Time Rel. 3.0.20 (2019-09-05) [721.1311]
+Error: [1]  >Tue Nov 23 09:54:33,651<    RfcException raised by system [DS4|GCDFS4DEV|00]:
+	message: connection closed without message (CM_NO_DATA_RECEIVED)
+	return code: RFC_CLOSED (6)
+	error group: 102
+	key: RFC_ERROR_COMMUNICATION
+
+
+**** Error file opened at 20211123 100236 Coordinated Universal Time Rel. 3.0.20 (2019-09-05) [721.1311]
+Error: [1]  >Tue Nov 23 10:02:36,658<    RfcException raised by system [DS4|GCDFS4DEV|00]:
+	message: connection closed without message (CM_NO_DATA_RECEIVED)
+	return code: RFC_CLOSED (6)
+	error group: 102
+	key: RFC_ERROR_COMMUNICATION
+
+
+**** Error file opened at 20211123 100942 Coordinated Universal Time Rel. 3.0.20 (2019-09-05) [721.1311]
+Error: [1]  >Tue Nov 23 10:09:42,693<    RfcException raised by system [DS4|GCDFS4DEV|00]:
+	message: connection closed without message (CM_NO_DATA_RECEIVED)
+	return code: RFC_CLOSED (6)
+	error group: 102
+	key: RFC_ERROR_COMMUNICATION
+
+
+**** Error file opened at 20211123 101842 Coordinated Universal Time Rel. 3.0.20 (2019-09-05) [721.1311]
+Error:   >Tue Nov 23 10:18:42,413<    >RfcGetException (rc=21) message:      Screen output without connection to user.                           
+<RfcGetException
+
+
+Error: [1]  >Tue Nov 23 10:18:42,415<    RfcException raised by system [DS4|GCDFS4DEV|00]:
+	message:      Screen output without connection to user.                           
+	return code: RFC_SYS_EXCEPTION (3)
+	error group: 104
+	key: RFC_ERROR_SYSTEM_FAILURE
+
+
+**** Error file opened at 20211123 105438 Coordinated Universal Time Rel. 3.0.20 (2019-09-05) [721.1311]
+Error: [1]  >Tue Nov 23 10:54:38,959<    RfcException raised by system [DS4|GCDFS4DEV|00]:
+	message: connection closed without message (CM_NO_DATA_RECEIVED)
+	return code: RFC_CLOSED (6)
+	error group: 102
+	key: RFC_ERROR_COMMUNICATION
+
+
+**** Error file opened at 20211123 105949 Coordinated Universal Time Rel. 3.0.20 (2019-09-05) [721.1311]
+Error: [1]  >Tue Nov 23 10:59:49,717<    RfcException raised by system [DS4|GCDFS4DEV|00]:
+	message: connection closed without message (CM_NO_DATA_RECEIVED)
+	return code: RFC_CLOSED (6)
+	error group: 102
+	key: RFC_ERROR_COMMUNICATION
+
+
+**** Error file opened at 20211123 110408 Coordinated Universal Time Rel. 3.0.20 (2019-09-05) [721.1311]
+Error: [1]  >Tue Nov 23 11:04:08,528<    RfcException raised by system [DS4|GCDFS4DEV|00]:
+	message: connection closed without message (CM_NO_DATA_RECEIVED)
+	return code: RFC_CLOSED (6)
+	error group: 102
+	key: RFC_ERROR_COMMUNICATION
+
+
+**** Error file opened at 20211123 110747 Coordinated Universal Time Rel. 3.0.20 (2019-09-05) [721.1311]
+Error: [1]  >Tue Nov 23 11:07:47,854<    RfcException raised by system [DS4|GCDFS4DEV|00]:
+	message: connection closed without message (CM_NO_DATA_RECEIVED)
+	return code: RFC_CLOSED (6)
+	error group: 102
+	key: RFC_ERROR_COMMUNICATION
+
+
+**** Error file opened at 20211123 114048 Coordinated Universal Time Rel. 3.0.20 (2019-09-05) [721.1311]
+Error: [1]  >Tue Nov 23 11:40:48,727<    RfcException raised by system [DS4|GCDFS4DEV|00]:
+	message: connection closed without message (CM_NO_DATA_RECEIVED)
+	return code: RFC_CLOSED (6)
+	error group: 102
+	key: RFC_ERROR_COMMUNICATION
+
+
+**** Error file opened at 20211123 115422 Coordinated Universal Time Rel. 3.0.20 (2019-09-05) [721.1311]
+Error: [1]  >Tue Nov 23 11:54:22,198<    RfcException raised by system [DS4|GCDFS4DEV|00]:
+	message: connection closed without message (CM_NO_DATA_RECEIVED)
+	return code: RFC_CLOSED (6)
+	error group: 102
+	key: RFC_ERROR_COMMUNICATION
+

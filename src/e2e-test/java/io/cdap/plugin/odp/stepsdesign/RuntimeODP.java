@@ -40,9 +40,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 /**
  * RuntimeODP.
@@ -58,9 +56,11 @@ public class RuntimeODP implements CdfHelper {
   static int presentRecords;
   static int i = 0;
   static String number;
+  static int noOfRecords;
   static String deltaLog;
   static String rawLog;
   static PrintWriter out;
+  private List<String> numList = new ArrayList<>();
   public static CdfPipelineRunLocators cdfPipelineRunLocators =
     (CdfPipelineRunLocators) SeleniumHelper.getPropertiesLocators(CdfPipelineRunLocators.class);
 
@@ -111,8 +111,7 @@ public class RuntimeODP implements CdfHelper {
 
   @When("Username and Password is provided")
   public void usernameAndPasswordIsProvided() throws IOException {
-    ODPActions.enterUserNamePassword(System.getenv("AUTH_USERNAME"), System.getenv("AUTH_PASSWORD"));
-
+    ODPActions.enterUserNamePassword("shaik", "Ds4@2021");
   }
 
 
@@ -190,11 +189,16 @@ public class RuntimeODP implements CdfHelper {
     runtimeODP.deleteTheExistingOdpTableInBigquery("tab_src01");
   }
 
-  @Then("Create the {string} records with {string} in the ODP datasource from JCO")
-  public void createTheRecordsInTheODPDatasourceFromJCO(String recordcount, String rfcName)
+  @Then("{string} the {string} records with {string} in the ODP datasource from JCO")
+  public void createTheRecordsInTheODPDatasourceFromJCO(String action,String recordcount, String rfcName)
     throws IOException, JCoException {
+    if(action.equalsIgnoreCase("create")) {
+      action="I_NUM_C";
+    }
+    else if (action.equalsIgnoreCase("delete")) { action="I_NUM_D"; }
+    else if (action.equalsIgnoreCase("update")){action="I_NUM_U"; }
+
     dsRecordsCount = Integer.parseInt(recordcount);
-    presentRecords = presentRecords + dsRecordsCount;
     Properties connection = readPropertyODP();
     sapProps = SAPProperties.getDefault(connection);
     errorCapture = new ErrorCapture(exceptionUtils);
@@ -203,14 +207,25 @@ public class RuntimeODP implements CdfHelper {
     opProps.put("RFC", CDAPUtils.getPluginProp(rfcName));
     opProps.put("autoCommit", "true");
     try {
+
       ObjectMapper mapper = new ObjectMapper();
       ObjectNode objectNode = mapper.createObjectNode();
-      objectNode.put("I_NUM", recordcount);
+      objectNode.put(action, recordcount);
       JsonNode response = sapAdapterImpl.executeRFC(objectNode.toString(), opProps, "", "");
-      String records = response.toString().replaceAll("\\D", "");
-      BeforeActions.scenario.write("No of records created:-" + records);
-      Assert.assertEquals(records, recordcount);
-      Thread.sleep(60000);
+      noOfRecords = Integer.parseInt(response.get("EX_COUNT").asText());
+      Iterator<JsonNode> iteratedData =  response.get("EX_DATA").iterator();
+      while (iteratedData.hasNext()) {
+        JsonNode object = iteratedData.next();
+        int zeroIndex = 0;
+        Iterator<String> fieldName = object.fieldNames();
+        while (fieldName.hasNext() && zeroIndex == 0) {
+            numList.add(object.get(fieldName.next()).asText());
+            zeroIndex++;
+        }
+      }
+      BeforeActions.scenario.write("No of records :-" + noOfRecords+"/nArrays.toString(numList.toArray())");
+      Assert.assertEquals(noOfRecords, Integer.parseInt(recordcount));
+    //  Thread.sleep(60000);
     } catch (Exception e) {
       throw SystemException.throwException(e.getMessage(), e);
     }
@@ -226,6 +241,8 @@ public class RuntimeODP implements CdfHelper {
     CdfBigQueryPropertiesLocators.dataSetProjectID.sendKeys(CDAPUtils.getPluginProp("ODP-Project-ID"));
     CdfBigQueryPropertiesLocators.dataSet.sendKeys(CDAPUtils.getPluginProp("data-Set-ODP"));
     CdfBigQueryPropertiesLocators.bigQueryTable.sendKeys(CDAPUtils.getPluginProp(tableName));
+    CdfBigQueryPropertiesLocators.truncatableSwitch.click();
+    CdfBigQueryPropertiesLocators.updateTable.click();
     CdfBigQueryPropertiesLocators.validateBttn.click();
     SeleniumHelper.waitElementIsVisible(CdfBigQueryPropertiesLocators.textSuccess, 1L);
   }
@@ -274,26 +291,32 @@ public class RuntimeODP implements CdfHelper {
   }
 
   @Then("Get Count of no of records transferred from ODP to BigQuery in {string}")
-  public void getCountOfNoOfRecordsTransferredFromODPToBigQueryIn(String table)
-    throws IOException, InterruptedException {
-
+  public void getCountOfNoOfRecordsTransferredFromODPToBigQueryIn(String table) throws
+          IOException, InterruptedException {
     countRecords = gcpClient.countBqQuery(CDAPUtils.getPluginProp(table));
-    BeforeActions.scenario.write("**********No of Records Transferred******************:" + countRecords);
-    if (i == 0) {
-      presentRecords = presentRecords + countRecords;
-    }
-    i++;
   }
 
-  @Then("Verify the Delta load transfer is successful")
-  public void verifyTheDeltaLoadTransferIsSuccessfull() {
-    Assert.assertEquals(presentRecords, countRecords);
+  @Then("Verify the Delta load transfer is successful in {string} on basis of {string}")
+  public void verifyTheDeltaLoadTransferIsSuccessfull(String table, String field) throws IOException, InterruptedException {
+    int i=0;
+    String projectId = CDAPUtils.getPluginProp("ODP-Project-ID");
+    String datasetName = CDAPUtils.getPluginProp("data-Set-ODP");
+    String selectQuery = "SELECT count(*)  FROM `" + projectId + "." + datasetName + "." + CDAPUtils.getPluginProp
+            (table) + "` WHERE " +
+            field.toUpperCase();
+    for( i=0; i<numList.size(); i++) {
+      Assert.assertTrue(GcpClient.executeQuery(selectQuery.concat("="+"\""+numList.get(i)+"\"")) == 1);
+    }
+    countRecords = gcpClient.countBqQuery(CDAPUtils.getPluginProp(table));
+    Assert.assertTrue(countRecords==noOfRecords);
+
+
   }
 
   @Then("Close the log window")
   public void closeTheLogWindow() {
     SeleniumDriver.getDriver().findElement(By.xpath("//*[@data-cy=\"log-viewer-close-btn\"]")).click();
-    ;
+    numList.clear();
   }
 
   @Then("delete table {string} in BQ if not empty")
@@ -322,7 +345,7 @@ public class RuntimeODP implements CdfHelper {
 
   @Then("Verify the full load transfer is successful")
   public void verifyTheFullLoadTransferIssuccessful() {
-    Assert.assertTrue(countRecords > 0);
+    Assert.assertTrue(countRecords == recordOut());
   }
 
   @Then("Open Logs of ODP Pipeline to capture delta logs")

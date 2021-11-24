@@ -27,49 +27,49 @@ Feature: Run Time E2E
 
   @ODP @RunTime-TC-ODP-RNTM-01(Direct)
   Scenario: Multi subscriber
-    Given Open CDF application to configure pipeline
-    When Source is SAP ODP
-    When Target is BigQuery for ODP data transfer
-    When Configure Direct Connection "S4client" "S4sysnr" "S4asHost" "S4dsName" "S4gcsPath" "S4Splitrow" "S4pkgSize"
-    When Username and Password is provided
-    When Subscriber is entered
-    When Run one Mode is Sync mode
-    Then Validate the Schema created
-    Then Close the ODP Properties
-    Then delete table "tableDemo" in BQ if not empty
-    Then Enter the BigQuery Properties for ODP datasource "tableDemo"
-    Then Close the BQ Properties
-    Then link source and target
-    Then Save and Deploy ODP Pipeline
-    Then Run the ODP Pipeline in Runtime
-    Then Wait till ODP pipeline is in running state
-    Then Create the "4" records with "RFC_2LIS_VAHDR" in the ODP datasource from JCO
-    Then Open Logs of ODP Pipeline
-    Then Verify the ODP pipeline status is "Succeeded"
-    Then validate successMessage is displayed for the ODP pipeline
-    Then Get Count of no of records transferred from ODP to BigQuery in "tableDemo"
-    Then Verify the full load transfer is successful
-    Given Open CDF application to configure pipeline
-    When Source is SAP ODP
-    When Target is BigQuery for ODP data transfer
-    When Configure Direct Connection "S4client" "S4sysnr" "S4asHost" "S4dsName" "S4gcsPath" "S4Splitrow" "S4pkgSize"
-    When Username and Password is provided
-    When Subscriber is entered
-    When Run one Mode is Sync mode
-    Then Validate the Schema created
-    Then Close the ODP Properties
-    Then Enter the BigQuery Properties for ODP datasource "tableDemo"
-    Then Close the BQ Properties
-    Then link source and target
-    Then Save and Deploy ODP Pipeline
-    Then Run the ODP Pipeline in Runtime
-    Then Wait till ODP pipeline is in running state
-    Then Open Logs of ODP Pipeline to capture delta logs
-    Then Verify the ODP pipeline status is "Succeeded"
-    Then validate successMessage is displayed for the ODP pipeline
-    Then Get Count of no of records transferred from ODP to BigQuery in "tableDemo"
-    Then Verify the Delta load transfer is successful
-    Then Reset the parameters
+#    Given Open CDF application to configure pipeline
+#    When Source is SAP ODP
+#    When Target is BigQuery for ODP data transfer
+#    When Configure Direct Connection "S4client" "S4sysnr" "S4asHost" "S4dsName" "S4gcsPath" "S4Splitrow" "S4pkgSize"
+#    When Username and Password is provided
+#    When Subscriber is entered
+#    When Run one Mode is Sync mode
+#    Then Validate the Schema created
+#    Then Close the ODP Properties
+#    Then delete table "tableDemo" in BQ if not empty
+#    Then Enter the BigQuery Properties for ODP datasource "tableDemo"
+#    Then Close the BQ Properties
+#    Then link source and target
+#    Then Save and Deploy ODP Pipeline
+#    Then Run the ODP Pipeline in Runtime
+#    Then Wait till ODP pipeline is in running state
+    Then "Create" the "4" records with "RFC_2LIS_02_HDR" in the ODP datasource from JCO
+#    Then Open Logs of ODP Pipeline
+#    Then Verify the ODP pipeline status is "Succeeded"
+#    Then validate successMessage is displayed for the ODP pipeline
+#    Then Get Count of no of records transferred from ODP to BigQuery in "tableDemo"
+#    Then Verify the full load transfer is successful
+#    Given Open CDF application to configure pipeline
+#    When Source is SAP ODP
+#    When Target is BigQuery for ODP data transfer
+#    When Configure Direct Connection "S4client" "S4sysnr" "S4asHost" "S4dsName" "S4gcsPath" "S4Splitrow" "S4pkgSize"
+#    When Username and Password is provided
+#    When Subscriber is entered
+#    When Run one Mode is Sync mode
+#    Then Validate the Schema created
+#    Then Close the ODP Properties
+#    Then Enter the BigQuery Properties for ODP datasource "tableDemo"
+#    Then Close the BQ Properties
+#    Then link source and target
+#    Then Save and Deploy ODP Pipeline
+#    Then Run the ODP Pipeline in Runtime
+#    Then Wait till ODP pipeline is in running state
+#    Then Open Logs of ODP Pipeline to capture delta logs
+#    Then Verify the ODP pipeline status is "Succeeded"
+#    Then validate successMessage is displayed for the ODP pipeline
+#    Then Get Count of no of records transferred from ODP to BigQuery in "tableDemo"
+#    Then Verify the Delta load transfer is successful
+#    Then Reset the parameters
 
   @ODP @RunTime-TC-ODP-RNTM-09-01(Direct)
   Scenario: User is able to Login and transfer delta load for 2LIS_02_HDR
@@ -88,7 +88,7 @@ Feature: Run Time E2E
     Then Save and Deploy ODP Pipeline
     Then Run the ODP Pipeline in Runtime
     Then Wait till ODP pipeline is in running state
-    Then Create the "4" records with "RFC_2LIS_02_HDR" in the ODP datasource from JCO
+    Then "Create" the "4" records with "RFC_2LIS_02_HDR" in the ODP datasource from JCO
     Then Open Logs of ODP Pipeline
     Then Verify the ODP pipeline status is "Succeeded"
     Then validate successMessage is displayed for the ODP pipeline
@@ -122,7 +122,7 @@ Feature: Run Time E2E
     Then Save and Deploy ODP Pipeline
     Then Run the ODP Pipeline in Runtime
     Then Wait till ODP pipeline is in running state
-    Then Create the "4" records with "RFC_2LIS_VAHDR" in the ODP datasource from JCO
+    Then "Create" the "4" records with "RFC_2LIS_VAHDR" in the ODP datasource from JCO
     Then Open Logs of ODP Pipeline
     Then Verify the ODP pipeline status is "Succeeded"
     Then validate successMessage is displayed for the ODP pipeline
@@ -233,4 +233,91 @@ Feature: Run Time E2E
     Then validate successMessage is displayed for the ODP pipeline
     Then Get Count of no of records transferred from ODP to BigQuery in "tableDemo"
     Then Verify the full load transfer is successful
+    Then Reset the parameters
+
+
+  @ODP @RunTime-TC-ODP-RNTM-09-02(Deletion)
+   Scenario: User is able to Login and validate deletion delta data data can be picked up
+    Given Open CDF application to configure pipeline
+    When Source is SAP ODP
+    When Target is BigQuery for ODP data transfer
+    When Configure Direct Connection "S4client" "S4sysnr" "S4asHost" "dsMasterAttr" "S4gcsPath" "S4Splitrow" "S4pkgSize"
+    When Username and Password is provided
+    When Run one Mode is Sync mode
+    Then Validate the Schema created
+    Then Close the ODP Properties
+    Then delete table "tableDemo" in BQ if not empty
+    Then Enter the BigQuery Properties for ODP datasource "tableDemo"
+    Then Close the BQ Properties
+    Then link source and target
+    Then Save and Deploy ODP Pipeline
+    Then Run the ODP Pipeline in Runtime
+    Then Wait till ODP pipeline is in running state
+    Then Open Logs of ODP Pipeline
+    Then Verify the ODP pipeline status is "Succeeded"
+    Then validate successMessage is displayed for the ODP pipeline
+    Then Get Count of no of records transferred from ODP to BigQuery in "tableDemo"
+    Then Verify the full load transfer is successful
+    Then Close the log window
+    Then "create" the "10" records with "rfc_matnr" in the ODP datasource from JCO
+    Then Run the ODP Pipeline in Runtime
+    Then Wait till ODP pipeline is successful again
+    Then Open Logs of ODP Pipeline to capture delta logs
+    Then Verify the ODP pipeline status is "Succeeded"
+    Then validate successMessage is displayed for the ODP pipeline
+    Then Get Count of no of records transferred from ODP to BigQuery in "tableDemo"
+    Then Verify the Delta load transfer is successful in "tableDemo" on basis of "MATNR"
+    Then Close the log window
+    Then "delete" the "10" records with "rfc_matnr" in the ODP datasource from JCO
+    Then Run the ODP Pipeline in Runtime
+    Then Wait till ODP pipeline is successful again
+    Then Open Logs of ODP Pipeline to capture delta logs
+    Then Verify the ODP pipeline status is "Succeeded"
+    Then validate successMessage is displayed for the ODP pipeline
+    Then Get Count of no of records transferred from ODP to BigQuery in "tableDemo"
+    Then Verify the Delta load transfer is successful in "tableDemo" on basis of "MATNR"
+    Then Close the log window
+    Then Reset the parameters
+
+  @ODP @RunTime-TC-ODP-RNTM-09-02(update)
+  Scenario: User is able to Login and validate updated delta data data can be picked up
+    Given Open CDF application to configure pipeline
+    When Source is SAP ODP
+    When Target is BigQuery for ODP data transfer
+    When Configure Direct Connection "S4client" "S4sysnr" "S4asHost" "dsMasterAttr" "S4gcsPath" "S4Splitrow" "S4pkgSize"
+    When Username and Password is provided
+    When Run one Mode is Sync mode
+    Then Validate the Schema created
+    Then Close the ODP Properties
+    Then delete table "tableDemo" in BQ if not empty
+    Then Enter the BigQuery Properties for ODP datasource "tableDemo"
+    Then Close the BQ Properties
+    Then link source and target
+    Then Save and Deploy ODP Pipeline
+    Then Run the ODP Pipeline in Runtime
+    Then Wait till ODP pipeline is in running state
+    Then Open Logs of ODP Pipeline
+    Then Verify the ODP pipeline status is "Succeeded"
+    Then validate successMessage is displayed for the ODP pipeline
+    Then Get Count of no of records transferred from ODP to BigQuery in "tableDemo"
+    Then Verify the full load transfer is successful
+    Then Close the log window
+    Then "create" the "10" records with "rfc_matnr" in the ODP datasource from JCO
+    Then Run the ODP Pipeline in Runtime
+    Then Wait till ODP pipeline is successful again
+    Then Open Logs of ODP Pipeline to capture delta logs
+    Then Verify the ODP pipeline status is "Succeeded"
+    Then validate successMessage is displayed for the ODP pipeline
+    Then Get Count of no of records transferred from ODP to BigQuery in "tableDemo"
+    Then Verify the Delta load transfer is successful in "tableDemo" on basis of "MATNR"
+    Then Close the log window
+    Then "update" the "10" records with "rfc_matnr" in the ODP datasource from JCO
+    Then Run the ODP Pipeline in Runtime
+    Then Wait till ODP pipeline is successful again
+    Then Open Logs of ODP Pipeline to capture delta logs
+    Then Verify the ODP pipeline status is "Succeeded"
+    Then validate successMessage is displayed for the ODP pipeline
+    Then Get Count of no of records transferred from ODP to BigQuery in "tableDemo"
+    Then Verify the Delta load transfer is successful in "tableDemo" on basis of "MATNR"
+    Then Close the log window
     Then Reset the parameters
