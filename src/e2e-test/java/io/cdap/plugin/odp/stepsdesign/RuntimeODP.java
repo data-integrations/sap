@@ -254,8 +254,8 @@ public class RuntimeODP implements CdfHelper {
     SeleniumHelper.replaceElementValue(CdfBigQueryPropertiesLocators.projectID,
                                        CDAPUtils.getPluginProp("odpProjectId"));
     CdfBigQueryPropertiesLocators.bigQueryReferenceName.sendKeys("automation_test");
-    CdfBigQueryPropertiesLocators.dataSetProjectID.sendKeys(CDAPUtils.getPluginProp("odpProjectId"));
-    CdfBigQueryPropertiesLocators.dataSet.sendKeys(CDAPUtils.getPluginProp("dataSetOdp"));
+    CdfBigQueryPropertiesLocators.datasetProjectID.sendKeys(CDAPUtils.getPluginProp("odpProjectId"));
+    CdfBigQueryPropertiesLocators.dataset.sendKeys(CDAPUtils.getPluginProp("dataSetOdp"));
     CdfBigQueryPropertiesLocators.bigQueryTable.sendKeys(CDAPUtils.getPluginProp(tableName));
     CdfBigQueryPropertiesLocators.truncatableSwitch.click();
     CdfBigQueryPropertiesLocators.updateTable.click();
