@@ -27,6 +27,7 @@ import io.cdap.plugin.odp.utils.CDAPUtils;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.junit.Assert;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoAlertPresentException;
 
@@ -180,6 +181,11 @@ public class Security implements CdfHelper {
   public void rfcAuthErrorIsDisplayed(String rfcError) {
     ODPActions.getSchema();
     errorExist = ODPLocators.mainStreamError.getText().toLowerCase().contains(CDAPUtils.getErrorProp(rfcError)
-                                                                                .toLowerCase());
+            .toLowerCase());
+  }
+
+  @Then("User is able to validate the validate the error no auth error")
+  public void userIsAbleToValidateTheValidateTheErrorNoAuthError() {
+      Assert.assertTrue(errorExist);
   }
 }

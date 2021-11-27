@@ -57,12 +57,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
+
 
 /**
  * RuntimeODP.
@@ -78,7 +81,9 @@ public class RuntimeODP implements CdfHelper {
   static int countRecords;
   static int presentRecords;
   static int counter = 0;
+  static String datasource;
   static String number;
+  static String action;
   static int noOfRecords;
   static String deltaLog;
   static String rawLog;
@@ -117,6 +122,7 @@ public class RuntimeODP implements CdfHelper {
   @When("Configure Direct Connection {string} {string} {string} {string} {string} {string} {string}")
   public void configureDirectConnection(String client, String sysnr, String asHost, String dsName, String gcsPath,
                                         String splitRow, String packageSize) throws IOException, InterruptedException {
+    datasource = CDAPUtils.getPluginProp(dsName);
     ODPActions.getODPProperties();
     ODPActions.enterDirectConnectionProperties(client, sysnr, asHost, dsName, gcsPath, splitRow, packageSize);
   }
@@ -148,6 +154,7 @@ public class RuntimeODP implements CdfHelper {
     WebDriverWait wait = new WebDriverWait(SeleniumDriver.getDriver(), 20000);
     wait.until(ExpectedConditions.numberOfElementsToBeMoreThan
       (By.xpath("//*[@placeholder=\"Field name\"]"), 2));
+    Assert.assertEquals(true, CDAPUtils.schemaValidation());
   }
 
   @Then("Close the ODP Properties")
@@ -205,8 +212,9 @@ public class RuntimeODP implements CdfHelper {
   }
 
   @Then("{string} the {string} records with {string} in the ODP datasource from JCO")
-  public void createTheRecordsInTheODPDatasourceFromJCO(String action, String recordcount, String rfcName)
+  public void createTheRecordsInTheODPDatasourceFromJCO(String process, String recordcount, String rfcName)
     throws IOException, JCoException {
+    action = process;
     if (action.equalsIgnoreCase("create")) {
       action = "I_NUM_C";
     } else if (action.equalsIgnoreCase("delete")) {
@@ -239,9 +247,9 @@ public class RuntimeODP implements CdfHelper {
           zeroIndex++;
         }
       }
-      BeforeActions.scenario.write("No of records :-" + noOfRecords + "/nArrays.toString(numList.toArray())");
+      BeforeActions.scenario.write("No of records :-" + noOfRecords + Arrays.toString(numList.toArray()));
       Assert.assertEquals(noOfRecords, Integer.parseInt(recordcount));
-      Thread.sleep(60000);
+     // Thread.sleep(60000);
     } catch (Exception e) {
       throw SystemException.throwException(e.getMessage(), e);
     }
@@ -317,11 +325,31 @@ public class RuntimeODP implements CdfHelper {
     String selectQuery = "SELECT count(*)  FROM `" + projectId + "." + datasetName + "." + CDAPUtils.getPluginProp
       (table) + "` WHERE " +
       field.toUpperCase();
-    for (i = 0; i < numList.size(); i++) {
-      Assert.assertTrue(GcpClient.executeQuery(selectQuery.concat("=" + "\"" + numList.get(i) + "\"")) == 1);
+    switch (datasource) {
+      case "0MATERIAL_ATTR":
+        for (i = 0; i < numList.size(); i++) {
+        Assert.assertTrue(GcpClient.executeQuery(selectQuery.concat("=" + "\"" + numList.get(i) + "\"")) == 1);
+      }
+        countRecords = gcpClient.countBqQuery(CDAPUtils.getPluginProp(table));
+        Assert.assertTrue(countRecords == noOfRecords);
+        break;
+      case "2LIS_02_HDR" :
+        if (action == "I_NUM_C") {
+        for (i = 0; i < numList.size(); i++) {
+          Assert.assertTrue(GcpClient.executeQuery(selectQuery.concat("=" + "\"" + numList.get(i) + "\"")) == 1);
+        }
+        countRecords = gcpClient.countBqQuery(CDAPUtils.getPluginProp(table));
+        Assert.assertTrue(countRecords == noOfRecords);
+        } else {
+        for (i = 0; i < numList.size(); i++) {
+          Assert.assertTrue(GcpClient.executeQuery(selectQuery.concat("=" + "\"" + numList.get(i) + "\"")) == 2);
+        }
+        countRecords = gcpClient.countBqQuery(CDAPUtils.getPluginProp(table));
+        Assert.assertTrue(countRecords == 2 * noOfRecords);
+        }
+        break;
     }
-    countRecords = gcpClient.countBqQuery(CDAPUtils.getPluginProp(table));
-    Assert.assertTrue(countRecords == noOfRecords);
+
   }
 
   @Then("Close the log window")
@@ -355,7 +383,9 @@ public class RuntimeODP implements CdfHelper {
 
   @Then("Verify the full load transfer is successful")
   public void verifyTheFullLoadTransferIssuccessful() {
-    Assert.assertTrue(countRecords == recordOut());
+    String rec = String.valueOf(countRecords);
+    int resultrec = Integer.valueOf(rec.replaceAll(",", "").toString());
+    Assert.assertTrue(resultrec == recordOut());
   }
 
   @Then("Open Logs of ODP Pipeline to capture delta logs")
