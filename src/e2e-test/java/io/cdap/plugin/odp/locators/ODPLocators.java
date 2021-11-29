@@ -26,10 +26,10 @@ import java.util.List;
  */
 public class ODPLocators {
 
-  @FindBy(how = How.XPATH, using = "//*[contains(text(),'SAP ODP')]")
+  @FindBy(how = How.XPATH, using = "//*[@data-cy=\"plugin-SapOdp-batchsource\"]")
   public static WebElement sapODPSource;
 
-  @FindBy(how = How.XPATH, using = "//*[contains(text(),'-SNAPSHOT')]")
+  @FindBy(how = How.XPATH, using = "//*[@title=\"SAP ODP\"]/following-sibling::div")
   public static WebElement sapODPProperties;
 
   @FindBy(how = How.XPATH, using = "//*[@placeholder='Name used to identify this source for lineage']")

@@ -25,7 +25,6 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.junit.Assert;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -35,8 +34,6 @@ import java.io.IOException;
  * DesginTimeODP.
  */
 public class DesginTimeODP {
-
-  private static final String A = "a";
 
   @Then("Connection is established")
   public void connectionIsEstablished() throws InterruptedException {
@@ -58,8 +55,7 @@ public class DesginTimeODP {
   @When("User has selected Sap client macro to configure")
   public void userHasSelectedSapClientMacroToConfigure() {
     ODPLocators.macros.get(0).click();
-    ODPLocators.sapClient.sendKeys(Keys.chord(Keys.CONTROL, A));
-    ODPLocators.sapClient.sendKeys("${client}");
+    SeleniumHelper.replaceElementValue(ODPLocators.sapClient, "${client}");
   }
 
   @Then("User is validate without any error")
@@ -71,57 +67,49 @@ public class DesginTimeODP {
   @When("User has selected Sap language macro to configure")
   public void userHasSelectedSapLagMacroToConfigure() {
     ODPLocators.macros.get(1).click();
-    ODPLocators.language.sendKeys(Keys.chord(Keys.CONTROL, A));
-    ODPLocators.language.sendKeys("${lang}");
+    SeleniumHelper.replaceElementValue(ODPLocators.language, "${lang}");
   }
 
   @When("User has selected Sap server as host macro to configure")
   public void userHasSelectedSapServerAsHostMacroToConfigure() {
     ODPLocators.macros.get(2).click();
-    ODPLocators.sapApplicationServerHost.sendKeys(Keys.chord(Keys.CONTROL, A));
-    ODPLocators.sapApplicationServerHost.sendKeys("${host}");
+    SeleniumHelper.replaceElementValue(ODPLocators.sapApplicationServerHost, "${host}");
   }
 
   @When("User has selected System Number macro to configure")
   public void userHasSelectedSystemNumberMacroToConfigure() {
     ODPLocators.macros.get(3).click();
-    ODPLocators.systemNumber.sendKeys(Keys.chord(Keys.CONTROL, A));
-    ODPLocators.systemNumber.sendKeys("${sysnr}");
+    SeleniumHelper.replaceElementValue(ODPLocators.systemNumber, "${sysnr}");
   }
 
   @When("User has selected datasource macro to configure")
   public void userHasSelectedDatasourceMacroToConfigure() {
     ODPLocators.macros.get(5).click();
-    ODPLocators.dataSourceName.sendKeys(Keys.chord(Keys.CONTROL, A));
-    ODPLocators.dataSourceName.sendKeys("${dsname}");
+    SeleniumHelper.replaceElementValue(ODPLocators.dataSourceName, "${dsname}");
   }
 
   @When("User has selected gcsPath macro to configure")
   public void userHasSelectedGcsPathMacroToConfigure() {
     ODPLocators.macros.get(10).click();
-    ODPLocators.gcsPath.sendKeys(Keys.chord(Keys.CONTROL, A));
-    ODPLocators.gcsPath.sendKeys("${gcs}");
+    SeleniumHelper.replaceElementValue(ODPLocators.gcsPath, "${gcs}");
   }
 
   @When("User has selected Sap msHost macro to configure")
   public void userHasSelectedSapMsHostMacroToConfigure() {
     ODPLocators.macros.get(2).click();
-    ODPLocators.msHost.sendKeys(Keys.chord(Keys.CONTROL, A));
-    ODPLocators.msHost.sendKeys("${msHOst}");
+    SeleniumHelper.replaceElementValue(ODPLocators.msHost, "${msHOst}");
   }
 
   @When("User has selected Sap msServ macro to configure")
   public void userHasSelectedSapMsServMacroToConfigure() {
     ODPLocators.macros.get(4).click();
-    ODPLocators.portNumber.sendKeys(Keys.chord(Keys.CONTROL, A));
-    ODPLocators.portNumber.sendKeys("${portN0}");
+    SeleniumHelper.replaceElementValue(ODPLocators.portNumber, "${portN0}");
   }
 
   @When("User has selected UserName and Password macro to configure")
   public void userHasSelectedUserNameAndPasswordMacroToConfigure() {
     ODPLocators.macros.get(10).click();
-    ODPLocators.usernameCredentials.sendKeys(Keys.chord(Keys.CONTROL, A));
-    ODPLocators.usernameCredentials.sendKeys("${userName}");
+    SeleniumHelper.replaceElementValue(ODPLocators.usernameCredentials, "${userName}");
   }
 
   @When("data source as {string} is added")
