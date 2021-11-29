@@ -17,7 +17,7 @@ Feature: Design Time ODP Scenario
   Scenario:User configured direct connection parameters and Security parameters by providing values on SAP UI(ENV)
     Given Open CDF application to configure pipeline
     When Source is SAP ODP
-    When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "s4DsName" "s4GcsPath" "s4Splitrow" "s4PkgSize"
+    When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "dsMasterAttr" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     When Username and Password is provided
     Then Connection is established
 
@@ -25,7 +25,7 @@ Feature: Design Time ODP Scenario
   Scenario:User configured Load connection parameters and Security parameters by providing values on SAP UI(ENV)
     Given Open CDF application to configure pipeline
     When Source is SAP ODP
-    When LoadProp "s4Client" "s4AsHost" "s4MsServ" "s4SystemId" "s4DsName" "s4GcsPath" "s4Splitrow" "s4PkgSize" "s4Lgrp"
+    When LoadProp "s4Client" "s4AsHost" "s4MsServ" "s4SystemId" "dsAllDataType" "s4GcsPath" "s4Splitrow" "s4PkgSize" "s4Lgrp"
     When Username and Password is provided
     Then Connection is established
 
@@ -33,7 +33,7 @@ Feature: Design Time ODP Scenario
   Scenario: User is able to configure Security parameters using macros in direct connection
     Given Open CDF application to configure pipeline
     When Source is SAP ODP
-    When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "s4DsName" "s4GcsPath" "s4Splitrow" "s4PkgSize"
+    When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "dsMasterAttr" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     When Username and Password is provided
     When User has selected Sap client macro to configure
     Then User is validate without any error
@@ -52,7 +52,7 @@ Feature: Design Time ODP Scenario
   Scenario: User is able to configure Security parameters using macros in load connection
     Given Open CDF application to configure pipeline
     When Source is SAP ODP
-    When LoadProp "s4Client" "s4MsHost" "s4MsServ" "s4SystemId" "s4DsName" "s4GcsPath" "s4Splitrow" "s4PkgSize" "s4Lgrp"
+    When LoadProp "s4Client" "s4AsHost" "s4MsServ" "s4SystemId" "dsAllDataType" "s4GcsPath" "s4Splitrow" "s4PkgSize" "s4Lgrp"
     When Username and Password is provided
     When User has selected Sap msHost macro to configure
     Then User is validate without any error
@@ -74,7 +74,7 @@ Feature: Design Time ODP Scenario
   Scenario Outline: User is able to get the schema of the SAP Datasource
     Given Open CDF application to configure pipeline
     When Source is SAP ODP
-    When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "s4DsName" "s4GcsPath" "s4Splitrow" "s4PkgSize"
+    When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "dsAllDataType" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     When Username and Password is provided
     When data source as "<datasource>" is added
     Then Validate the Schema created

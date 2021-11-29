@@ -20,7 +20,6 @@ Feature: Optional Properties
     When Target is BigQuery for ODP data transfer
     When Configure Connection "s4Client" "s4Sysnr" "s4AsHost" "allTypeDsName" "s4GcsPath" "s4Splitrow" "s4PkgSize" "load.S4msServ" "load.S4systemID" "load.S4Lgrp"
     When Username and Password is provided
-    When Run one Mode is Sync mode
     Then Validate the Schema created
     Then Close the ODP Properties
     Then delete table "tableDemo" in BQ if not empty
@@ -34,4 +33,4 @@ Feature: Optional Properties
     Then Verify the ODP pipeline status is "Succeeded"
     Then validate successMessage is displayed for the ODP pipeline
     Then Get Count of no of records transferred from ODP to BigQuery in "tableDemo"
-    Then Verify the Delta load transfer is successfull
+    Then Verify the Delta load transfer is successful in "tableDemo" on basis of "EBELN"  #todo
