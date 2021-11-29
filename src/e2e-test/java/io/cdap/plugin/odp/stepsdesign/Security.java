@@ -27,11 +27,9 @@ import io.cdap.plugin.odp.utils.CDAPUtils;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoAlertPresentException;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 /**
  * Security.
@@ -157,7 +155,7 @@ public class Security implements CdfHelper {
     ODPLocators.splitRow.sendKeys("${secure(testjcosplit)}");
     ODPLocators.packageSize.sendKeys("${secure(testjcopackagesize)}");
     ODPLocators.validateButton.click();
-    ODPLocators.successMessage.isDisplayed();
+    ODPLocators.pluginValidationSuccessMessage.isDisplayed();
   }
 
   @Then("enter the {string} of the service username and password")

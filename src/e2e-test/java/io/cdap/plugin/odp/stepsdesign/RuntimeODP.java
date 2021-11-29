@@ -84,6 +84,7 @@ public class RuntimeODP implements CdfHelper {
   static String rawLog;
   static PrintWriter out;
   private List<String> numList = new ArrayList<>();
+  private static Properties connection = new SAPProperties();
   public static CdfPipelineRunLocators cdfPipelineRunLocators =
     SeleniumHelper.getPropertiesLocators(CdfPipelineRunLocators.class);
 
@@ -92,6 +93,16 @@ public class RuntimeODP implements CdfHelper {
       out = new PrintWriter(BeforeActions.myObj);
     } catch (FileNotFoundException e) {
       logger.error("Failed while printWriter : " + e);
+    }
+
+    Properties prop = new Properties();
+    try {
+      prop.load(new FileInputStream("src/e2e-test/resources/Google_SAP_Connection.properties"));
+    } catch (IOException e) {
+      logger.error("Failed while reading SAP properties file" + e);
+    }
+    for (String property : prop.stringPropertyNames()) {
+      connection.put(property, prop.getProperty(property));
     }
   }
 
@@ -168,7 +179,6 @@ public class RuntimeODP implements CdfHelper {
 
   @Then("Delete all existing records in datasource")
   public void deleteAllExistingRecordsInDatasource() throws JCoException, IOException {
-    Properties connection = readPropertyODP();
     sapProps = SAPProperties.getDefault(connection);
     errorCapture = new ErrorCapture(exceptionUtils);
     sapAdapterImpl = new SAPAdapterImpl(errorCapture, connection);
@@ -184,19 +194,6 @@ public class RuntimeODP implements CdfHelper {
     } catch (Exception e) {
       throw SystemException.throwException(e.getMessage(), e);
     }
-  }
-
-  public Properties readPropertyODP() throws IOException {
-    Properties prop = new Properties();
-    InputStream input;
-    Properties connection = new SAPProperties();
-    input = new FileInputStream("src/e2e-test/resources/Google_SAP_Connection.properties");
-    prop.load(input);
-    Set<String> propertyNames = prop.stringPropertyNames();
-    for (String property : propertyNames) {
-      connection.put(property, prop.getProperty(property));
-    }
-    return connection;
   }
 
   public static void main(String args[]) throws IOException, JCoException, InterruptedException {
@@ -215,7 +212,6 @@ public class RuntimeODP implements CdfHelper {
       action = "I_NUM_U";
     }
     dsRecordsCount = Integer.parseInt(recordcount);
-    Properties connection = readPropertyODP();
     sapProps = SAPProperties.getDefault(connection);
     errorCapture = new ErrorCapture(exceptionUtils);
     sapAdapterImpl = new SAPAdapterImpl(errorCapture, connection);

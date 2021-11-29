@@ -23,11 +23,9 @@ import io.cdap.plugin.odp.locators.ODPLocators;
 import io.cdap.plugin.odp.utils.CDAPUtils;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -67,7 +65,7 @@ public class DesginTimeODP {
   @Then("User is validate without any error")
   public void userIsValidateWithoutAnyError() throws InterruptedException {
     ODPLocators.validateButton.click();
-    Assert.assertTrue(ODPLocators.successMessage.isDisplayed());
+    Assert.assertTrue(ODPLocators.pluginValidationSuccessMessage.isDisplayed());
   }
 
   @When("User has selected Sap language macro to configure")
@@ -130,6 +128,6 @@ public class DesginTimeODP {
   public void dataSourceAsIsAdded(String datasource) throws InterruptedException {
     SeleniumHelper.replaceElementValue(ODPLocators.dataSourceName, datasource);
     ODPLocators.validateButton.click();
-    ODPLocators.successMessage.isDisplayed();
+    ODPLocators.pluginValidationSuccessMessage.isDisplayed();
   }
 }

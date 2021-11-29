@@ -96,7 +96,7 @@ public class ODPLocators {
   public static WebElement validateButton;
 
   @FindBy(how = How.XPATH, using = "//*[@data-cy='plugin-validation-success-msg']")
-  public static WebElement successMessage;
+  public static WebElement pluginValidationSuccessMessage;
 
   @FindBy(how = How.XPATH, using = "//*[@data-cy='jco.client.lang' and @class='MuiInputBase-input']")
   public static WebElement language;
