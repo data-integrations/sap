@@ -83,6 +83,3 @@ Feature: Design Time ODP Scenario
       | 2LIS_02_ITM         |
       | 2LIS_11_VAITM       |
       | 0MATERIAL_LPRH_HIER |
-
-
-

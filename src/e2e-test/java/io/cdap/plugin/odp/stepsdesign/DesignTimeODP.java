@@ -33,7 +33,7 @@ import java.io.IOException;
 /**
  * DesginTimeODP.
  */
-public class DesginTimeODP {
+public class DesignTimeODP {
 
   @Then("Connection is established")
   public void connectionIsEstablished() throws InterruptedException {
@@ -97,13 +97,13 @@ public class DesginTimeODP {
   @When("User has selected Sap msHost macro to configure")
   public void userHasSelectedSapMsHostMacroToConfigure() {
     ODPLocators.macros.get(2).click();
-    SeleniumHelper.replaceElementValue(ODPLocators.msHost, "${msHOst}");
+    SeleniumHelper.replaceElementValue(ODPLocators.msHost, "${msHost}");
   }
 
   @When("User has selected Sap msServ macro to configure")
   public void userHasSelectedSapMsServMacroToConfigure() {
     ODPLocators.macros.get(4).click();
-    SeleniumHelper.replaceElementValue(ODPLocators.portNumber, "${portN0}");
+    SeleniumHelper.replaceElementValue(ODPLocators.portNumber, "${portNo}");
   }
 
   @When("User has selected UserName and Password macro to configure")

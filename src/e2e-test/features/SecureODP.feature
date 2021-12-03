@@ -78,4 +78,4 @@ Feature: Secured macros can be configured and used for the login credentials
     When Username "testNoAuthUsername" and Password "testNoAuthPwd" is provided
     When Run one Mode is Sync mode
     Then RFC auth error is displayed "rfc_error"
-    Then User is able to validate the validate the error no auth error
+    Then User is able to validate the error no auth error

@@ -20,7 +20,6 @@ Feature: User has entered all the details of the connection with below mentioned
     When Source is SAP ODP
     When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "dsAllDataType" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     Then "referenceName" as "" and getting "noRefName"
-    Then User is able to validate the validate the error
     Then User is able to validate the text box is highlighted
 
   @DesignTime-TC-ODP-DSGN-03.02
@@ -29,7 +28,6 @@ Feature: User has entered all the details of the connection with below mentioned
     When Source is SAP ODP
     When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "dsAllDataType" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     Then "jco.client.client" as "" and getting "noJcoClient"
-    Then User is able to validate the validate the error
     Then User is able to validate the text box is highlighted
 
   @DesignTime-TC-ODP-DSGN-03.02
@@ -39,7 +37,6 @@ Feature: User has entered all the details of the connection with below mentioned
     When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "dsAllDataType" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     When Username and Password is provided
     Then "jco.client.lang" as "" and getting "noJcoLang"
-    Then User is able to validate the validate the error
     Then User is able to validate the text box is highlighted
 
   @DesignTime-TC-ODP-DSGN-03.02
@@ -49,7 +46,6 @@ Feature: User has entered all the details of the connection with below mentioned
     When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "dsAllDataType" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     When Username and Password is provided
     Then "jco.client.ashost" as "" and getting "sapAppServerHostRequired"
-    Then User is able to validate the validate the error
     Then User is able to validate the text box is highlighted
 
   @DesignTime-TC-ODP-DSGN-03.02
@@ -59,7 +55,6 @@ Feature: User has entered all the details of the connection with below mentioned
     When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "dsAllDataType" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     When Username and Password is provided
     Then "jco.client.sysnr" as "" and getting "sapSystemNumberRequired"
-    Then User is able to validate the validate the error
     Then User is able to validate the text box is highlighted
 
   @DesignTime-TC-ODP-DSGN-03.02
@@ -69,7 +64,6 @@ Feature: User has entered all the details of the connection with below mentioned
     When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "dsAllDataType" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     When Username and Password is provided
     Then "sapSourceObjName" as "" and getting "noSapSource"
-    Then User is able to validate the validate the error
     Then User is able to validate the text box is highlighted
 
   @DesignTime-TC-ODP-DSGN-03.02
@@ -79,7 +73,6 @@ Feature: User has entered all the details of the connection with below mentioned
     When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "dsAllDataType" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     When Username and Password is provided
     Then "jco.client.user" as "" and getting "noJcoUser"
-    Then User is able to validate the validate the error
     Then User is able to validate the text box is highlighted
 
   @DesignTime-TC-ODP-DSGN-03.02
@@ -89,7 +82,6 @@ Feature: User has entered all the details of the connection with below mentioned
     When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "dsAllDataType" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     When Username and Password is provided
     Then "gcsPath" as "" and getting "noGcsPath"
-    Then User is able to validate the validate the error
     Then User is able to validate the text box is highlighted
 
   @DesignTime-TC-ODP-DSGN-03.02
@@ -99,7 +91,6 @@ Feature: User has entered all the details of the connection with below mentioned
     When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "dsAllDataType" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     When Username and Password is provided
     Then User is able to set parameter "jco.client.client" as "abc" and getting "wrongJcoCLientConfig" for wrong input
-    Then User is able to validate the validate the error
     Then User is able to validate the text box is highlighted
 
   @DesignTime-TC-ODP-DSGN-03.02
@@ -109,7 +100,6 @@ Feature: User has entered all the details of the connection with below mentioned
     When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "dsAllDataType" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     When Username and Password is provided
     Then User is able to set parameter "jco.client.lang" as "Eq" and getting "wrongLogonLang" for wrong input
-    Then User is able to validate the validate the error
     Then User is able to validate the text box is highlighted
 
   @DesignTime-TC-ODP-DSGN-03.02
@@ -119,7 +109,6 @@ Feature: User has entered all the details of the connection with below mentioned
     When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "dsAllDataType" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     When Username and Password is provided
     Then User is able to set parameter "jco.client.ashost" as "10.132.0.300" and getting "sapgatewayFailure" for wrong input
-    Then User is able to validate the validate the error
     Then User is able to validate the text box is highlighted
 
   @DesignTime-TC-ODP-DSGN-03.02
@@ -129,7 +118,6 @@ Feature: User has entered all the details of the connection with below mentioned
     When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "dsAllDataType" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     When Username and Password is provided
     Then User is able to set parameter "jco.client.user" as "invalid" and getting "wrongCreds" for wrong input
-    Then User is able to validate the validate the error
     Then User is able to validate the text box is highlighted
 
 
@@ -140,7 +128,6 @@ Feature: User has entered all the details of the connection with below mentioned
     When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "dsAllDataType" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     When Username and Password is provided
     Then User is able to set parameter "gcsPath" as "gs://invalid" and getting "missingBillingAc" for wrong input
-    Then User is able to validate the validate the error
     Then User is able to validate the text box is highlighted
 
   @DesignTime-TC-ODP-DSGN-03.02
@@ -150,8 +137,6 @@ Feature: User has entered all the details of the connection with below mentioned
     When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "dsAllDataType" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     When Username and Password is provided
     Then User is able to set parameter <option> as <input> and getting row <errorMessage> for wrong input
-    Then User is able to validate the validate the error
-    Then User is able to validate the text box is highlighted
     Examples:
       | option         | input           | errorMessage          |
       | subscriberName | subscriber-Name | invalidSubscriberName |
@@ -165,7 +150,6 @@ Feature: User has entered all the details of the connection with below mentioned
     When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "dsAllDataType" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     When Username and Password is provided
     Then User is able to set parameters filterEqualKey as <filterOption> and its filterEqualVal as <query> and getting row <errorMessage> for wrong input
-    Then User is able to validate the validate the error
     Then User is able to validate the text box is highlighted
     Examples:
       | filterOption | query    | errorMessage       |
@@ -178,7 +162,6 @@ Feature: User has entered all the details of the connection with below mentioned
     When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "dsAllDataType" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     When Username and Password is provided
     Then User is able to set parameters filterRangeKey as <filterOption> and its filterRangeVal as <query> and getting row <errorMessage> for wrong input
-    Then User is able to validate the validate the error
     Then User is able to validate the text box is highlighted
     Examples:
       | filterOption | query     | errorMessage              |

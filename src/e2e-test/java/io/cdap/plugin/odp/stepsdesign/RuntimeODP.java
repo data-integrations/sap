@@ -54,7 +54,6 @@ import stepsdesign.BeforeActions;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,8 +62,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
+import static io.cdap.plugin.odp.utils.AutoConstants.ACT_CREATE;
+import static io.cdap.plugin.odp.utils.AutoConstants.ACT_DELETE;
+import static io.cdap.plugin.odp.utils.AutoConstants.ACT_UPDATE;
+import static io.cdap.plugin.odp.utils.AutoConstants.DATASOURCE_LISHDR;
+import static io.cdap.plugin.odp.utils.AutoConstants.DATASOURCE_MAT;
+import static io.cdap.plugin.odp.utils.AutoConstants.TABLE_ODP;
 
 
 /**
@@ -88,7 +92,7 @@ public class RuntimeODP implements CdfHelper {
   static String deltaLog;
   static String rawLog;
   static PrintWriter out;
-  private List<String> numList = new ArrayList<>();
+  private List<String> fields = new ArrayList<>();
   private static Properties connection = new SAPProperties();
   public static CdfPipelineRunLocators cdfPipelineRunLocators =
     SeleniumHelper.getPropertiesLocators(CdfPipelineRunLocators.class);
@@ -205,7 +209,7 @@ public class RuntimeODP implements CdfHelper {
 
   public static void main(String args[]) throws IOException, JCoException, InterruptedException {
     RuntimeODP runtimeODP = new RuntimeODP();
-    runtimeODP.deleteTheExistingOdpTableInBigquery("tab_src01");
+    runtimeODP.deleteTheExistingOdpTableInBigquery(TABLE_ODP);
   }
 
   @Then("{string} the {string} records with {string} in the ODP datasource from JCO")
@@ -213,11 +217,11 @@ public class RuntimeODP implements CdfHelper {
     throws IOException, JCoException {
     action = process;
     if (action.equalsIgnoreCase("create")) {
-      action = "I_NUM_C";
+      action = ACT_CREATE;
     } else if (action.equalsIgnoreCase("delete")) {
-      action = "I_NUM_D";
+      action = ACT_DELETE;
     } else if (action.equalsIgnoreCase("update")) {
-      action = "I_NUM_U";
+      action = ACT_UPDATE;
     }
     dsRecordsCount = Integer.parseInt(recordcount);
     sapProps = SAPProperties.getDefault(connection);
@@ -239,13 +243,12 @@ public class RuntimeODP implements CdfHelper {
         int zeroIndex = 0;
         Iterator<String> fieldName = object.fieldNames();
         while (fieldName.hasNext() && zeroIndex == 0) {
-          numList.add(object.get(fieldName.next()).asText());
+          fields.add(object.get(fieldName.next()).asText());
           zeroIndex++;
         }
       }
-      BeforeActions.scenario.write("No of records :-" + noOfRecords + Arrays.toString(numList.toArray()));
+      BeforeActions.scenario.write("No of records :-" + noOfRecords + Arrays.toString(fields.toArray()));
       Assert.assertEquals(noOfRecords, Integer.parseInt(recordcount));
-     // Thread.sleep(60000);
     } catch (Exception e) {
       throw SystemException.throwException(e.getMessage(), e);
     }
@@ -322,26 +325,26 @@ public class RuntimeODP implements CdfHelper {
       (table) + "` WHERE " +
       field.toUpperCase();
     switch (datasource) {
-      case "0MATERIAL_ATTR":
-        for (i = 0; i < numList.size(); i++) {
-        Assert.assertTrue(GcpClient.executeQuery(selectQuery.concat("=" + "\"" + numList.get(i) + "\"")) == 1);
-      }
+      case DATASOURCE_MAT:
+        for (String element : fields) {
+          Assert.assertTrue(GcpClient.executeQuery(selectQuery.concat("=" + "\"" + element + "\"")) == 1);
+        }
         countRecords = gcpClient.countBqQuery(CDAPUtils.getPluginProp(table));
         Assert.assertTrue(countRecords == noOfRecords);
         break;
-      case "2LIS_02_HDR" :
-        if (action == "I_NUM_C") {
-        for (i = 0; i < numList.size(); i++) {
-          Assert.assertTrue(GcpClient.executeQuery(selectQuery.concat("=" + "\"" + numList.get(i) + "\"")) == 1);
-        }
-        countRecords = gcpClient.countBqQuery(CDAPUtils.getPluginProp(table));
-        Assert.assertTrue(countRecords == noOfRecords);
+      case DATASOURCE_LISHDR:
+        if (action == ACT_CREATE) {
+          for (String element : fields) {
+            Assert.assertTrue(GcpClient.executeQuery(selectQuery.concat("=" + "\"" + element + "\"")) == 1);
+          }
+          countRecords = gcpClient.countBqQuery(CDAPUtils.getPluginProp(table));
+          Assert.assertTrue(countRecords == noOfRecords);
         } else {
-        for (i = 0; i < numList.size(); i++) {
-          Assert.assertTrue(GcpClient.executeQuery(selectQuery.concat("=" + "\"" + numList.get(i) + "\"")) == 2);
-        }
-        countRecords = gcpClient.countBqQuery(CDAPUtils.getPluginProp(table));
-        Assert.assertTrue(countRecords == 2 * noOfRecords);
+          for (String element : fields) {
+            Assert.assertTrue(GcpClient.executeQuery(selectQuery.concat("=" + "\"" + element + "\"")) == 2);
+          }
+          countRecords = gcpClient.countBqQuery(CDAPUtils.getPluginProp(table));
+          Assert.assertTrue(countRecords == 2 * noOfRecords);
         }
         break;
     }
@@ -351,7 +354,7 @@ public class RuntimeODP implements CdfHelper {
   @Then("Close the log window")
   public void closeTheLogWindow() {
     SeleniumDriver.getDriver().findElement(By.xpath("//*[@data-cy=\"log-viewer-close-btn\"]")).click();
-    numList.clear();
+    fields.clear();
   }
 
   @Then("delete table {string} in BQ if not empty")

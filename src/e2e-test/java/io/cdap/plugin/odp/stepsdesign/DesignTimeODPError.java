@@ -33,18 +33,14 @@ public class DesignTimeODPError {
   static String color;
 
   @Then("{string} as {string} and getting {string}")
-  public void userIsAbleToSetParameterAsAndGetting(String arg0, String input, String errorMessage) {
+  public void userIsAbleToSetParameterAsAndGettingErrorMessage(String configParam, String input, String errorMessage) {
     WebElement elementIn = SeleniumDriver.getDriver().findElement(
-      By.xpath("//*[@data-cy='" + arg0 + "' and @class='MuiInputBase-input']"));
+      By.xpath("//*[@data-cy='" + configParam + "' and @class='MuiInputBase-input']"));
     CDAPUtils.clearField(elementIn);
     ODPLocators.validateButton.click();
     color = ODPLocators.rowError.getCssValue("border-color");
     errorExist = CDAPUtils.getErrorProp(errorMessage).toLowerCase().contains(ODPLocators.rowError.getText()
                                                                                .toLowerCase());
-  }
-
-  @Then("User is able to validate the validate the error")
-  public void userIsAbleToValidateTheValidateTheError() {
     Assert.assertTrue(errorExist);
   }
 
@@ -58,6 +54,7 @@ public class DesignTimeODPError {
     ODPLocators.validateButton.click();
     errorExist = CDAPUtils.getErrorProp(errorMessage).toLowerCase().contains(ODPLocators.jcoError.getText()
                                                                                .toLowerCase());
+    Assert.assertTrue(errorExist);
   }
 
   @Then("User is able to set parameter {string} as {string} and getting {string} for wrong input of password")
@@ -71,10 +68,11 @@ public class DesignTimeODPError {
     errorExist = CDAPUtils.getErrorProp(errorMessage).toLowerCase().contains(ODPLocators.jcoError.getText()
                                                                                .toLowerCase());
     color = ODPLocators.rowError.getCssValue("border-color");
+    Assert.assertTrue(errorExist);
   }
 
   @Then("^User is able to set parameter (.+) as (.+) and getting row (.+) for wrong input$")
-  public void user_is_able_to_set_parameter_as_and_getting_row_for_wrong_input(
+  public void userIsAbleToSetParameterAsAndGettingRowForWrongInput(
     String option, String input, String errorMessage) {
     errorExist = false;
     WebElement element = SeleniumDriver.getDriver().findElement(
@@ -86,11 +84,14 @@ public class DesignTimeODPError {
     errorExist = CDAPUtils.getErrorProp(errorMessage).toLowerCase().contains(ODPLocators.rowError.getText()
                                                                                .toLowerCase());
     color = ODPLocators.rowError.getCssValue("border-color");
+    Assert.assertTrue(errorExist);
+    BeforeActions.scenario.write("Color of the text box" + color);
+    Assert.assertTrue(color.toLowerCase().contains("rgb(164, 4, 3)"));
   }
 
   @Then("^User is able to set parameters filterEqualKey as (.+) and its filterEqualVal " +
     "as (.+) and getting row (.+) for wrong input$")
-  public void user_is_able_to_set_parameters_filterequalkey_as_and_its_filterequalval_as_and_getting
+  public void userIsAbleToSetParametersFilterequalkeyAsAndItsFilterequalvalAsAndGettingError
     (String filterOption, String query, String errorMessage) throws Throwable {
     errorExist = false;
     ODPLocators.filterEqualKey.sendKeys(filterOption);
@@ -99,6 +100,7 @@ public class DesignTimeODPError {
     errorExist = ODPLocators.rowError.getText().toLowerCase().contains(CDAPUtils.getErrorProp(errorMessage)
                                                                          .toLowerCase());
     color = ODPLocators.rowError.getCssValue("border-color");
+    Assert.assertTrue(errorExist);
   }
 
   @Then("User is able to validate the text box is highlighted")

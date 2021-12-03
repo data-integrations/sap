@@ -182,7 +182,7 @@ public class Security implements CdfHelper {
             .toLowerCase());
   }
 
-  @Then("User is able to validate the validate the error no auth error")
+  @Then("User is able to validate the error no auth error")
   public void userIsAbleToValidateTheValidateTheErrorNoAuthError() {
       Assert.assertTrue(errorExist);
   }
