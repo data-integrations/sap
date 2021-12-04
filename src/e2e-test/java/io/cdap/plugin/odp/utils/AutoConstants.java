@@ -15,6 +15,9 @@
  */
 package io.cdap.plugin.odp.utils;
 
+/**
+ * constants file.
+ */
 public class AutoConstants {
 
   public static final String DATASOURCE_MAT = "0MATERIAL_ATTR";
