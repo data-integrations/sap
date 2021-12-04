@@ -31,7 +31,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.io.IOException;
 
 /**
- * DesginTimeODP.
+ * DesignTimeODP.
  */
 public class DesignTimeODP {
 
@@ -54,7 +54,7 @@ public class DesignTimeODP {
 
   @When("User has selected Sap client macro to configure")
   public void userHasSelectedSapClientMacroToConfigure() {
-    ODPLocators.macros.get(0).click();
+    ODPLocators.macroSapClient.click();
     SeleniumHelper.replaceElementValue(ODPLocators.sapClient, "${client}");
   }
 
@@ -66,49 +66,49 @@ public class DesignTimeODP {
 
   @When("User has selected Sap language macro to configure")
   public void userHasSelectedSapLagMacroToConfigure() {
-    ODPLocators.macros.get(1).click();
+    ODPLocators.macroSapLanguage.click();
     SeleniumHelper.replaceElementValue(ODPLocators.language, "${lang}");
   }
 
   @When("User has selected Sap server as host macro to configure")
   public void userHasSelectedSapServerAsHostMacroToConfigure() {
-    ODPLocators.macros.get(2).click();
+    ODPLocators.macroSapASHost.click();
     SeleniumHelper.replaceElementValue(ODPLocators.sapApplicationServerHost, "${host}");
   }
 
   @When("User has selected System Number macro to configure")
   public void userHasSelectedSystemNumberMacroToConfigure() {
-    ODPLocators.macros.get(3).click();
+    ODPLocators.macroSapSysNumber.click();
     SeleniumHelper.replaceElementValue(ODPLocators.systemNumber, "${sysnr}");
   }
 
   @When("User has selected datasource macro to configure")
   public void userHasSelectedDatasourceMacroToConfigure() {
-    ODPLocators.macros.get(5).click();
+    ODPLocators.macroSapDsName.click();
     SeleniumHelper.replaceElementValue(ODPLocators.dataSourceName, "${dsname}");
   }
 
   @When("User has selected gcsPath macro to configure")
   public void userHasSelectedGcsPathMacroToConfigure() {
-    ODPLocators.macros.get(10).click();
+    ODPLocators.macroSapGcsPath.click();
     SeleniumHelper.replaceElementValue(ODPLocators.gcsPath, "${gcs}");
   }
 
   @When("User has selected Sap msHost macro to configure")
   public void userHasSelectedSapMsHostMacroToConfigure() {
-    ODPLocators.macros.get(2).click();
+    ODPLocators.macroSapASHost.click();
     SeleniumHelper.replaceElementValue(ODPLocators.msHost, "${msHost}");
   }
 
   @When("User has selected Sap msServ macro to configure")
   public void userHasSelectedSapMsServMacroToConfigure() {
-    ODPLocators.macros.get(4).click();
+    ODPLocators.macroSapRouter.click();
     SeleniumHelper.replaceElementValue(ODPLocators.portNumber, "${portNo}");
   }
 
   @When("User has selected UserName and Password macro to configure")
   public void userHasSelectedUserNameAndPasswordMacroToConfigure() {
-    ODPLocators.macros.get(10).click();
+    ODPLocators.macroSapGcsPath.click();
     SeleniumHelper.replaceElementValue(ODPLocators.usernameCredentials, "${userName}");
   }
 

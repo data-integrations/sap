@@ -145,4 +145,53 @@ public class ODPLocators {
 
   @FindBy(how = How.XPATH, using = "//*[@data-cy='subscriberName' and  @type='text']")
   public static WebElement subsName;
+
+  /* macros */
+  @FindBy(how = How.XPATH, using = "//*[@data-cy=\"jco.client.client\"]//child::button//span//span//strong")
+  public static WebElement macroSapClient;
+
+  @FindBy(how = How.XPATH, using = "//*[@data-cy=\"jco.client.lang\"]//child::button//span//span//strong")
+  public static WebElement macroSapLanguage;
+
+  @FindBy(how = How.XPATH, using = "//*[@data-cy=\"jco.client.ashost\"]//child::button//span//span//strong")
+  public static WebElement macroSapASHost;
+
+  @FindBy(how = How.XPATH, using = "//*[@data-cy=\"jco.client.sysnr\"]//child::button//span//span//strong")
+  public static WebElement macroSapSysNumber;
+
+  @FindBy(how = How.XPATH, using = "//*[@data-cy=\"jco.client.saprouter\"]//child::button//span//span//strong")
+  public static WebElement macroSapRouter;
+
+  @FindBy(how = How.XPATH, using = "//*[@data-cy=\"sapSourceObjName\"]//child::button//span//span//strong")
+  public static WebElement macroSapDsName;
+
+  @FindBy(how = How.XPATH, using = "//*[@data-cy=\"extractType\"]//child::button//span//span//strong")
+  public static WebElement macroSapExtractType;
+
+  @FindBy(how = How.XPATH, using = "//*[@data-cy=\"jco.client.user\"]//child::button//span//span//strong")
+  public static WebElement macroSapUserName;
+
+  @FindBy(how = How.XPATH, using = "//*[@data-cy=\"jco.client.passwd\"]//child::button//span//span//strong")
+  public static WebElement macroSapUserPazwrd;
+
+  @FindBy(how = How.XPATH, using = "//*[@data-cy=\"gcpProjectId\"]//child::button//span//span//strong")
+  public static WebElement macroSapGcsProjId;
+
+  @FindBy(how = How.XPATH, using = "//*[@data-cy=\"gcsPath\"]//child::button//span//span//strong")
+  public static WebElement macroSapGcsPath;
+
+  @FindBy(how = How.XPATH, using = "//*[@data-cy=\"subscriberName\"]//child::button//span//span//strong")
+  public static WebElement macroSapSubsName;
+
+  @FindBy(how = How.XPATH, using = "//*[@data-cy=\"filterOptionsEq\"]//child::button//span//span//strong")
+  public static WebElement macroFilterOptionEqual;
+
+  @FindBy(how = How.XPATH, using = "//*[@data-cy=\"filterOptionsRange\"]//child::button//span//span//strong")
+  public static WebElement macroFilterOptionRange;
+
+  @FindBy(how = How.XPATH, using = "//*[@data-cy=\"numSplits\"]//child::button//span//span//strong")
+  public static WebElement macroSplits;
+
+  @FindBy(how = How.XPATH, using = "//*[@data-cy=\"packageSize\"]//child::button//span//span//strong")
+  public static WebElement macroPackSize;
 }

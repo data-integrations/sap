@@ -188,30 +188,6 @@ public class RuntimeODP implements CdfHelper {
     SeleniumHelper.dragAndDrop(ODPLocators.fromODP, CdfStudioLocators.toBigQiery);
   }
 
-  @Then("Delete all existing records in datasource")
-  public void deleteAllExistingRecordsInDatasource() throws JCoException, IOException {
-    sapProps = SAPProperties.getDefault(connection);
-    errorCapture = new ErrorCapture(exceptionUtils);
-    sapAdapterImpl = new SAPAdapterImpl(errorCapture, connection);
-    Map opProps = new HashMap<>();
-    opProps.put("RFC", "ZTEST_DATA_DEL_ACDOCA");
-    opProps.put("autoCommit", "true");
-    try {
-      ObjectMapper mapper = new ObjectMapper();
-      ObjectNode objectNode = mapper.createObjectNode();
-      objectNode.put("I_ALL", "X");
-      JsonNode response = sapAdapterImpl.executeRFC(objectNode.toString(), opProps,
-                                                    StringUtils.EMPTY, StringUtils.EMPTY);
-    } catch (Exception e) {
-      throw SystemException.throwException(e.getMessage(), e);
-    }
-  }
-
-  public static void main(String args[]) throws IOException, JCoException, InterruptedException {
-    RuntimeODP runtimeODP = new RuntimeODP();
-    runtimeODP.deleteTheExistingOdpTableInBigquery(TABLE_ODP);
-  }
-
   @Then("{string} the {string} records with {string} in the ODP datasource from JCO")
   public void createTheRecordsInTheODPDatasourceFromJCO(String process, String recordcount, String rfcName)
     throws IOException, JCoException {
@@ -240,11 +216,9 @@ public class RuntimeODP implements CdfHelper {
       Iterator<JsonNode> iteratedData = response.get("EX_DATA").iterator();
       while (iteratedData.hasNext()) {
         JsonNode object = iteratedData.next();
-        int zeroIndex = 0;
         Iterator<String> fieldName = object.fieldNames();
-        while (fieldName.hasNext() && zeroIndex == 0) {
+        if (fieldName.hasNext()) {
           fields.add(object.get(fieldName.next()).asText());
-          zeroIndex++;
         }
       }
       BeforeActions.scenario.write("No of records :-" + noOfRecords + Arrays.toString(fields.toArray()));

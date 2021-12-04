@@ -123,15 +123,4 @@ public class ODPActions {
   public static void closeButton() {
     odpLocators.closeButton.click();
   }
-
-  public static void clickAllMacroElements() {
-    int size = odpLocators.macros.size();
-    for (int count = 0; count < size - 1; count++) {
-      odpLocators.macros.get(count).click();
-    }
-  }
-
-  public static void clickMacroElement(int location) throws InterruptedException {
-    odpLocators.macros.get(location).click();
-  }
 }
