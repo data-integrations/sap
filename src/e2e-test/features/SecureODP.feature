@@ -77,5 +77,5 @@ Feature: Secured macros can be configured and used for the login credentials
     When Configure Direct Connection "s4Client" "s4Sysnr" "s4AsHost" "dsHdr" "s4GcsPath" "s4Splitrow" "s4PkgSize"
     When Username "testNoAuthUsername" and Password "testNoAuthPwd" is provided
     When Run one Mode is Sync mode
-    Then RFC auth error is displayed "rfc_error"
+    Then RFC auth error is displayed "rfcError"
     Then User is able to validate the error no auth error
