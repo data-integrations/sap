@@ -83,7 +83,7 @@ public class ODPLocators {
   @FindBy(how = How.XPATH, using = "//*[@data-cy=\"jco.client.mshost\" and @type='text']")
   public static WebElement msHost;
 
-  @FindBy(how = How.XPATH, using = "//*[@placeholder='Ex: sapms02 or 3602']")
+  @FindBy(how = How.XPATH, using = "//*[@data-cy=\"jco.client.msserv\" and @type='text']")
   public static WebElement portNumber;
 
   @FindBy(how = How.XPATH, using = "//*[@data-cy='jco.client.r3name' and @class='MuiInputBase-input']")
@@ -156,11 +156,17 @@ public class ODPLocators {
   @FindBy(how = How.XPATH, using = "//*[@data-cy=\"jco.client.ashost\"]//child::button//span//span//strong")
   public static WebElement macroSapASHost;
 
+  @FindBy(how = How.XPATH, using = "//*[@data-cy=\"jco.client.mshost\"]//child::button//span//span//strong")
+  public static WebElement macroSapMSHost;
+
   @FindBy(how = How.XPATH, using = "//*[@data-cy=\"jco.client.sysnr\"]//child::button//span//span//strong")
   public static WebElement macroSapSysNumber;
 
   @FindBy(how = How.XPATH, using = "//*[@data-cy=\"jco.client.saprouter\"]//child::button//span//span//strong")
   public static WebElement macroSapRouter;
+
+  @FindBy(how = How.XPATH, using = "//*[@data-cy=\"jco.client.msserv\"]//child::button//span//span//strong")
+  public static WebElement macroSapMsserv;
 
   @FindBy(how = How.XPATH, using = "//*[@data-cy=\"sapSourceObjName\"]//child::button//span//span//strong")
   public static WebElement macroSapDsName;

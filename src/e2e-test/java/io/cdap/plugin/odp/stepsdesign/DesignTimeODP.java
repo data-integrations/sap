@@ -96,13 +96,13 @@ public class DesignTimeODP {
 
   @When("User has selected Sap msHost macro to configure")
   public void userHasSelectedSapMsHostMacroToConfigure() {
-    ODPLocators.macroSapASHost.click();
+    ODPLocators.macroSapMSHost.click();
     SeleniumHelper.replaceElementValue(ODPLocators.msHost, "${msHost}");
   }
 
   @When("User has selected Sap msServ macro to configure")
   public void userHasSelectedSapMsServMacroToConfigure() {
-    ODPLocators.macroSapRouter.click();
+    ODPLocators.macroSapMsserv.click();
     SeleniumHelper.replaceElementValue(ODPLocators.portNumber, "${portNo}");
   }
 
