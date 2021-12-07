@@ -59,10 +59,10 @@ public class Security implements CdfHelper {
   }
 
   @Then("enter variable for {string} of the macro")
-  public void enterVariableForOfTheMacro(String arg0) {
-    countarr = arg0.length();
+  public void enterVariableForOfTheMacro(String param) {
+    countarr = param.length();
     CDAPUtils.clearField(CdfSysAdminLocators.apiInputURI);
-    CdfSysAdminActions.enterURI("namespaces/default/securekeys/" + arg0);
+    CdfSysAdminActions.enterURI("namespaces/default/securekeys/" + param);
   }
 
   @Then("enter the {string} of the service")
@@ -126,6 +126,7 @@ public class Security implements CdfHelper {
     ODPLocators.macroSapGcsProjId.click();
     ODPLocators.macroSapLanguage.click();
     ODPLocators.macroSapExtractType.click();
+    ODPLocators.macroFilterOptionEqual.click();
     CDAPUtils.clearField(ODPLocators.sapRouter);
     CDAPUtils.clearField(ODPLocators.subsName);
     CDAPUtils.clearField(ODPLocators.filterEqualMacros);

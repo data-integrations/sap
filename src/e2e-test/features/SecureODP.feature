@@ -14,7 +14,7 @@
 @Security
 Feature: Secured macros can be configured and used for the login credentials
 
-  @Security-TC-ODP-SECU-01
+  @ODP @Security-TC-ODP-SECU-01
   Scenario: User is able to configure security macros with auth user and no errors while validating the credentials plus connection parameter
     Given Open "httpCall" link to configure macros
     Then Select "PUT" service to configure
@@ -69,7 +69,7 @@ Feature: Secured macros can be configured and used for the login credentials
     Then Get Count of no of records transferred from ODP to BigQuery in "tableDemo"
     Then Verify the full load transfer is successful
 
-  @Security-TS-ODP-SECU-06
+  @ODP @Security-TS-ODP-SECU-06
   Scenario: Unauthorized user gets an Error message on trying to initiate data transfer  (User dont have access to RFC)
     Given Open CDF application to configure pipeline
     When Source is SAP ODP

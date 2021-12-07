@@ -190,7 +190,7 @@ public class RuntimeODP implements CdfHelper {
 
   @Then("{string} the {string} records with {string} in the ODP datasource from JCO")
   public void createTheRecordsInTheODPDatasourceFromJCO(String process, String recordcount, String rfcName)
-    throws IOException, JCoException {
+    throws IOException, JCoException, InterruptedException {
     action = process;
     if (action.equalsIgnoreCase("create")) {
       action = ACT_CREATE;
@@ -226,6 +226,7 @@ public class RuntimeODP implements CdfHelper {
     } catch (Exception e) {
       throw SystemException.throwException(e.getMessage(), e);
     }
+    Thread.sleep(60000); //sleep required to wait for SAP record creation
   }
 
   @Then("Enter the BigQuery Properties for ODP datasource {string}")
