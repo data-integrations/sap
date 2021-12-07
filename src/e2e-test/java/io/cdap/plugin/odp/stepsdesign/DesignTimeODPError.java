@@ -116,5 +116,6 @@ public class DesignTimeODPError {
     ODPLocators.filterRangeKey.sendKeys(filterOption);
     ODPLocators.filterRangeVal.sendKeys(query);
     ODPLocators.validateButton.click();
+    color = ODPLocators.rowError.getCssValue("border-color");
   }
 }

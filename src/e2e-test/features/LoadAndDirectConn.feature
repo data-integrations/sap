@@ -33,4 +33,3 @@ Feature: Optional Properties
     Then Verify the ODP pipeline status is "Succeeded"
     Then validate successMessage is displayed for the ODP pipeline
     Then Get Count of no of records transferred from ODP to BigQuery in "tableDemo"
-    Then Verify the Delta load transfer is successful in "tableDemo" on basis of "EBELN"  #todo
