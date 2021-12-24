@@ -522,6 +522,7 @@
   <profiles>
     <profile>
       <id>e2e-tests</id>
+      <!-- Please refer README.md for a prerequisite to execute this profile -->
       <properties>
         <testSourceLocation>src/e2e-test/java</testSourceLocation>
       </properties>
