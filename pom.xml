@@ -83,7 +83,7 @@
     <hadoop.version>2.3.0</hadoop.version>
     <httpcomponents.version>4.5.9</httpcomponents.version>
     <hydrator.version>2.2.0</hydrator.version>
-    <junit.version>4.11</junit.version>
+    <junit.version>4.13.1</junit.version>
     <mockito.version>1.10.19</mockito.version>
     <olingo.version>4.6.0</olingo.version>
     <olingo2.version>2.0.11</olingo2.version>
