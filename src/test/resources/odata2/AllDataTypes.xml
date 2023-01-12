@@ -34,6 +34,23 @@
         <d:Time>PT11H10M59S</d:Time>
         <d:DateTime>1984-12-08T01:01:01</d:DateTime>
         <d:DateTimeOffset>2002-10-10T17:00:01+01:00</d:DateTimeOffset>
+        <d:Address m:type="ZGW100_XX_S2_SRV.Location">
+          <d:Address>187 Suffolk Ln.</d:Address>
+          <d:City m:type="ZGW100_XX_S2_SRV.City">
+            <d:CountryRegion>United States</d:CountryRegion>
+            <d:Name>Boise</d:Name>
+            <d:Region>ID</d:Region>
+          </d:City>
+        </d:Address>
+        <d:HomeAddress m:type="ZGW100_XX_S2_SRV.HomeAddress">
+          <d:Address>187 Suffolk Ln.</d:Address>
+          <d:City m:type="ZGW100_XX_S2_SRV.City">
+            <d:CountryRegion>United States</d:CountryRegion>
+            <d:Name>Boise</d:Name>
+            <d:Region>ID</d:Region>
+          </d:City>
+          <d:FamilyName>Test</d:FamilyName>
+        </d:HomeAddress>
       </m:properties>
     </content>
   </entry>
@@ -63,6 +80,23 @@
         <d:Time>PT11H10M59S</d:Time>
         <d:DateTime>1984-12-08T01:01:01</d:DateTime>
         <d:DateTimeOffset>2002-10-10T17:00:01+01:00</d:DateTimeOffset>
+        <d:Address m:type="ZGW100_XX_S2_SRV.Location">
+          <d:Address>187 Suffolk Ln.</d:Address>
+          <d:City m:type="ZGW100_XX_S2_SRV.City">
+            <d:CountryRegion>United States</d:CountryRegion>
+            <d:Name>Boise</d:Name>
+            <d:Region>ID</d:Region>
+          </d:City>
+        </d:Address>
+        <d:HomeAddress m:type="ZGW100_XX_S2_SRV.HomeAddress">
+          <d:Address>187 Suffolk Ln.</d:Address>
+          <d:City m:type="ZGW100_XX_S2_SRV.City">
+            <d:CountryRegion>United States</d:CountryRegion>
+            <d:Name>Boise</d:Name>
+            <d:Region>ID</d:Region>
+          </d:City>
+          <d:FamilyName>Test</d:FamilyName>
+        </d:HomeAddress>
       </m:properties>
     </content>
   </entry>
@@ -92,6 +126,23 @@
         <d:Time>PT11H10M59S</d:Time>
         <d:DateTime>1984-12-08T01:01:01</d:DateTime>
         <d:DateTimeOffset>2002-10-10T17:00:01+01:00</d:DateTimeOffset>
+        <d:Address m:type="ZGW100_XX_S2_SRV.Location">
+          <d:Address>187 Suffolk Ln.</d:Address>
+          <d:City m:type="ZGW100_XX_S2_SRV.City">
+            <d:CountryRegion>United States</d:CountryRegion>
+            <d:Name>Boise</d:Name>
+            <d:Region>ID</d:Region>
+          </d:City>
+        </d:Address>
+        <d:HomeAddress m:type="ZGW100_XX_S2_SRV.HomeAddress">
+          <d:Address>187 Suffolk Ln.</d:Address>
+          <d:City m:type="ZGW100_XX_S2_SRV.City">
+            <d:CountryRegion>United States</d:CountryRegion>
+            <d:Name>Boise</d:Name>
+            <d:Region>ID</d:Region>
+          </d:City>
+          <d:FamilyName>Test</d:FamilyName>
+        </d:HomeAddress>
       </m:properties>
     </content>
   </entry>

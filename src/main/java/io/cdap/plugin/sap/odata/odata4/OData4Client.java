@@ -17,25 +17,33 @@
 package io.cdap.plugin.sap.odata.odata4;
 
 import io.cdap.plugin.sap.odata.EntityType;
+import io.cdap.plugin.sap.odata.ODataAnnotation;
 import io.cdap.plugin.sap.odata.ODataClient;
 import io.cdap.plugin.sap.odata.ODataEntity;
 import io.cdap.plugin.sap.odata.PropertyMetadata;
-import org.apache.olingo.client.api.communication.request.retrieve.EdmMetadataRequest;
+import io.cdap.plugin.sap.odata.exception.ODataException;
 import org.apache.olingo.client.api.communication.request.retrieve.ODataEntitySetIteratorRequest;
+import org.apache.olingo.client.api.communication.request.retrieve.XMLMetadataRequest;
 import org.apache.olingo.client.api.communication.response.ODataRetrieveResponse;
 import org.apache.olingo.client.api.domain.ClientEntity;
 import org.apache.olingo.client.api.domain.ClientEntitySet;
 import org.apache.olingo.client.api.domain.ClientEntitySetIterator;
+import org.apache.olingo.client.api.edm.xml.XMLMetadata;
 import org.apache.olingo.client.core.ODataClientFactory;
 import org.apache.olingo.client.core.http.BasicAuthHttpClientFactory;
-import org.apache.olingo.commons.api.edm.Edm;
-import org.apache.olingo.commons.api.edm.EdmEntityType;
-import org.apache.olingo.commons.api.edm.EdmProperty;
+import org.apache.olingo.commons.api.edm.FullQualifiedName;
+import org.apache.olingo.commons.api.edm.provider.CsdlAnnotation;
+import org.apache.olingo.commons.api.edm.provider.CsdlAnnotations;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntitySet;
+import org.apache.olingo.commons.api.edm.provider.CsdlEntityType;
+import org.apache.olingo.commons.api.edm.provider.CsdlSchema;
 
 import java.net.URI;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.ws.rs.core.MediaType;
 
@@ -74,27 +82,74 @@ public class OData4Client extends ODataClient {
 
   @Override
   public EntityType getEntitySetType(String entitySetName) {
-    EdmMetadataRequest request = client.getRetrieveRequestFactory().getMetadataRequest(rootUrl);
+    // Use XML metadata request instead of metadata request, since it's not possible to fetch property annotations in
+    // the case of missing vocabulary references: https://issues.apache.org/jira/browse/OLINGO-1130
+    XMLMetadataRequest request = client.getRetrieveRequestFactory().getXMLMetadataRequest(rootUrl);
     request.setAccept(MediaType.APPLICATION_XML);
+    ODataRetrieveResponse<XMLMetadata> response = request.execute();
+    XMLMetadata metadata = response.getBody();
+    CsdlSchema schema = metadata.getSchemas().stream()
+      .filter(s -> s.getEntityContainer() != null && s.getEntityContainer().getEntitySet(entitySetName) != null)
+      .findFirst()
+      .orElseThrow(() -> new ODataException(String.format("Entity set '%s' does not exist in SAP", entitySetName)));
 
-    ODataRetrieveResponse<Edm> response = request.execute();
-    Edm edm = response.getBody();
-    EdmEntityType entityType = edm.getEntityContainer().getEntitySet(entitySetName).getEntityType();
-    List<PropertyMetadata> properties = new ArrayList<>();
-    for (String propertyName : entityType.getPropertyNames()) {
-      EdmProperty property = (EdmProperty) entityType.getProperty(propertyName);
-      properties.add(edmToProperty(property));
-    }
+    CsdlEntityType entityType = getCsdlEntityType(schema, entitySetName);
+    List<PropertyMetadata> properties = getProperties(schema, entityType);
 
     return new EntityType(entityType.getName(), properties);
   }
 
-  private PropertyMetadata edmToProperty(EdmProperty property) {
-    String type = property.getType().getName();
-    boolean nullable = property.isNullable();
-    Integer precision = property.getPrecision();
-    Integer scale = property.getScale();
+  private CsdlEntityType getCsdlEntityType(CsdlSchema schema, String entitySetName) {
+    CsdlEntitySet entitySet = schema.getEntityContainer().getEntitySet(entitySetName);
+    FullQualifiedName entityTypeFQN = entitySet.getTypeFQN();
+    return schema.getEntityType(entityTypeFQN.getName());
+  }
 
-    return new PropertyMetadata(property.getName(), type, nullable, precision, scale, null);
+  private List<PropertyMetadata> getProperties(CsdlSchema schema, CsdlEntityType entityType) {
+    Map<String, List<ODataAnnotation>> targetingAnnotations = getTargetingAnnotations(schema, entityType);
+    return entityType.getProperties().stream()
+      .map(p -> {
+        List<ODataAnnotation> externalTargetingAnnotations = targetingAnnotations.get(p.getName());
+        return PropertyMetadata.valueOf(schema, p, externalTargetingAnnotations);
+      })
+      .collect(Collectors.toList());
+  }
+
+  /**
+   * Retrieves map of external targeting annotations grouped by property name.
+   *
+   * @param schema     csdl schema.
+   * @param entityType csdl entity type.
+   * @return map of external targeting annotations grouped by property name.
+   */
+  private Map<String, List<ODataAnnotation>> getTargetingAnnotations(CsdlSchema schema, CsdlEntityType entityType) {
+    List<CsdlAnnotations> annotationGroups = schema.getAnnotationGroups();
+    if (annotationGroups == null || annotationGroups.isEmpty()) {
+      return Collections.emptyMap();
+    }
+    // Target starts either with namespace or its alias.
+    String entityTypeNameFQN = String.format("%s.%s", schema.getNamespace(), entityType.getName());
+    String entityTypeNameWithAlias = String.format("%s.%s", schema.getAlias(), entityType.getName());
+    return annotationGroups.stream()
+      .filter(a -> a.getTarget().startsWith(entityTypeNameFQN) || a.getTarget().startsWith(entityTypeNameWithAlias))
+      .collect(Collectors.toMap(this::targetName, a -> csdlToOData4Annotations(a.getAnnotations())));
+  }
+
+  /**
+   * Returns simple target name, which is targeted property name without namespace.
+   *
+   * @param annotationGroup targeting annotation group.
+   * @return simple target name, which is targeted property name without namespace.
+   */
+  private String targetName(CsdlAnnotations annotationGroup) {
+    String targetFQN = annotationGroup.getTarget();
+    return targetFQN.substring(targetFQN.lastIndexOf("/") + 1);
+  }
+
+  private List<ODataAnnotation> csdlToOData4Annotations(List<CsdlAnnotation> annotations) {
+    if (annotations == null) {
+      return null;
+    }
+    return annotations.stream().map(OData4Annotation::new).collect(Collectors.toList());
   }
 }

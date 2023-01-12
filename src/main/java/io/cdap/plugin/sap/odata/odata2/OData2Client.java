@@ -110,22 +110,14 @@ public class OData2Client extends ODataClient {
       List<PropertyMetadata> properties = new ArrayList<>();
       for (String propertyName : edmEntityType.getPropertyNames()) {
         EdmProperty property = (EdmProperty) edmEntityType.getProperty(propertyName);
-        properties.add(edmToProperty(property));
+        PropertyMetadata propertyMetadata = PropertyMetadata.valueOf(property);
+        properties.add(propertyMetadata);
       }
 
       return new EntityType(edmEntityType.getName(), properties);
     } catch (EdmException e) {
       throw new ODataException("Unable to get entity set type: " + e.getMessage(), e);
     }
-  }
-
-  private PropertyMetadata edmToProperty(EdmProperty property) throws EdmException {
-    String type = property.getType().getName();
-    boolean nullable = property.getFacets().isNullable();
-    Integer precision = property.getFacets().getPrecision();
-    Integer scale = property.getFacets().getScale();
-
-    return new PropertyMetadata(property.getName(), type, nullable, precision, scale, null);
   }
 
   private void initMetadata() {

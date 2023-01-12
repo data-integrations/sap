@@ -20,8 +20,11 @@ import io.cdap.cdap.api.data.format.StructuredRecord;
 import io.cdap.cdap.api.data.format.UnexpectedFormatException;
 import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.plugin.sap.SapODataConstants;
+import io.cdap.plugin.sap.odata.ODataAnnotation;
 import io.cdap.plugin.sap.odata.ODataEntity;
 import io.cdap.plugin.sap.odata.StreamProperty;
+import io.cdap.plugin.sap.odata.odata2.OData2Annotation;
+import io.cdap.plugin.sap.odata.odata4.OData4Annotation;
 import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeException;
 import org.apache.olingo.commons.api.edm.geo.ComposedGeospatial;
 import org.apache.olingo.commons.api.edm.geo.Geospatial;
@@ -45,9 +48,12 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -59,9 +65,17 @@ import java.util.stream.Stream;
 public class ODataEntryToRecordTransformer {
 
   private final Schema schema;
+  private final Map<String, List<ODataAnnotation>> fieldNameToAnnotations;
+  private final OData4AnnotationToRecordTransformer oData4AnnotationToRecordTransformer;
 
   public ODataEntryToRecordTransformer(Schema schema) {
+    this(schema, Collections.emptyMap());
+  }
+
+  public ODataEntryToRecordTransformer(Schema schema, Map<String, List<ODataAnnotation>> fieldNameToAnnotations) {
     this.schema = schema;
+    this.fieldNameToAnnotations = fieldNameToAnnotations;
+    this.oData4AnnotationToRecordTransformer = new OData4AnnotationToRecordTransformer();
   }
 
   /**
@@ -77,9 +91,53 @@ public class ODataEntryToRecordTransformer {
         field.getSchema().getNonNullable() : field.getSchema();
       String fieldName = field.getName();
       Object value = oDataEntity.getProperties().get(fieldName);
-      builder.set(fieldName, extractValue(fieldName, value, nonNullableSchema));
+      Object extracted = SapODataConstants.METADATA_FIELD_NAME.equals(fieldName)
+        ? extractMetadataRecord()
+        : extractValue(fieldName, value, nonNullableSchema);
+      builder.set(fieldName, extracted);
     }
+
     return builder.build();
+  }
+
+  private StructuredRecord extractMetadataRecord() {
+    Schema.Field metadataField = schema.getField(SapODataConstants.METADATA_FIELD_NAME);
+    Schema metadataSchema = metadataField.getSchema().isNullable() ? metadataField.getSchema().getNonNullable()
+      : metadataField.getSchema();
+    StructuredRecord.Builder builder = StructuredRecord.builder(metadataSchema);
+    for (Schema.Field field : metadataSchema.getFields()) {
+      String fieldName = field.getName();
+      List<ODataAnnotation> annotations = fieldNameToAnnotations.get(fieldName);
+      if (annotations == null || annotations.isEmpty()) {
+        continue;
+      }
+      Schema nonNullableSchema = field.getSchema().isNullable() ? field.getSchema().getNonNullable()
+        : field.getSchema();
+      Object extractedValue = extractFieldMetadataRecord(fieldName, nonNullableSchema);
+      builder.set(fieldName, extractedValue);
+    }
+
+    return builder.build();
+  }
+
+  private StructuredRecord extractFieldMetadataRecord(String fieldName, Schema schema) {
+    List<ODataAnnotation> annotations = fieldNameToAnnotations.get(fieldName);
+    StructuredRecord.Builder builder = StructuredRecord.builder(schema);
+    annotations.stream()
+      .filter(a -> Objects.nonNull(schema.getField(a.getName())))
+      .forEach(a -> builder.set(a.getName(), extractAnnotationValue(a, schema)));
+    return builder.build();
+  }
+
+  private Object extractAnnotationValue(ODataAnnotation annotation, Schema schema) {
+    if (annotation instanceof OData2Annotation) {
+      return ((OData2Annotation) annotation).getValue();
+    }
+    // OData 4 annotations mapped to record
+    Schema.Field annotationField = schema.getField(annotation.getName());
+    Schema annotationRecordSchema = annotationField.getSchema().isNullable()
+      ? annotationField.getSchema().getNonNullable() : annotationField.getSchema();
+    return oData4AnnotationToRecordTransformer.transform((OData4Annotation) annotation, annotationRecordSchema);
   }
 
   /**
@@ -152,11 +210,19 @@ public class ODataEntryToRecordTransformer {
         }
         return value.toString();
       case RECORD:
-        ensureTypeValid(fieldName, value, Geospatial.class, StreamProperty.class);
+        ensureTypeValid(fieldName, value, Geospatial.class, StreamProperty.class, Map.class);
         if (value instanceof StreamProperty) {
           return extractStream((StreamProperty) value);
         }
+        if (value instanceof Map) {
+          return extractComplexValue((Map<String, Object>) value, schema);
+        }
         return extractGeospatial(fieldName, (Geospatial) value);
+      case ARRAY:
+        ensureTypeValid(fieldName, value, List.class);
+        Schema componentSchema = schema.getComponentSchema().isNullable() ? schema.getComponentSchema().getNonNullable()
+          : schema.getComponentSchema();
+        return extractCollection(fieldName, (List<Object>) value, componentSchema);
       default:
         throw new UnexpectedFormatException(String.format("Field '%s' is of unsupported type '%s'", fieldName,
                                                           fieldType.name().toLowerCase()));
@@ -170,6 +236,24 @@ public class ODataEntryToRecordTransformer {
       .set(SapODataConstants.Stream.READ_LINK_FIELD_NAME, streamProperty.getMediaReadLink())
       .set(SapODataConstants.Stream.EDIT_LINK_FIELD_NAME, streamProperty.getMediaEditLink())
       .build();
+  }
+
+  private List<Object> extractCollection(String fieldName, List<Object> collection, Schema componentSchema) {
+    return collection.stream()
+      .map(item -> extractValue(fieldName, item, componentSchema))
+      .collect(Collectors.toList());
+  }
+
+  private StructuredRecord extractComplexValue(Map<String, Object> complexValue, Schema schema) {
+    StructuredRecord.Builder builder = StructuredRecord.builder(schema);
+    schema.getFields().forEach(field -> {
+      String fieldName = field.getName();
+      Schema fieldSchema = field.getSchema().isNullable() ? field.getSchema().getNonNullable() : field.getSchema();
+      Object extractedValue = extractValue(fieldName, complexValue.get(fieldName), fieldSchema);
+      builder.set(fieldName, extractedValue);
+    });
+
+    return builder.build();
   }
 
   private StructuredRecord extractGeospatial(String fieldName, Geospatial geospatial) {

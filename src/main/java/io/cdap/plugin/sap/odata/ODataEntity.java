@@ -98,7 +98,7 @@ public class ODataEntity {
       return property.getEnumValue().getValue();
     }
     if (property.hasComplexValue()) {
-      throw new IllegalArgumentException("Complex types are not supported");
+      return property.getComplexValue().asJavaMap();
     }
 
     throw new IllegalArgumentException(String.format("Property '%s' has unsupported value: '%s'.",

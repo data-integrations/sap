@@ -43,6 +43,22 @@
             "kv-delimiter": "=",
             "delimiter": "&"
           }
+        },
+        {
+          "widget-type": "toggle",
+          "label": "Include Metadata Annotations",
+          "name": "includeMetadataAnnotations",
+          "widget-attributes": {
+            "on": {
+              "value": "true",
+              "label": "Yes"
+            },
+            "off": {
+              "value": "false",
+              "label": "No"
+            },
+            "default": "false"
+          }
         }
       ]
     },

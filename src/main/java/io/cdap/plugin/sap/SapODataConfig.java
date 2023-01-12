@@ -91,8 +91,12 @@ public class SapODataConfig extends PluginConfig {
   @Nullable
   private String schema;
 
+  @Name(SapODataConstants.INCLUDE_METADATA_ANNOTATIONS)
+  @Description("Whether the plugin should read SAP metadata annotations and include them to each record.")
+  private boolean includeMetadataAnnotations;
+
   public SapODataConfig(String referenceName, String url, String resourcePath, String query, String user,
-                        String password, String schema) {
+                        String password, String schema, boolean includeMetadataAnnotations) {
     this.referenceName = referenceName;
     this.url = url;
     this.resourcePath = resourcePath;
@@ -100,6 +104,7 @@ public class SapODataConfig extends PluginConfig {
     this.user = user;
     this.password = password;
     this.schema = schema;
+    this.includeMetadataAnnotations = includeMetadataAnnotations;
   }
 
   public String getReferenceName() {
@@ -167,6 +172,10 @@ public class SapODataConfig extends PluginConfig {
   @Nullable
   public String getSchema() {
     return schema;
+  }
+  
+  public boolean isIncludeMetadataAnnotations() {
+    return includeMetadataAnnotations;
   }
 
   /**

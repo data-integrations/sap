@@ -28,6 +28,7 @@ public final class SapODataConfigBuilder {
   private String user;
   private String password;
   private String schema;
+  private boolean includeMetadataAnnotations;
 
   private SapODataConfigBuilder() {
   }
@@ -82,7 +83,13 @@ public final class SapODataConfigBuilder {
     return this;
   }
 
+  public SapODataConfigBuilder setIncludeMetadataAnnotations(boolean includeMetadataAnnotations) {
+    this.includeMetadataAnnotations = includeMetadataAnnotations;
+    return this;
+  }
+
   public SapODataConfig build() {
-    return new SapODataConfig(referenceName, url, resourcePath, query, user, password, schema);
+    return new SapODataConfig(referenceName, url, resourcePath, query, user, password, schema,
+                              includeMetadataAnnotations);
   }
 }
